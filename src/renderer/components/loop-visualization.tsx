@@ -3,29 +3,16 @@ import React from 'react';
 import type { GateId, GateUI } from '../models/ui';
 import { IconCheck, IconX } from './icons';
 
-function nodeRing(status: GateUI['status']) {
-  switch (status) {
-    case 'passed':
-      return 'ring-[color-mix(in_oklab,var(--green)_50%,transparent)]';
-    case 'failed':
-      return 'ring-[color-mix(in_oklab,var(--red)_55%,transparent)]';
-    case 'running':
-      return 'ring-[color-mix(in_oklab,var(--cyan)_55%,transparent)]';
-    default:
-      return 'ring-[color-mix(in_oklab,var(--border)_55%,transparent)]';
-  }
-}
-
 function nodeAccent(status: GateUI['status']) {
   switch (status) {
     case 'passed':
-      return 'text-[var(--green)]';
+      return 'text-[var(--neon-green)]';
     case 'failed':
-      return 'text-[var(--red)]';
+      return 'text-[var(--neon-red)]';
     case 'running':
-      return 'text-[var(--cyan)]';
+      return 'text-[var(--neon-cyan)]';
     default:
-      return 'text-[var(--muted)]';
+      return 'text-[var(--text-secondary)]';
   }
 }
 
@@ -37,14 +24,10 @@ export type LoopVisualizationProps = {
 
 export function LoopVisualization(props: LoopVisualizationProps) {
   return (
-    <section className="hud-panel rounded-2xl p-5">
+    <section className="hud-panel rounded-2xl p-5 shadow-[0_0_0_1px_var(--border-glow)_inset]">
       <div className="flex items-center justify-between">
-        <div className="text-xs uppercase tracking-[0.25em] text-[var(--muted)]">
-          Loop Visualization
-        </div>
-        <div className="text-xs text-[var(--muted)] font-[var(--font-mono)]">
-          Active: {props.activeGateId ?? 'none'}
-        </div>
+        <div className="hud-label">Loop Visualization</div>
+        <div className="hud-meta">Active: {props.activeGateId ?? 'none'}</div>
       </div>
 
       <div className="mt-5">
@@ -60,36 +43,51 @@ export function LoopVisualization(props: LoopVisualizationProps) {
                     type="button"
                     onClick={() => props.onSelectGate(gate.id)}
                     className={[
-                      'relative flex min-h-24 flex-1 flex-col items-center justify-center rounded-2xl border px-3 py-4',
-                      'border-[color-mix(in_oklab,var(--border)_85%,transparent)] bg-[color-mix(in_oklab,var(--panel-2)_75%,transparent)]',
-                      'outline-none transition-colors transition-shadow duration-300',
-                      'focus-visible:ring-2 focus-visible:ring-[var(--cyan)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg)]',
-                      active ? 'animate-[hudPulse_2.2s_ease-in-out_infinite]' : '',
-                      `ring-1 ${nodeRing(status)}`,
+                      'relative flex min-h-24 flex-1 flex-col items-center justify-center rounded-xl border px-3 py-4',
+                      'border-[var(--border-subtle)] bg-[rgba(15,23,42,0.50)]',
+                      'outline-none transition-colors transition-shadow duration-250',
+                      'focus-visible:ring-2 focus-visible:ring-[var(--neon-cyan)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg-deep)]',
+                      status === 'pending' ? 'opacity-50' : '',
+                      active
+                        ? 'border-[var(--neon-cyan)] shadow-[var(--glow-cyan)] animate-[node-breathe_2.6s_ease-in-out_infinite]'
+                        : '',
+                      status === 'passed'
+                        ? 'border-[rgba(0,255,65,0.30)] shadow-[var(--glow-green)]'
+                        : '',
+                      status === 'failed'
+                        ? 'border-[rgba(255,45,85,0.34)] shadow-[var(--glow-red)] animate-[glitch_2.8s_ease-in-out_infinite]'
+                        : '',
                     ].join(' ')}
                     aria-label={`${gate.label} gate`}
                   >
                     <div
                       className={[
-                        'font-[var(--font-heading)] text-sm font-semibold',
+                        'font-[var(--font-heading)] text-[13px] font-semibold',
                         nodeAccent(status),
                       ].join(' ')}
                     >
                       {gate.label}
                     </div>
-                    <div className="mt-1 text-xs text-[var(--muted)]">{status.toUpperCase()}</div>
+                    <div
+                      className={[
+                        'mt-1 font-[var(--font-mono)] text-[11px] uppercase tracking-widest',
+                        status === 'running'
+                          ? 'text-[var(--neon-cyan)]'
+                          : status === 'passed'
+                            ? 'text-[var(--neon-green)]'
+                            : status === 'failed'
+                              ? 'text-[var(--neon-red)]'
+                              : 'text-[var(--text-secondary)]',
+                      ].join(' ')}
+                    >
+                      {status}
+                    </div>
 
                     {status === 'passed' ? (
-                      <IconCheck className="absolute right-2 top-2 h-5 w-5 text-[var(--green)]" />
+                      <IconCheck className="absolute right-2 top-2 h-5 w-5 text-[var(--neon-green)] drop-shadow-[0_0_14px_rgba(0,255,65,0.35)]" />
                     ) : null}
                     {status === 'failed' ? (
-                      <IconX className="absolute right-2 top-2 h-5 w-5 text-[var(--red)]" />
-                    ) : null}
-                    {status === 'running' ? (
-                      <div
-                        className="absolute right-2 top-2 h-2.5 w-2.5 rounded-full bg-[var(--cyan)] animate-[hudRunning_1.1s_ease-in-out_infinite]"
-                        aria-hidden="true"
-                      />
+                      <IconX className="absolute right-2 top-2 h-5 w-5 text-[var(--neon-red)] drop-shadow-[0_0_16px_rgba(255,45,85,0.45)]" />
                     ) : null}
                   </button>
 
@@ -98,8 +96,13 @@ export function LoopVisualization(props: LoopVisualizationProps) {
                       aria-hidden="true"
                       className="hidden w-10 items-center justify-center sm:flex"
                     >
-                      <div className="h-px w-8 bg-[color-mix(in_oklab,var(--border)_70%,transparent)]" />
-                      <div className="-ml-1 h-2 w-2 rotate-45 border-r border-t border-[color-mix(in_oklab,var(--border)_70%,transparent)]" />
+                      <div
+                        className={[
+                          'h-0.5 w-8 rounded-full bg-[var(--border-glow)]',
+                          props.gates[i + 1]?.status === 'running' ? 'connector-active' : '',
+                        ].join(' ')}
+                      />
+                      <div className="-ml-1 h-2 w-2 rotate-45 border-r border-t border-[var(--border-glow)]" />
                     </div>
                   ) : null}
                 </React.Fragment>

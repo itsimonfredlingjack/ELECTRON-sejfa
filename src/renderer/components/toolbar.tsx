@@ -39,11 +39,11 @@ function ModeButton(props: {
       aria-pressed={props.active}
       onClick={props.onSelect}
       className={[
-        'px-3 py-1.5 text-xs font-medium tracking-wide outline-none transition',
-        'focus-visible:ring-2 focus-visible:ring-[var(--cyan)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg)]',
+        'rounded-full px-3 py-1.5 font-[var(--font-heading)] text-[11px] font-semibold tracking-wide outline-none transition-colors duration-200',
+        'focus-visible:ring-2 focus-visible:ring-[var(--neon-cyan)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg-deep)]',
         props.active
-          ? 'bg-[color-mix(in_oklab,var(--cyan)_16%,transparent)] text-[var(--text)]'
-          : 'text-[var(--muted)] hover:text-[var(--text)]',
+          ? 'bg-[rgba(34,211,238,0.10)] text-[var(--text-primary)] shadow-[0_0_0_1px_rgba(34,211,238,0.25)_inset]'
+          : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]',
       ].join(' ')}
     >
       {props.children}
@@ -55,33 +55,37 @@ export function Toolbar(props: ToolbarProps) {
   const killArmed = Boolean(props.killArmedUntil);
 
   return (
-    <header className="hud-panel rounded-2xl px-5 py-4">
+    <header className="hud-panel rounded-2xl px-5 py-4 shadow-[0_0_0_1px_var(--border-glow)_inset]">
       <div className="flex flex-col gap-3">
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0">
-            <div className="text-xs uppercase tracking-[0.28em] text-[var(--muted)]">Objective</div>
-            <div className="mt-1 truncate font-[var(--font-heading)] text-lg font-semibold text-[var(--text)]">
+            <div className="hud-label">Objective</div>
+            <div className="mt-1 truncate font-[var(--font-heading)] text-lg font-semibold text-[var(--text-primary)]">
               {props.objectiveText}
             </div>
           </div>
 
           <div className="flex shrink-0 items-center gap-3">
-            <div className="flex items-center gap-2 rounded-full border border-[color-mix(in_oklab,var(--border)_80%,transparent)] bg-[color-mix(in_oklab,var(--panel-2)_88%,transparent)] px-3 py-1.5">
+            <div className="flex items-center gap-2 rounded-full border border-[var(--border-subtle)] bg-[rgba(10,18,36,0.35)] px-3 py-1.5">
               <IconDot
                 className={[
                   'h-3 w-3',
-                  props.connected ? 'text-[var(--green)]' : 'text-[var(--red)]',
+                  props.connected
+                    ? 'text-[var(--neon-green)]'
+                    : 'animate-[dot-pulse_2s_ease-in-out_infinite] text-[var(--neon-red)]',
                 ].join(' ')}
                 title={props.connected ? 'Connected' : 'Disconnected'}
               />
-              <div className="text-xs text-[var(--muted)]">
+              <div
+                className={['hud-meta', props.connected ? '' : 'text-[var(--neon-red)]'].join(' ')}
+              >
                 {props.connected ? 'Connected' : 'Disconnected'}
               </div>
             </div>
 
-            <div className="flex items-center gap-2 rounded-full border border-[color-mix(in_oklab,var(--border)_80%,transparent)] bg-[color-mix(in_oklab,var(--panel-2)_88%,transparent)] px-3 py-1.5">
-              <div className="text-xs text-[var(--muted)]">Alerts</div>
-              <div className="rounded-full bg-[color-mix(in_oklab,var(--amber)_22%,transparent)] px-2 py-0.5 text-xs font-semibold text-[color-mix(in_oklab,var(--amber)_95%,white)]">
+            <div className="flex items-center gap-2 rounded-full border border-[var(--border-subtle)] bg-[rgba(10,18,36,0.35)] px-3 py-1.5">
+              <div className="hud-label">Alerts</div>
+              <div className="rounded-full bg-[rgba(255,184,0,0.14)] px-2 py-0.5 font-[var(--font-mono)] text-[11px] font-semibold text-[var(--neon-amber)] shadow-[var(--glow-amber)]">
                 {props.alertsCount}
               </div>
             </div>
@@ -90,10 +94,10 @@ export function Toolbar(props: ToolbarProps) {
 
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex items-center gap-2">
-            <div className="text-xs uppercase tracking-[0.2em] text-[var(--muted)]">Mode</div>
+            <div className="hud-label">Mode</div>
             <div
               aria-label="App mode"
-              className="inline-flex overflow-hidden rounded-xl border border-[color-mix(in_oklab,var(--border)_80%,transparent)] bg-[color-mix(in_oklab,var(--panel-2)_88%,transparent)]"
+              className="inline-flex items-center gap-1 rounded-full border border-[var(--border-subtle)] bg-[rgba(10,18,36,0.35)] p-1"
               onKeyDown={(e) => {
                 if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
                 e.preventDefault();
@@ -123,11 +127,12 @@ export function Toolbar(props: ToolbarProps) {
               disabled={props.startDisabled}
               onClick={props.onStart}
               className={[
-                'inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold',
-                'transition focus-visible:ring-2 focus-visible:ring-[var(--cyan)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg)]',
+                'inline-flex items-center gap-2 rounded-xl border border-[var(--border-subtle)] px-3 py-2 font-[var(--font-heading)] text-sm font-semibold',
+                'border-l-2 border-l-transparent bg-transparent transition-colors duration-200',
+                'focus-visible:ring-2 focus-visible:ring-[var(--neon-cyan)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg-deep)]',
                 props.startDisabled
-                  ? 'cursor-not-allowed bg-[color-mix(in_oklab,var(--panel-2)_85%,transparent)] text-[color-mix(in_oklab,var(--muted)_80%,transparent)]'
-                  : 'bg-[color-mix(in_oklab,var(--cyan)_18%,transparent)] text-[var(--text)] hover:bg-[color-mix(in_oklab,var(--cyan)_26%,transparent)]',
+                  ? 'cursor-not-allowed opacity-40'
+                  : 'text-[var(--text-secondary)] hover:border-l-[var(--neon-green)] hover:bg-[var(--bg-panel-hover)] hover:text-[var(--text-primary)] hover:shadow-[var(--glow-green)]',
               ].join(' ')}
             >
               <IconPlay className="h-4 w-4" />
@@ -139,28 +144,31 @@ export function Toolbar(props: ToolbarProps) {
               disabled={props.pauseDisabled}
               onClick={props.onPause}
               className={[
-                'inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold',
-                'transition focus-visible:ring-2 focus-visible:ring-[var(--cyan)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg)]',
+                'inline-flex items-center gap-2 rounded-xl border border-[var(--border-subtle)] px-3 py-2 font-[var(--font-heading)] text-sm font-semibold',
+                'border-l-2 border-l-transparent bg-transparent transition-colors duration-200',
+                'focus-visible:ring-2 focus-visible:ring-[var(--neon-cyan)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg-deep)]',
                 props.pauseDisabled
-                  ? 'cursor-not-allowed bg-[color-mix(in_oklab,var(--panel-2)_85%,transparent)] text-[color-mix(in_oklab,var(--muted)_80%,transparent)]'
-                  : 'bg-[color-mix(in_oklab,var(--panel-2)_80%,transparent)] text-[var(--text)] hover:bg-[color-mix(in_oklab,var(--panel-2)_92%,transparent)]',
+                  ? 'cursor-not-allowed opacity-40'
+                  : 'text-[var(--text-secondary)] hover:border-l-[var(--neon-amber)] hover:bg-[var(--bg-panel-hover)] hover:text-[var(--text-primary)] hover:shadow-[var(--glow-amber)]',
               ].join(' ')}
             >
               <IconPause className="h-4 w-4" />
               Pause
             </button>
 
-            <div className="flex items-center gap-2">
+            <div className={['kill-zone', killArmed ? 'kill-zone--armed' : ''].join(' ')}>
               <button
                 type="button"
                 disabled={props.killDisabled || killArmed}
                 onClick={props.onArmKill}
                 className={[
-                  'inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold',
-                  'transition focus-visible:ring-2 focus-visible:ring-[var(--red)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg)]',
+                  'inline-flex items-center gap-2 rounded-xl border border-[var(--border-subtle)] px-3 py-2 font-[var(--font-heading)] text-sm font-semibold',
+                  'bg-transparent transition-colors duration-200',
+                  'focus-visible:ring-2 focus-visible:ring-[var(--neon-red)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg-deep)]',
                   props.killDisabled || killArmed
-                    ? 'cursor-not-allowed bg-[color-mix(in_oklab,var(--panel-2)_85%,transparent)] text-[color-mix(in_oklab,var(--muted)_80%,transparent)]'
-                    : 'bg-[color-mix(in_oklab,var(--red)_14%,transparent)] text-[color-mix(in_oklab,var(--red)_90%,white)] hover:bg-[color-mix(in_oklab,var(--red)_22%,transparent)]',
+                    ? 'cursor-not-allowed opacity-40'
+                    : 'text-[var(--text-secondary)] hover:bg-[var(--bg-panel-hover)] hover:text-[var(--text-primary)]',
+                  killArmed ? 'pointer-events-none opacity-0' : '',
                 ].join(' ')}
               >
                 Arm Kill
@@ -171,11 +179,13 @@ export function Toolbar(props: ToolbarProps) {
                 disabled={props.killDisabled || !killArmed}
                 onClick={props.onConfirmKill}
                 className={[
-                  'inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold',
-                  'transition focus-visible:ring-2 focus-visible:ring-[var(--red)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg)]',
+                  'inline-flex items-center gap-2 rounded-xl border px-4 py-2 font-[var(--font-heading)] text-sm font-bold uppercase tracking-widest',
+                  'transition-colors duration-200',
+                  'focus-visible:ring-2 focus-visible:ring-[var(--neon-red)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg-deep)]',
                   props.killDisabled || !killArmed
-                    ? 'cursor-not-allowed bg-[color-mix(in_oklab,var(--panel-2)_85%,transparent)] text-[color-mix(in_oklab,var(--muted)_80%,transparent)]'
-                    : 'animate-[killGlow_1.05s_ease-in-out_infinite] bg-[color-mix(in_oklab,var(--red)_22%,transparent)] text-[color-mix(in_oklab,var(--red)_95%,white)] hover:bg-[color-mix(in_oklab,var(--red)_30%,transparent)]',
+                    ? 'cursor-not-allowed border-[rgba(255,45,85,0.25)] bg-[rgba(10,18,36,0.55)] text-[rgba(255,45,85,0.75)]'
+                    : 'border-2 border-[var(--neon-red)] bg-[rgba(255,45,85,0.16)] text-[var(--neon-red)] shadow-[var(--glow-red)] hover:bg-[rgba(255,45,85,0.22)] animate-[kill-armed_1.35s_ease-in-out_infinite]',
+                  killArmed ? 'animate-[event-enter_160ms_ease-out]' : '',
                 ].join(' ')}
                 aria-live="polite"
               >
@@ -188,15 +198,16 @@ export function Toolbar(props: ToolbarProps) {
               disabled={props.openPrDisabled}
               onClick={props.onOpenPr}
               className={[
-                'inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold',
-                'transition focus-visible:ring-2 focus-visible:ring-[var(--cyan)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg)]',
+                'inline-flex items-center gap-2 rounded-xl border border-[var(--border-subtle)] px-3 py-2 font-[var(--font-heading)] text-sm font-semibold',
+                'bg-transparent transition-colors duration-200',
+                'focus-visible:ring-2 focus-visible:ring-[var(--neon-cyan)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg-deep)]',
                 props.openPrDisabled
-                  ? 'cursor-not-allowed bg-[color-mix(in_oklab,var(--panel-2)_85%,transparent)] text-[color-mix(in_oklab,var(--muted)_80%,transparent)]'
-                  : 'bg-[color-mix(in_oklab,var(--panel-2)_80%,transparent)] text-[var(--text)] hover:bg-[color-mix(in_oklab,var(--panel-2)_92%,transparent)]',
+                  ? 'cursor-not-allowed opacity-40'
+                  : 'text-[var(--text-secondary)] hover:bg-[var(--bg-panel-hover)] hover:text-[var(--text-primary)]',
               ].join(' ')}
             >
               Open PR
-              <IconExternal className="h-4 w-4 text-[var(--muted)]" />
+              <IconExternal className="h-4 w-4 text-[var(--text-secondary)]" />
             </button>
 
             <button
@@ -204,22 +215,23 @@ export function Toolbar(props: ToolbarProps) {
               disabled={props.openRunDisabled}
               onClick={props.onOpenRun}
               className={[
-                'inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold',
-                'transition focus-visible:ring-2 focus-visible:ring-[var(--cyan)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg)]',
+                'inline-flex items-center gap-2 rounded-xl border border-[var(--border-subtle)] px-3 py-2 font-[var(--font-heading)] text-sm font-semibold',
+                'bg-transparent transition-colors duration-200',
+                'focus-visible:ring-2 focus-visible:ring-[var(--neon-cyan)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg-deep)]',
                 props.openRunDisabled
-                  ? 'cursor-not-allowed bg-[color-mix(in_oklab,var(--panel-2)_85%,transparent)] text-[color-mix(in_oklab,var(--muted)_80%,transparent)]'
-                  : 'bg-[color-mix(in_oklab,var(--panel-2)_80%,transparent)] text-[var(--text)] hover:bg-[color-mix(in_oklab,var(--panel-2)_92%,transparent)]',
+                  ? 'cursor-not-allowed opacity-40'
+                  : 'text-[var(--text-secondary)] hover:bg-[var(--bg-panel-hover)] hover:text-[var(--text-primary)]',
               ].join(' ')}
             >
               Open Run
-              <IconExternal className="h-4 w-4 text-[var(--muted)]" />
+              <IconExternal className="h-4 w-4 text-[var(--text-secondary)]" />
             </button>
           </div>
         </div>
 
         {killArmed ? (
-          <div className="text-xs text-[color-mix(in_oklab,var(--red)_92%,white)]">
-            Kill armed until <span className="font-[var(--font-mono)]">{props.killArmedUntil}</span>
+          <div className="font-[var(--font-mono)] text-[11px] text-[var(--neon-red)]">
+            Kill armed until <span className="font-semibold">{props.killArmedUntil}</span>
           </div>
         ) : null}
       </div>

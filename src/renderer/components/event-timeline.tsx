@@ -16,13 +16,52 @@ function fmtTime(iso: string) {
 function severityStyles(sev: EventSeverity) {
   switch (sev) {
     case 'success':
-      return 'border-l-[var(--green)] text-[color-mix(in_oklab,var(--text)_92%,white)]';
+      return 'border-l-[var(--neon-green)]';
     case 'warning':
-      return 'border-l-[var(--amber)] text-[color-mix(in_oklab,var(--text)_92%,white)]';
+      return 'border-l-[var(--neon-amber)]';
     case 'error':
-      return 'border-l-[var(--red)] text-[color-mix(in_oklab,var(--text)_92%,white)]';
+      return 'border-l-[var(--neon-red)]';
     default:
-      return 'border-l-[color-mix(in_oklab,var(--muted)_65%,transparent)] text-[color-mix(in_oklab,var(--text)_88%,white)]';
+      return 'border-l-[var(--neon-cyan)]';
+  }
+}
+
+function severityAccent(sev: EventSeverity) {
+  switch (sev) {
+    case 'success':
+      return 'text-[var(--neon-green)]';
+    case 'warning':
+      return 'text-[var(--neon-amber)]';
+    case 'error':
+      return 'text-[var(--neon-red)]';
+    default:
+      return 'text-[var(--neon-cyan)]';
+  }
+}
+
+function filterOnStyles(sev: EventSeverity) {
+  switch (sev) {
+    case 'success':
+      return 'border-l-[var(--neon-green)] text-[var(--neon-green)] bg-[rgba(0,255,65,0.06)]';
+    case 'warning':
+      return 'border-l-[var(--neon-amber)] text-[var(--neon-amber)] bg-[rgba(255,184,0,0.08)]';
+    case 'error':
+      return 'border-l-[var(--neon-red)] text-[var(--neon-red)] bg-[rgba(255,45,85,0.08)]';
+    default:
+      return 'border-l-[var(--neon-cyan)] text-[var(--neon-cyan)] bg-[rgba(34,211,238,0.07)]';
+  }
+}
+
+function filterDotBg(sev: EventSeverity) {
+  switch (sev) {
+    case 'success':
+      return 'bg-[var(--neon-green)]';
+    case 'warning':
+      return 'bg-[var(--neon-amber)]';
+    case 'error':
+      return 'bg-[var(--neon-red)]';
+    default:
+      return 'bg-[var(--neon-cyan)]';
   }
 }
 
@@ -34,22 +73,37 @@ const TimelineRow = React.memo(function TimelineRow(props: {
   return (
     <div
       className={[
-        'flex h-14 items-center gap-3 rounded-xl border border-[color-mix(in_oklab,var(--border)_80%,transparent)] bg-[color-mix(in_oklab,var(--panel-2)_76%,transparent)] px-3',
-        'border-l-4',
+        'flex h-14 items-center gap-3 rounded-xl border border-[var(--border-subtle)] bg-transparent px-3 transition-colors',
+        'hover:bg-[rgba(255,255,255,0.02)]',
+        'border-l-[3px]',
         severityStyles(e.severity),
-        props.animate ? 'animate-[eventIn_160ms_ease-out]' : '',
+        props.animate ? 'animate-[event-enter_160ms_ease-out]' : '',
       ].join(' ')}
     >
-      <div className="w-20 shrink-0 font-[var(--font-mono)] text-[11px] text-[var(--muted)]">
+      <div className="w-20 shrink-0 font-[var(--font-mono)] text-xs text-[var(--text-secondary)]">
         {fmtTime(e.at)}
       </div>
       <div className="w-20 shrink-0">
-        <span className="rounded-lg border border-[color-mix(in_oklab,var(--border)_75%,transparent)] bg-[color-mix(in_oklab,var(--panel)_65%,transparent)] px-2 py-1 font-[var(--font-mono)] text-[11px] text-[var(--muted)]">
+        <span
+          title={String(e.node)}
+          className="rounded-full border border-[var(--border-subtle)] bg-[rgba(0,0,0,0.22)] px-2 py-1 font-[var(--font-mono)] text-[11px] text-[var(--text-secondary)]"
+        >
           {e.node}
         </span>
       </div>
-      <div className="min-w-0 flex-1 truncate text-sm">{e.message}</div>
-      <div className="shrink-0 font-[var(--font-mono)] text-[11px] text-[var(--muted)]">
+      <div
+        title={e.message}
+        className="min-w-0 flex-1 truncate font-[var(--font-mono)] text-[13px] text-[var(--text-primary)]"
+      >
+        {e.message}
+      </div>
+      <div
+        title={e.severity.toUpperCase()}
+        className={[
+          'shrink-0 font-[var(--font-mono)] text-[10px] font-semibold uppercase tracking-widest',
+          severityAccent(e.severity),
+        ].join(' ')}
+      >
         {e.severity}
       </div>
     </div>
@@ -154,20 +208,20 @@ export function EventTimeline(props: EventTimelineProps) {
   }, []);
 
   return (
-    <section className="hud-panel flex min-h-0 flex-col rounded-2xl p-5">
+    <section className="hud-panel flex min-h-0 flex-col rounded-2xl p-5 shadow-[0_0_0_1px_var(--border-glow)_inset]">
       <div className="flex flex-col gap-3">
         <div className="flex items-center justify-between gap-3">
-          <div className="text-xs uppercase tracking-[0.25em] text-[var(--muted)]">Events</div>
+          <div className="hud-label">Events</div>
 
           <button
             type="button"
             aria-pressed={pinned}
             onClick={() => setPinned((v) => !v)}
             className={[
-              'rounded-xl border px-3 py-1.5 text-xs font-semibold outline-none transition',
-              'border-[color-mix(in_oklab,var(--border)_80%,transparent)] bg-[color-mix(in_oklab,var(--panel-2)_80%,transparent)] text-[var(--text)]',
-              'hover:bg-[color-mix(in_oklab,var(--panel-2)_92%,transparent)]',
-              'focus-visible:ring-2 focus-visible:ring-[var(--cyan)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg)]',
+              'rounded-full border border-[var(--border-subtle)] bg-[rgba(10,18,36,0.35)] px-3 py-1.5',
+              'font-[var(--font-heading)] text-[11px] font-semibold text-[var(--text-secondary)]',
+              'outline-none transition-colors hover:bg-[var(--bg-panel-hover)] hover:text-[var(--text-primary)]',
+              'focus-visible:ring-2 focus-visible:ring-[var(--neon-cyan)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg-deep)]',
             ].join(' ')}
           >
             {pinned ? 'Pinned (Following)' : 'Unpinned'}
@@ -185,25 +239,30 @@ export function EventTimeline(props: EventTimelineProps) {
                   aria-pressed={on}
                   onClick={() => toggleSeverity(sev)}
                   className={[
-                    'rounded-xl border px-3 py-1.5 text-xs font-semibold outline-none transition',
-                    'focus-visible:ring-2 focus-visible:ring-[var(--cyan)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg)]',
+                    'h-6 rounded-full border border-[var(--border-subtle)] bg-transparent px-3',
+                    'border-l-2 border-l-transparent font-[var(--font-heading)] text-[11px] font-semibold outline-none transition-colors',
+                    'focus-visible:ring-2 focus-visible:ring-[var(--neon-cyan)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg-deep)]',
                     on
-                      ? 'border-[color-mix(in_oklab,var(--cyan)_25%,var(--border))] bg-[color-mix(in_oklab,var(--cyan)_10%,transparent)] text-[var(--text)]'
-                      : 'border-[color-mix(in_oklab,var(--border)_80%,transparent)] bg-[color-mix(in_oklab,var(--panel-2)_80%,transparent)] text-[var(--muted)] hover:text-[var(--text)]',
+                      ? filterOnStyles(sev)
+                      : 'text-[var(--text-secondary)] hover:bg-[rgba(255,255,255,0.02)] hover:text-[var(--text-primary)]',
                   ].join(' ')}
                 >
-                  {sev}
+                  <span
+                    aria-hidden="true"
+                    className={['inline-flex h-1.5 w-1.5 rounded-full', filterDotBg(sev)].join(' ')}
+                  />
+                  <span className="ml-2">{sev}</span>
                 </button>
               );
             })}
           </div>
 
           <div className="flex items-center gap-2">
-            <div className="text-xs uppercase tracking-[0.2em] text-[var(--muted)]">Node</div>
+            <div className="hud-label">Node</div>
             <select
               value={nodeFilter}
               onChange={(e) => setNodeFilter(e.target.value as GateId | 'all')}
-              className="rounded-xl border border-[color-mix(in_oklab,var(--border)_80%,transparent)] bg-[color-mix(in_oklab,var(--panel-2)_80%,transparent)] px-3 py-2 text-sm text-[var(--text)] outline-none focus-visible:ring-2 focus-visible:ring-[var(--cyan)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg)]"
+              className="h-8 rounded-xl border border-[var(--border-subtle)] bg-[rgba(10,18,36,0.35)] px-3 font-[var(--font-mono)] text-[12px] text-[var(--text-primary)] outline-none focus-visible:ring-2 focus-visible:ring-[var(--neon-cyan)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg-deep)]"
             >
               <option value="all">all</option>
               {allNodes
@@ -216,16 +275,14 @@ export function EventTimeline(props: EventTimelineProps) {
               {allNodes.includes('system') ? <option value="system">system</option> : null}
             </select>
 
-            <div className="ml-2 font-[var(--font-mono)] text-[11px] text-[var(--muted)]">
-              {filtered.length} items
-            </div>
+            <div className="hud-meta ml-2">{filtered.length} items</div>
           </div>
         </div>
       </div>
 
       <div
         ref={scrollerRef}
-        className="mt-4 min-h-0 flex-1 overflow-auto rounded-2xl border border-[color-mix(in_oklab,var(--border)_80%,transparent)] bg-[color-mix(in_oklab,var(--panel-2)_72%,transparent)] p-3"
+        className="mt-4 min-h-0 flex-1 overflow-auto rounded-2xl border border-[var(--border-subtle)] bg-[rgba(0,0,0,0.18)] p-3"
       >
         <div ref={listRef} className="pt-[var(--pad-top)] pb-[var(--pad-bottom)]">
           <div className="flex flex-col gap-2">
