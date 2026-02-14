@@ -244,9 +244,11 @@ export function MainView() {
         />
 
         {!socketConnected ? (
-          <div className="hud-panel rounded-2xl px-4 py-3 text-sm text-[color-mix(in_oklab,var(--amber)_90%,white)]">
-            <span className="font-[var(--font-heading)] font-semibold">OFFLINE</span>
-            <span className="ml-2 text-[var(--muted)]">
+          <div className="hud-panel offline-banner rounded-2xl px-4 py-3">
+            <span className="font-[var(--font-mono)] text-sm font-semibold uppercase tracking-widest text-[var(--neon-red)] animate-[offline-pulse_2s_ease-in-out_infinite]">
+              OFFLINE
+            </span>
+            <span className="ml-2 font-[var(--font-mono)] text-sm text-[var(--text-primary)]">
               Monitor backend not reachable{socketLastError ? `: ${socketLastError}` : '.'}
             </span>
           </div>

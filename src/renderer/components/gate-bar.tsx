@@ -1,34 +1,45 @@
 import React from 'react';
 
 import type { GateId, GateUI } from '../models/ui';
-import { IconCheck, IconX } from './icons';
 
 function statusClasses(status: GateUI['status']) {
   switch (status) {
     case 'passed':
-      return 'border-[color-mix(in_oklab,var(--green)_45%,var(--border))] bg-[color-mix(in_oklab,var(--green)_12%,transparent)] text-[color-mix(in_oklab,var(--green)_85%,white)]';
+      return 'border-[rgba(0,255,65,0.25)] bg-[rgba(15,23,42,0.80)] text-[var(--text-primary)]';
     case 'failed':
-      return 'border-[color-mix(in_oklab,var(--red)_45%,var(--border))] bg-[color-mix(in_oklab,var(--red)_12%,transparent)] text-[color-mix(in_oklab,var(--red)_90%,white)]';
+      return 'border-[rgba(255,45,85,0.28)] bg-[rgba(15,23,42,0.80)] text-[var(--text-primary)]';
     case 'running':
-      return 'border-[color-mix(in_oklab,var(--cyan)_45%,var(--border))] bg-[color-mix(in_oklab,var(--cyan)_10%,transparent)] text-[color-mix(in_oklab,var(--cyan)_90%,white)]';
+      return 'border-[rgba(34,211,238,0.30)] bg-[rgba(15,23,42,0.80)] text-[var(--text-primary)] shadow-[var(--glow-cyan)]';
     default:
-      return 'border-[color-mix(in_oklab,var(--border)_85%,transparent)] bg-[color-mix(in_oklab,var(--panel-2)_85%,transparent)] text-[var(--muted)]';
+      return 'border-[var(--border-subtle)] bg-[rgba(15,23,42,0.80)] text-[var(--text-secondary)]';
   }
 }
 
-function statusIcon(status: GateUI['status']) {
-  if (status === 'passed') return <IconCheck className="h-4 w-4" title="Passed" />;
-  if (status === 'failed') return <IconX className="h-4 w-4" title="Failed" />;
+function statusDot(status: GateUI['status']) {
+  if (status === 'passed')
+    return (
+      <span
+        className="inline-flex h-1.5 w-1.5 rounded-full bg-[var(--neon-green)] shadow-[0_0_18px_rgba(0,255,65,0.15)]"
+        aria-label="Passed"
+      />
+    );
+  if (status === 'failed')
+    return (
+      <span
+        className="inline-flex h-1.5 w-1.5 rounded-full bg-[var(--neon-red)] shadow-[0_0_18px_rgba(255,45,85,0.22)]"
+        aria-label="Failed"
+      />
+    );
   if (status === 'running')
     return (
       <span
-        className="inline-flex h-2 w-2 rounded-full bg-[var(--cyan)] animate-[hudRunning_1.2s_ease-in-out_infinite]"
+        className="inline-flex h-1.5 w-1.5 rounded-full bg-[var(--neon-cyan)] shadow-[var(--glow-cyan)] animate-[dot-pulse_1.5s_ease-in-out_infinite]"
         aria-label="Running"
       />
     );
   return (
     <span
-      className="inline-flex h-2 w-2 rounded-full bg-[color-mix(in_oklab,var(--muted)_45%,transparent)]"
+      className="inline-flex h-1.5 w-1.5 rounded-full bg-[var(--text-secondary)] opacity-70"
       aria-label="Pending"
     />
   );
@@ -45,13 +56,11 @@ export function GateBar(props: GateBarProps) {
   const btnRefs = React.useRef(new Map<GateId, HTMLButtonElement | null>());
 
   return (
-    <section className="hud-panel rounded-2xl px-4 py-3">
+    <section className="hud-panel hud-ambient rounded-2xl px-4 py-3 shadow-[0_0_0_1px_var(--border-glow)_inset]">
       <div className="flex flex-col gap-2">
         <div className="flex items-center justify-between gap-4">
-          <div className="text-xs uppercase tracking-[0.25em] text-[var(--muted)]">Pipeline</div>
-          <div className="text-xs text-[var(--muted)]">
-            Use arrows to move, Enter to open evidence
-          </div>
+          <div className="hud-label">Pipeline</div>
+          <div className="hud-meta">Use arrows to move, Enter to open evidence</div>
         </div>
 
         <nav className="flex flex-wrap items-center gap-2" aria-label="Gate pipeline">
@@ -86,26 +95,29 @@ export function GateBar(props: GateBarProps) {
                     btnRefs.current.get(nextId)?.focus();
                   }}
                   className={[
-                    'inline-flex items-center gap-2 rounded-xl border px-3 py-2 text-sm font-semibold outline-none transition',
-                    'transition-colors transition-shadow duration-300',
-                    'focus-visible:ring-2 focus-visible:ring-[var(--cyan)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg)]',
+                    'relative inline-flex items-center gap-3 rounded-lg border px-5 py-2 outline-none',
+                    'transition-colors transition-shadow transition-transform duration-250',
+                    'focus-visible:ring-2 focus-visible:ring-[var(--neon-cyan)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg-deep)]',
                     statusClasses(gate.status),
+                    gate.status === 'running' ? 'gate-running' : '',
                     selected
-                      ? 'ring-1 ring-[color-mix(in_oklab,var(--cyan)_55%,transparent)]'
-                      : 'hover:border-[color-mix(in_oklab,var(--cyan)_25%,var(--border))]',
-                    gate.status === 'running'
-                      ? 'animate-[hudRunning_1.8s_ease-in-out_infinite]'
-                      : '',
+                      ? "translate-y-[-2px] border-[rgba(34,211,238,0.45)] shadow-[var(--glow-cyan)] after:absolute after:bottom-[-6px] after:left-1/2 after:h-3 after:w-3 after:-translate-x-1/2 after:rotate-45 after:bg-[rgba(15,23,42,0.82)] after:border after:border-[rgba(34,211,238,0.35)] after:shadow-[0_0_22px_rgba(34,211,238,0.12)] after:content-['']"
+                      : 'hover:border-[rgba(34,211,238,0.22)] hover:bg-[rgba(15,25,50,0.55)]',
                   ].join(' ')}
                 >
-                  <span className="inline-flex items-center">{statusIcon(gate.status)}</span>
-                  <span className="font-[var(--font-heading)]">{gate.label}</span>
+                  <span className="inline-flex items-center">{statusDot(gate.status)}</span>
+                  <span className="font-[var(--font-mono)] text-[13px] font-semibold">
+                    {gate.label}
+                  </span>
                 </button>
 
                 {i < props.gates.length - 1 ? (
                   <div
                     aria-hidden="true"
-                    className="hidden h-px w-6 bg-[color-mix(in_oklab,var(--border)_70%,transparent)] sm:block"
+                    className={[
+                      'hidden h-0.5 w-7 rounded-full bg-[var(--border-glow)] sm:block',
+                      props.gates[i + 1]?.status === 'running' ? 'connector-active' : '',
+                    ].join(' ')}
                   />
                 ) : null}
               </React.Fragment>

@@ -14,6 +14,7 @@ function buildCsp(isDev: boolean) {
     "base-uri 'self';",
     "form-action 'self';",
     "frame-ancestors 'none';",
+    "frame-src 'none';",
     "object-src 'none';",
     "img-src 'self' data:;",
     "font-src 'self' data: https://fonts.gstatic.com;",

@@ -1,5 +1,7 @@
 @import "tailwindcss";
 @import "./renderer/styles/theme.css";
+@import "./renderer/styles/hud.base.css";
+@import "./renderer/styles/hud.anim.css";
 
 :root {
   color-scheme: dark;
@@ -13,4 +15,14 @@ body,
 
 body {
   margin: 0;
+  background: var(--bg-deep);
+  background-image: radial-gradient(
+      ellipse at 20% 50%,
+      rgba(34, 211, 238, 0.03) 0%,
+      transparent 50%
+    ), radial-gradient(ellipse at 80% 20%, rgba(59, 130, 246, 0.03) 0%, transparent 50%);
+  color: var(--text-primary);
+  font-family: var(--font-heading);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }

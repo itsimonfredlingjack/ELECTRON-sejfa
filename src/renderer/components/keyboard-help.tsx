@@ -21,26 +21,22 @@ export function KeyboardHelp(props: KeyboardHelpProps) {
         type="button"
         tabIndex={-1}
         aria-label="Close keyboard help"
-        className="absolute inset-0 bg-black/60 backdrop-blur-[2px]"
+        className="absolute inset-0 hud-backdrop"
         onClick={props.onClose}
       />
 
       <div className="absolute inset-0 flex items-center justify-center p-4">
-        <div className="hud-panel w-full max-w-2xl animate-[drawerIn_180ms_ease-out] rounded-2xl p-6">
+        <div className="hud-panel w-full max-w-2xl animate-[drawerIn_220ms_ease-out] rounded-2xl p-6 shadow-[0_0_0_1px_var(--border-glow)_inset]">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <div className="text-xs uppercase tracking-[0.25em] text-[var(--muted)]">
-                Keyboard
-              </div>
-              <div className="mt-1 font-[var(--font-heading)] text-xl font-semibold text-[var(--text)]">
-                Shortcuts
-              </div>
+              <div className="hud-label">Keyboard</div>
+              <div className="hud-title mt-1 text-xl">Shortcuts</div>
             </div>
             <button
               ref={closeRef}
               type="button"
               onClick={props.onClose}
-              className="rounded-xl border border-[color-mix(in_oklab,var(--border)_85%,transparent)] bg-[color-mix(in_oklab,var(--panel-2)_80%,transparent)] px-3 py-2 text-sm font-semibold text-[var(--text)] outline-none transition hover:bg-[color-mix(in_oklab,var(--panel-2)_92%,transparent)] focus-visible:ring-2 focus-visible:ring-[var(--cyan)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg)]"
+              className="rounded-xl border border-[var(--border-subtle)] bg-transparent px-3 py-2 font-[var(--font-heading)] text-sm font-semibold text-[var(--text-secondary)] outline-none transition-colors hover:bg-[var(--bg-panel-hover)] hover:text-[var(--text-primary)] focus-visible:ring-2 focus-visible:ring-[var(--neon-cyan)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg-deep)]"
             >
               Close
             </button>
@@ -58,15 +54,15 @@ export function KeyboardHelp(props: KeyboardHelpProps) {
             ].map(([k, d]) => (
               <div
                 key={k}
-                className="rounded-2xl border border-[color-mix(in_oklab,var(--border)_85%,transparent)] bg-[color-mix(in_oklab,var(--panel-2)_75%,transparent)] p-4"
+                className="rounded-xl border border-[var(--border-subtle)] bg-[rgba(15,23,42,0.45)] p-4"
               >
-                <div className="font-[var(--font-mono)] text-xs text-[var(--muted)]">{k}</div>
-                <div className="mt-1 text-sm text-[var(--text)]">{d}</div>
+                <kbd className="hud-kbd">{k}</kbd>
+                <div className="mt-2 text-sm text-[var(--text-primary)]">{d}</div>
               </div>
             ))}
           </div>
 
-          <div className="mt-5 text-xs text-[var(--muted)]">
+          <div className="hud-meta mt-5">
             Tips: Arrow keys also work inside the pipeline. Evidence drawer closes on backdrop
             click.
           </div>

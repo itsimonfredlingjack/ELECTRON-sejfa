@@ -36,23 +36,21 @@ export function EvidenceDrawer(props: EvidenceDrawerProps) {
         type="button"
         aria-label="Close evidence drawer"
         tabIndex={-1}
-        className="absolute inset-0 bg-black/60 backdrop-blur-[2px]"
+        className="absolute inset-0 hud-backdrop"
         onClick={props.onClose}
       />
 
       <div className="absolute inset-x-0 bottom-0 mx-auto w-full max-w-5xl px-4 pb-4">
-        <div className="hud-panel animate-[drawerIn_180ms_ease-out] rounded-2xl p-5">
+        <div className="hud-panel hud-panel--strong relative animate-[drawerIn_220ms_ease-out] rounded-2xl p-5 before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-[var(--neon-cyan)] before:shadow-[var(--glow-cyan)] before:content-['']">
           <div className="flex items-start justify-between gap-4">
             <div className="min-w-0">
-              <div className="text-xs uppercase tracking-[0.25em] text-[var(--muted)]">
-                Evidence
-              </div>
-              <div className="mt-1 truncate font-[var(--font-heading)] text-lg font-semibold text-[var(--text)]">
-                {title}
-              </div>
-              <div className="mt-1 text-xs text-[var(--muted)]">
+              <div className="hud-label">Evidence</div>
+              <div className="hud-title mt-1 truncate text-lg">{title}</div>
+              <div className="hud-meta mt-1">
                 Updated:{' '}
-                <span className="font-[var(--font-mono)]">{fmtTime(props.gate?.updatedAt)}</span>
+                <span className="font-semibold text-[var(--text-primary)]">
+                  {fmtTime(props.gate?.updatedAt)}
+                </span>
               </div>
             </div>
 
@@ -61,9 +59,10 @@ export function EvidenceDrawer(props: EvidenceDrawerProps) {
                 ref={closeRef}
                 type="button"
                 onClick={props.onClose}
-                className="rounded-xl border border-[color-mix(in_oklab,var(--border)_85%,transparent)] bg-[color-mix(in_oklab,var(--panel-2)_80%,transparent)] px-3 py-2 text-sm font-semibold text-[var(--text)] outline-none transition hover:bg-[color-mix(in_oklab,var(--panel-2)_92%,transparent)] focus-visible:ring-2 focus-visible:ring-[var(--cyan)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg)]"
+                aria-label="Close"
+                className="grid h-9 w-9 place-items-center rounded-full border border-[var(--border-subtle)] bg-transparent font-[var(--font-heading)] text-lg text-[var(--text-secondary)] outline-none transition-colors hover:bg-[rgba(255,255,255,0.02)] hover:text-[var(--text-primary)] focus-visible:ring-2 focus-visible:ring-[var(--neon-cyan)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg-deep)]"
               >
-                Close
+                ✕
               </button>
               <button
                 type="button"
@@ -74,15 +73,15 @@ export function EvidenceDrawer(props: EvidenceDrawerProps) {
                     // Clipboard access may be blocked; fail silently in Phase 4.
                   }
                 }}
-                className="rounded-xl border border-[color-mix(in_oklab,var(--border)_85%,transparent)] bg-[color-mix(in_oklab,var(--cyan)_14%,transparent)] px-3 py-2 text-sm font-semibold text-[var(--text)] outline-none transition hover:bg-[color-mix(in_oklab,var(--cyan)_22%,transparent)] focus-visible:ring-2 focus-visible:ring-[var(--cyan)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg)]"
+                className="rounded-xl border border-[var(--border-subtle)] bg-transparent px-3 py-2 font-[var(--font-heading)] text-sm font-semibold text-[var(--text-secondary)] outline-none transition-colors hover:bg-[var(--bg-panel-hover)] hover:text-[var(--text-primary)] focus-visible:ring-2 focus-visible:ring-[var(--neon-cyan)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg-deep)]"
               >
                 Copy
               </button>
             </div>
           </div>
 
-          <div className="mt-4 max-h-[50vh] overflow-auto rounded-xl border border-[color-mix(in_oklab,var(--border)_85%,transparent)] bg-[color-mix(in_oklab,var(--panel-2)_78%,transparent)] p-4">
-            <pre className="whitespace-pre-wrap break-words font-[var(--font-mono)] text-xs leading-relaxed text-[color-mix(in_oklab,var(--text)_88%,white)]">
+          <div className="mt-4 max-h-[50vh] overflow-auto rounded-xl border border-[var(--border-subtle)] bg-[rgba(0,0,0,0.30)] p-4">
+            <pre className="whitespace-pre-wrap break-words font-[var(--font-mono)] text-[13px] leading-relaxed text-[var(--text-primary)]">
               {evidence}
             </pre>
           </div>
