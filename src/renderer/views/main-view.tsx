@@ -2,10 +2,10 @@ import React from 'react';
 
 import type { Result } from '../../shared/api';
 import { deriveGates, deriveObjectiveText, deriveTimelineEvents } from '../adapters/loop-adapters';
-import { EventTimeline } from '../components/event-timeline';
 import { EvidenceDrawer } from '../components/evidence-drawer';
 import { GateBar } from '../components/gate-bar';
 import { KeyboardHelp } from '../components/keyboard-help';
+import { LogConsole } from '../components/log-console';
 import { LoopVisualization } from '../components/loop-visualization';
 import { Toolbar, type ToolbarMode } from '../components/toolbar';
 import { useElectronApi } from '../hooks/use-electron-api';
@@ -275,7 +275,7 @@ export function MainView() {
             />
           </div>
           <div className="min-h-0 lg:col-span-3">
-            <EventTimeline events={timelineEvents} />
+            <LogConsole events={timelineEvents} />
           </div>
         </div>
       </div>

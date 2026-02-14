@@ -5,13 +5,13 @@ import type { GateId, GateUI } from '../models/ui';
 function statusClasses(status: GateUI['status']) {
   switch (status) {
     case 'passed':
-      return 'border-[rgba(0,255,65,0.25)] bg-[rgba(15,23,42,0.80)] text-[var(--text-primary)]';
+      return 'border-[rgba(0,255,65,0.25)] bg-[rgba(5,10,15,0.6)] text-[var(--text-primary)] shadow-[var(--glow-green)]';
     case 'failed':
-      return 'border-[rgba(255,45,85,0.28)] bg-[rgba(15,23,42,0.80)] text-[var(--text-primary)]';
+      return 'border-[rgba(255,0,60,0.3)] bg-[rgba(5,10,15,0.6)] text-[var(--text-primary)] shadow-[var(--glow-red)]';
     case 'running':
-      return 'border-[rgba(34,211,238,0.30)] bg-[rgba(15,23,42,0.80)] text-[var(--text-primary)] shadow-[var(--glow-cyan)]';
+      return 'border-[rgba(34,211,238,0.30)] bg-[rgba(5,10,15,0.6)] text-[var(--text-primary)] shadow-[var(--glow-cyan)]';
     default:
-      return 'border-[var(--border-subtle)] bg-[rgba(15,23,42,0.80)] text-[var(--text-secondary)]';
+      return 'border-[var(--border-subtle)] bg-[rgba(5,10,15,0.4)] text-[var(--text-secondary)]';
   }
 }
 
@@ -19,21 +19,21 @@ function statusDot(status: GateUI['status']) {
   if (status === 'passed')
     return (
       <span
-        className="inline-flex h-1.5 w-1.5 rounded-full bg-[var(--neon-green)] shadow-[0_0_18px_rgba(0,255,65,0.15)]"
+        className="inline-flex h-2 w-2 rounded-full bg-[var(--neon-green)] shadow-[var(--glow-green)]"
         aria-label="Passed"
       />
     );
   if (status === 'failed')
     return (
       <span
-        className="inline-flex h-1.5 w-1.5 rounded-full bg-[var(--neon-red)] shadow-[0_0_18px_rgba(255,45,85,0.22)]"
+        className="inline-flex h-2 w-2 rounded-full bg-[var(--neon-red)] shadow-[var(--glow-red)] animate-pulse"
         aria-label="Failed"
       />
     );
   if (status === 'running')
     return (
       <span
-        className="inline-flex h-1.5 w-1.5 rounded-full bg-[var(--neon-cyan)] shadow-[var(--glow-cyan)] animate-[dot-pulse_1.5s_ease-in-out_infinite]"
+        className="inline-flex h-2 w-2 rounded-full bg-[var(--neon-cyan)] shadow-[var(--glow-cyan)] animate-[dot-pulse_1.5s_ease-in-out_infinite]"
         aria-label="Running"
       />
     );
@@ -56,14 +56,21 @@ export function GateBar(props: GateBarProps) {
   const btnRefs = React.useRef(new Map<GateId, HTMLButtonElement | null>());
 
   return (
-    <section className="hud-panel hud-ambient rounded-2xl px-4 py-3 shadow-[0_0_0_1px_var(--border-glow)_inset]">
-      <div className="flex flex-col gap-2">
+    <section className="glass-panel rounded-xl px-4 py-3 relative overflow-hidden">
+      {/* Subtle grid background for this panel */}
+      <div className="absolute inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.1)_50%),linear-gradient(90deg,rgba(255,0,0,0.03),rgba(0,255,0,0.01),rgba(0,0,255,0.03))] bg-[length:100%_2px,3px_100%] pointer-events-none opacity-20 z-0" />
+
+      <div className="relative z-10 flex flex-col gap-2">
         <div className="flex items-center justify-between gap-4">
-          <div className="hud-label">Pipeline</div>
-          <div className="hud-meta">Use arrows to move, Enter to open evidence</div>
+          <div className="text-xs font-bold uppercase tracking-[0.2em] text-[var(--neon-cyan)] drop-shadow-[0_0_5px_rgba(34,211,238,0.5)]">
+            Pipeline Status
+          </div>
+          <div className="text-[10px] text-[var(--text-secondary)] font-mono opacity-70">
+            Use arrows to move, Enter to open evidence
+          </div>
         </div>
 
-        <nav className="flex flex-wrap items-center gap-2" aria-label="Gate pipeline">
+        <nav className="flex flex-wrap items-center gap-3 mt-1" aria-label="Gate pipeline">
           {props.gates.map((gate, i) => {
             const selected = gate.id === props.selectedGateId;
             return (
@@ -95,28 +102,32 @@ export function GateBar(props: GateBarProps) {
                     btnRefs.current.get(nextId)?.focus();
                   }}
                   className={[
-                    'relative inline-flex items-center gap-3 rounded-lg border px-5 py-2 outline-none',
-                    'transition-colors transition-shadow transition-transform duration-250',
-                    'focus-visible:ring-2 focus-visible:ring-[var(--neon-cyan)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg-deep)]',
+                    'relative inline-flex items-center gap-3 rounded border px-4 py-1.5 outline-none',
+                    'transition-all duration-200 group',
+                    'focus-visible:ring-1 focus-visible:ring-[var(--neon-cyan)] focus-visible:ring-offset-1 focus-visible:ring-offset-[var(--bg-deep)]',
                     statusClasses(gate.status),
-                    gate.status === 'running' ? 'gate-running' : '',
                     selected
-                      ? "translate-y-[-2px] border-[rgba(34,211,238,0.45)] shadow-[var(--glow-cyan)] after:absolute after:bottom-[-6px] after:left-1/2 after:h-3 after:w-3 after:-translate-x-1/2 after:rotate-45 after:bg-[rgba(15,23,42,0.82)] after:border after:border-[rgba(34,211,238,0.35)] after:shadow-[0_0_22px_rgba(34,211,238,0.12)] after:content-['']"
-                      : 'hover:border-[rgba(34,211,238,0.22)] hover:bg-[rgba(15,25,50,0.55)]',
+                      ? 'border-[rgba(34,211,238,0.6)] shadow-[var(--glow-cyan)] scale-105'
+                      : 'hover:border-[rgba(34,211,238,0.3)] hover:bg-[rgba(15,25,50,0.8)]',
                   ].join(' ')}
                 >
                   <span className="inline-flex items-center">{statusDot(gate.status)}</span>
-                  <span className="font-[var(--font-mono)] text-[13px] font-semibold">
+                  <span className="font-[var(--font-mono)] text-[12px] font-bold tracking-wide uppercase">
                     {gate.label}
                   </span>
+                  {selected && (
+                    <span className="absolute -bottom-1 left-1/2 w-1 h-1 bg-[var(--neon-cyan)] rounded-full -translate-x-1/2 shadow-[0_0_5px_var(--neon-cyan)]" />
+                  )}
                 </button>
 
                 {i < props.gates.length - 1 ? (
                   <div
                     aria-hidden="true"
                     className={[
-                      'hidden h-0.5 w-7 rounded-full bg-[var(--border-glow)] sm:block',
-                      props.gates[i + 1]?.status === 'running' ? 'connector-active' : '',
+                      'hidden h-px w-6 bg-[var(--border-subtle)] sm:block opacity-30',
+                      props.gates[i + 1]?.status === 'running'
+                        ? 'bg-[var(--neon-cyan)] opacity-100 shadow-[0_0_5px_var(--neon-cyan)]'
+                        : '',
                     ].join(' ')}
                   />
                 ) : null}

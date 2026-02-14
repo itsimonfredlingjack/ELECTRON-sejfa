@@ -5,6 +5,7 @@ import path from 'node:path';
 import readline from 'node:readline';
 
 import { app } from 'electron';
+import treeKill from 'tree-kill';
 
 import type {
   ManagedProcessId,
@@ -375,7 +376,7 @@ export class ChildProcessManager extends EventEmitter {
     rec.stopRequested = true;
 
     const proc = rec.proc;
-    if (!proc) {
+    if (!proc || typeof proc.pid !== 'number') {
       rec.state = 'stopped';
       rec.updatedAt = nowIso();
       this.emitStatus();
@@ -388,13 +389,25 @@ export class ChildProcessManager extends EventEmitter {
 
     try {
       const force = Boolean(opts?.force);
-      const signal: NodeJS.Signals = force ? 'SIGKILL' : 'SIGTERM';
-      proc.kill(signal);
+      const pid = proc.pid;
+
+      // Wrap tree-kill in a promise
+      const killTree = (signal: string) =>
+        new Promise<void>((resolve, reject) => {
+          treeKill(pid, signal, (err) => {
+            // Ignore error if process is already dead (ESRCH)
+            if (err && !err.message.includes('ESRCH')) reject(err);
+            else resolve();
+          });
+        });
+
+      await killTree(force ? 'SIGKILL' : 'SIGTERM');
 
       if (!force) {
         const res = await this.waitForExit(proc, 3500);
         if (res === 'timeout') {
-          proc.kill('SIGKILL');
+          // If it didn't exit after SIGTERM, force kill the tree.
+          await killTree('SIGKILL');
           await this.waitForExit(proc, 2000);
         }
       } else {

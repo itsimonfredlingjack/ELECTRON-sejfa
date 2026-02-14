@@ -12,7 +12,7 @@ export type LoopState = {
   appMode: AppMode;
 };
 
-const MAX_EVENTS = 500;
+const MAX_EVENTS = 1000;
 
 const INITIAL_LOOP_STATE: LoopState = {
   objective: null,

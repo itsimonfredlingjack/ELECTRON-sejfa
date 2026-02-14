@@ -1,15 +1,18 @@
 :root {
   /* Base */
-  --bg-deep: #050a12;
+  --cyber-black: #050505;
+  --bg-deep: var(--cyber-black);
   --bg-panel: rgba(10, 18, 36, 0.65);
   --bg-panel-hover: rgba(15, 25, 50, 0.75);
+  --glass-panel: rgba(10, 20, 30, 0.7);
+
   --border-glow: rgba(34, 211, 238, 0.15);
   --border-subtle: rgba(148, 163, 184, 0.08);
 
   /* Neon accents */
   --neon-cyan: #22d3ee;
   --neon-green: #00ff41;
-  --neon-red: #ff2d55;
+  --neon-red: #ff003c;
   --neon-amber: #ffb800;
   --neon-blue: #3b82f6;
 
@@ -19,26 +22,23 @@
   --text-label: #94a3b8;
 
   /* Glassmorphism */
-  --glass-bg: rgba(15, 23, 42, 0.6);
-  --glass-blur: blur(16px);
+  --glass-bg: var(--glass-panel);
+  --glass-blur: blur(10px);
   --glass-blur-strong: blur(24px);
   --glass-blur-soft: blur(4px);
   --glass-border: 1px solid rgba(148, 163, 184, 0.1);
 
   /* Shadows */
   --glow-cyan: 0 0 20px rgba(34, 211, 238, 0.15), 0 0 60px rgba(34, 211, 238, 0.05);
-  --glow-red: 0 0 20px rgba(255, 45, 85, 0.3), 0 0 60px rgba(255, 45, 85, 0.1);
-  --glow-green: 0 0 20px rgba(0, 255, 65, 0.2), 0 0 60px rgba(0, 255, 65, 0.05);
+  --glow-red: 0 0 20px rgba(255, 0, 60, 0.5);
+  --glow-green: 0 0 20px rgba(0, 255, 65, 0.5);
   --glow-amber: 0 0 15px rgba(255, 184, 0, 0.2);
   --glow-cyan-soft: 0 0 12px rgba(34, 211, 238, 0.1), 0 0 30px rgba(34, 211, 238, 0.04);
-  --glow-red-soft: 0 0 12px rgba(255, 45, 85, 0.18), 0 0 30px rgba(255, 45, 85, 0.06);
-  --glow-green-soft: 0 0 12px rgba(0, 255, 65, 0.12), 0 0 30px rgba(0, 255, 65, 0.04);
 
-  --font-heading: "Inter", ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
-    "Liberation Mono", "Courier New", monospace;
+  --font-heading: "JetBrains Mono", "Fira Code", monospace;
+  --font-mono: "JetBrains Mono", "Fira Code", monospace;
 
-  /* Back-compat tokens (existing Tailwind arbitrary vars) */
+  /* Back-compat tokens */
   --bg: var(--bg-deep);
   --panel: rgba(10, 18, 36, 0.85);
   --panel-2: rgba(15, 23, 42, 0.7);
