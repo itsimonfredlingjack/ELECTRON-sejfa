@@ -1,0 +1,92 @@
+:root {
+  --bg: #0a0e17;
+  --panel: #111827;
+  --panel-2: #0f172a;
+  --border: #1e293b;
+  --text: #e2e8f0;
+  --muted: #94a3b8;
+
+  --cyan: #22d3ee;
+  --green: #22c55e;
+  --amber: #f59e0b;
+  --red: #ef4444;
+
+  --font-heading: "Space Grotesk", ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    "Liberation Mono", "Courier New", monospace;
+}
+
+.hud-panel {
+  background: color-mix(in oklab, var(--panel) 88%, black);
+  border: 1px solid color-mix(in oklab, var(--border) 85%, black);
+  box-shadow: 0 0 0 1px color-mix(in oklab, var(--border) 25%, transparent) inset, 0 12px 30px
+    color-mix(in oklab, black 65%, transparent);
+}
+
+@keyframes hudPulse {
+  0% {
+    box-shadow: 0 0 0 1px color-mix(in oklab, var(--cyan) 55%, transparent) inset, 0 0 0 0
+      color-mix(in oklab, var(--cyan) 25%, transparent);
+  }
+  50% {
+    box-shadow: 0 0 0 1px color-mix(in oklab, var(--cyan) 75%, transparent) inset, 0 0 26px 4px
+      color-mix(in oklab, var(--cyan) 22%, transparent);
+  }
+  100% {
+    box-shadow: 0 0 0 1px color-mix(in oklab, var(--cyan) 55%, transparent) inset, 0 0 0 0
+      color-mix(in oklab, var(--cyan) 25%, transparent);
+  }
+}
+
+@keyframes hudRunning {
+  0% {
+    filter: drop-shadow(0 0 0 color-mix(in oklab, var(--cyan) 35%, transparent));
+    opacity: 0.92;
+  }
+  50% {
+    filter: drop-shadow(0 0 10px color-mix(in oklab, var(--cyan) 35%, transparent));
+    opacity: 1;
+  }
+  100% {
+    filter: drop-shadow(0 0 0 color-mix(in oklab, var(--cyan) 35%, transparent));
+    opacity: 0.92;
+  }
+}
+
+@keyframes drawerIn {
+  0% {
+    transform: translateY(18px);
+    opacity: 0;
+  }
+  80% {
+    transform: translateY(-2px);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes eventIn {
+  0% {
+    transform: translateY(6px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes killGlow {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in oklab, var(--red) 35%, transparent);
+  }
+  50% {
+    box-shadow: 0 0 18px 3px color-mix(in oklab, var(--red) 35%, transparent);
+  }
+  100% {
+    box-shadow: 0 0 0 0 color-mix(in oklab, var(--red) 35%, transparent);
+  }
+}

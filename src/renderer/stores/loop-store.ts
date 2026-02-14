@@ -1,0 +1,117 @@
+import { create } from 'zustand';
+
+import type { GateState, LoopEvent, TaskObjective } from '../../shared/types';
+
+export type AppMode = 'observe' | 'control';
+
+export type LoopState = {
+  objective: TaskObjective | null;
+  gates: GateState[];
+  events: LoopEvent[];
+  currentNode: string | null;
+  appMode: AppMode;
+};
+
+const MAX_EVENTS = 500;
+
+const INITIAL_LOOP_STATE: LoopState = {
+  objective: null,
+  gates: [],
+  events: [],
+  currentNode: null,
+  appMode: 'observe',
+};
+
+export const useLoopStore = create<LoopState>(() => INITIAL_LOOP_STATE);
+
+function safeEvent(event: LoopEvent): LoopEvent {
+  try {
+    const json = JSON.stringify(event);
+    if (json.length > 200_000) {
+      return {
+        type: 'log',
+        at: new Date().toISOString(),
+        runId: 'renderer',
+        level: 'warn',
+        message: `Dropped oversized event (${json.length} bytes)`,
+      };
+    }
+    return event;
+  } catch {
+    return {
+      type: 'log',
+      at: new Date().toISOString(),
+      runId: 'renderer',
+      level: 'warn',
+      message: 'Dropped unserializable event',
+    };
+  }
+}
+
+export const loopActions = {
+  reset: () => {
+    useLoopStore.setState(INITIAL_LOOP_STATE);
+  },
+
+  setObjective: (objective: TaskObjective | null) => {
+    useLoopStore.setState({ objective });
+  },
+
+  setGates: (gates: GateState[]) => {
+    useLoopStore.setState({ gates });
+  },
+
+  upsertGate: (gate: GateState) => {
+    useLoopStore.setState((prev) => {
+      const idx = prev.gates.findIndex((g) => g.nodeId === gate.nodeId);
+      if (idx === -1) return { gates: [...prev.gates, gate] };
+      const next = prev.gates.slice();
+      next[idx] = gate;
+      return { gates: next };
+    });
+  },
+
+  addEvent: (event: LoopEvent) => {
+    const e = safeEvent(event);
+    useLoopStore.setState((prev) => {
+      const next = [...prev.events, e];
+      return { events: next.length > MAX_EVENTS ? next.slice(-MAX_EVENTS) : next };
+    });
+  },
+
+  clearEvents: () => {
+    useLoopStore.setState({ events: [] });
+  },
+
+  setCurrentNode: (currentNode: string | null) => {
+    useLoopStore.setState({ currentNode });
+  },
+
+  setAppMode: (appMode: AppMode) => {
+    useLoopStore.setState({ appMode });
+  },
+};
+
+export function useLoopActions() {
+  return loopActions;
+}
+
+export function useObjective() {
+  return useLoopStore((s) => s.objective);
+}
+
+export function useGates() {
+  return useLoopStore((s) => s.gates);
+}
+
+export function useEvents() {
+  return useLoopStore((s) => s.events);
+}
+
+export function useCurrentNode() {
+  return useLoopStore((s) => s.currentNode);
+}
+
+export function useAppMode() {
+  return useLoopStore((s) => s.appMode);
+}
