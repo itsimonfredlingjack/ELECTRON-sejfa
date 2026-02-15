@@ -55,15 +55,16 @@ test('electron smoke (offline backend)', async () => {
   const page = await electronApp.firstWindow();
   await page.setViewportSize({ width: 1152, height: 768 });
 
-  await expect(page.getByText('Pipeline')).toBeVisible();
-  await expect(page.getByText('OFFLINE')).toBeVisible();
+  await expect(
+    page.getByRole('img', { name: 'Orbital loop visualization showing pipeline stages' }),
+  ).toBeVisible({ timeout: 15_000 });
+  await expect(page.getByText('OFFLINE', { exact: true })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Control' })).toBeVisible();
   await page.waitForTimeout(900);
   await attachScreenshot(page, 'main-offline');
 
   // Evidence drawer opens and closes with Escape.
-  const pipeline = page.getByRole('navigation', { name: 'Gate pipeline' });
-  await pipeline.getByRole('button', { name: /CI/i }).click();
+  await page.getByLabel('Select CI gate').click();
   await expect(page.getByText(/CI evidence/i)).toBeVisible();
   await page.waitForTimeout(250);
   await attachScreenshot(page, 'evidence-open');
@@ -81,15 +82,15 @@ test('electron smoke (offline backend)', async () => {
 
   // Mode switch enables actions; kill is two-step in UI + IPC.
   await page.getByRole('button', { name: 'Control' }).click();
-  await expect(page.getByRole('button', { name: 'Start' })).toBeEnabled();
-  await page.getByRole('button', { name: 'Arm Kill' }).click();
-  await expect(page.getByRole('button', { name: 'KILL', exact: true })).toBeEnabled();
+  await expect(page.getByRole('button', { name: 'Start Agent' })).toBeEnabled();
+  await page.getByRole('button', { name: 'ARM KILL' }).click();
+  await expect(page.getByRole('button', { name: 'CONFIRM KILL' })).toBeVisible();
   await page.waitForTimeout(350);
   await attachScreenshot(page, 'kill-armed');
   await attachScreenshot(page, 'anim-frame-a');
   await page.waitForTimeout(900);
   await attachScreenshot(page, 'anim-frame-b');
-  await page.getByRole('button', { name: 'KILL', exact: true }).click();
+  await page.getByRole('button', { name: 'CONFIRM KILL' }).click();
 
   await electronApp.close();
 });
