@@ -13,6 +13,7 @@ import { RalphReactor, type ReactorState } from '../components/ralph-reactor';
 import { ActionBar, type ToolbarMode } from '../components/toolbar';
 import { useElectronApi } from '../hooks/use-electron-api';
 import { useKeyboardShortcuts } from '../hooks/use-keyboard-shortcuts';
+import { useSoundEffects } from '../hooks/use-sound-effects';
 import type { GateId } from '../models/ui';
 import {
   loopActions,
@@ -92,6 +93,9 @@ export function MainView() {
     if (Object.values(processes).some((p) => p?.state === 'running')) return 'active';
     return 'idle';
   }, [socketConnected, processes, derivedGates.gates]);
+
+  // Sound effects — reacts to state transitions
+  useSoundEffects(reactorState, killArmedUntil !== null);
 
   const controlsEnabled = appMode === 'control';
   const anyStartingOrRunning = Object.values(processes).some(
