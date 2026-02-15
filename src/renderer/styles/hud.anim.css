@@ -13,10 +13,10 @@
 @keyframes node-breathe {
   0%,
   100% {
-    box-shadow: 0 0 15px rgba(34, 211, 238, 0.2);
+    box-shadow: 0 0 0 1px rgb(var(--primary-rgb) / 0.12), 0 18px 60px rgb(var(--primary-rgb) / 0.12);
   }
   50% {
-    box-shadow: 0 0 30px rgba(34, 211, 238, 0.4);
+    box-shadow: 0 0 0 1px rgb(var(--primary-rgb) / 0.18), 0 22px 70px rgb(var(--primary-rgb) / 0.18);
   }
 }
 
@@ -34,12 +34,12 @@
 @keyframes kill-armed {
   0%,
   100% {
-    box-shadow: 0 0 20px rgba(255, 45, 85, 0.3);
-    background-color: rgba(255, 45, 85, 0.1);
+    box-shadow: 0 0 0 1px rgb(var(--danger-rgb) / 0.25), 0 22px 70px rgb(var(--danger-rgb) / 0.16);
+    background-color: rgb(var(--danger-rgb) / 0.1);
   }
   50% {
-    box-shadow: 0 0 40px rgba(255, 45, 85, 0.6), 0 0 80px rgba(255, 45, 85, 0.2);
-    background-color: rgba(255, 45, 85, 0.25);
+    box-shadow: 0 0 0 1px rgb(var(--danger-rgb) / 0.35), 0 26px 82px rgb(var(--danger-rgb) / 0.24);
+    background-color: rgb(var(--danger-rgb) / 0.16);
   }
 }
 
@@ -112,15 +112,154 @@
   }
 }
 
+/* Dashed flow along a running pipeline segment */
+@keyframes segment-flow {
+  from {
+    stroke-dashoffset: 0;
+  }
+  to {
+    stroke-dashoffset: -28;
+  }
+}
+
+/* One-shot green flash when a gate passes */
+@keyframes gate-pass-flash {
+  0% {
+    filter: drop-shadow(0 0 0 transparent);
+  }
+  30% {
+    filter: drop-shadow(0 0 16px rgb(var(--success-rgb) / 0.6));
+  }
+  100% {
+    filter: drop-shadow(0 0 0 transparent);
+  }
+}
+
+/* ── New Living-UI Animations ─────────────────────────────────── */
+
+/* Slow ambient background mesh drift */
+@keyframes gradient-shift {
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(30px, -20px) scale(1.02);
+  }
+  66% {
+    transform: translate(-20px, 15px) scale(0.98);
+  }
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+}
+
+@keyframes gradient-shift-reverse {
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(-25px, 18px) scale(0.98);
+  }
+  66% {
+    transform: translate(18px, -22px) scale(1.03);
+  }
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+}
+
+/* 360-degree radar sweep rotation */
+@keyframes scan-sweep {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Connection badge pulse rings */
+@keyframes signal-wave {
+  0% {
+    opacity: 0.6;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(2.2);
+  }
+}
+
+/* Animated gradient border flow */
+@keyframes border-flow {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Terminal cursor blink */
+@keyframes type-cursor {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+
+/* Horizontal light sweep across toolbar */
+@keyframes toolbar-scan {
+  0% {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(200%);
+    opacity: 0;
+  }
+}
+
+/* Concentric danger ring pulse for kill switch */
+@keyframes kill-ring-pulse {
+  0% {
+    opacity: 0.5;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(2.5);
+  }
+}
+
+/* Power button ripple */
+@keyframes power-ripple {
+  0% {
+    opacity: 0.4;
+    transform: scale(0);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(2.5);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   :root {
     --glass-blur: blur(0px);
-    --glass-blur-strong: blur(0px);
-    --glass-blur-soft: blur(0px);
-    --glass-bg: rgba(15, 23, 42, 0.92);
-    --glow-cyan: var(--glow-cyan-soft);
-    --glow-green: var(--glow-green-soft);
-    --glow-red: var(--glow-red-soft);
+    --glass-bg: rgb(15 23 42 / 0.92);
   }
 
   *,
@@ -136,11 +275,6 @@
 @media (prefers-reduced-transparency: reduce) {
   :root {
     --glass-blur: blur(0px);
-    --glass-blur-strong: blur(0px);
-    --glass-blur-soft: blur(0px);
-    --glass-bg: rgba(15, 23, 42, 0.92);
-    --glow-cyan: var(--glow-cyan-soft);
-    --glow-green: var(--glow-green-soft);
-    --glow-red: var(--glow-red-soft);
+    --glass-bg: rgb(15 23 42 / 0.92);
   }
 }

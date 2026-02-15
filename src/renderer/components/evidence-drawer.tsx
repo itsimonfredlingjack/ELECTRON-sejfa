@@ -61,7 +61,7 @@ export function EvidenceDrawer({ open, gate, onClose }: EvidenceDrawerProps) {
             className="relative z-10 flex max-h-[85vh] w-full max-w-4xl flex-col overflow-hidden rounded-t-2xl border border-border-subtle bg-bg-panel shadow-2xl sm:rounded-2xl"
           >
             {/* Header */}
-            <div className="flex shrink-0 items-center justify-between border-b border-border-subtle px-6 py-4 bg-bg-deep/50">
+            <div className="relative flex shrink-0 items-center justify-between border-b border-border-subtle px-6 py-4 bg-bg-deep/50">
               <div className="flex items-center gap-4">
                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary">
                   <FileText className="h-5 w-5" />
@@ -97,6 +97,7 @@ export function EvidenceDrawer({ open, gate, onClose }: EvidenceDrawerProps) {
                   <X className="h-5 w-5" />
                 </button>
               </div>
+              <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-primary via-secondary to-transparent" />
             </div>
 
             {/* Content */}

@@ -1,40 +1,50 @@
 :root {
-  /* Base - Dark Navy */
-  --bg-deep: #0a0f1a;
-  --bg-panel: rgba(10, 15, 26, 0.65);
-  --bg-panel-hover: rgba(15, 25, 40, 0.75);
-  --glass-panel: rgba(10, 15, 26, 0.7);
+  color-scheme: dark;
 
-  --border-glow: rgba(34, 211, 238, 0.15);
-  --border-subtle: rgba(148, 163, 184, 0.08);
+  /* Living mission-control dark: deeper surfaces + cyan-sky accent + violet secondary */
+  --bg-deep: #080d1c;
+  --bg-panel: rgb(15 23 42 / 0.72);
+  --bg-panel-hover: rgb(15 23 42 / 0.86);
+  --glass-panel: rgb(15 23 42 / 0.64);
 
-  /* Functional Colors */
-  --primary: #22d3ee; /* Cyan - Interactive/Focus */
-  --success: #00ff41; /* Green - Healthy/Success */
-  --danger: #ff003c; /* Red - Error/Kill */
-  --warning: #ffb800; /* Amber - Warning */
+  --border-subtle: rgb(148 163 184 / 0.14);
+  --border-glow: rgb(56 189 248 / 0.18);
+
+  /* Functional colors */
+  --primary-rgb: 56 189 248;
+  --secondary-rgb: 167 139 250;
+  --success-rgb: 52 211 153;
+  --danger-rgb: 239 68 68;
+  --warning-rgb: 245 158 11;
+
+  --primary: rgb(var(--primary-rgb));
+  --secondary: rgb(var(--secondary-rgb));
+  --success: rgb(var(--success-rgb));
+  --danger: rgb(var(--danger-rgb));
+  --warning: rgb(var(--warning-rgb));
 
   /* Text */
-  --text-primary: #e2e8f0;
-  --text-secondary: #94a3b8;
-  --text-muted: #64748b;
+  --text-primary: rgb(226 232 240);
+  --text-secondary: rgb(148 163 184);
+  --text-muted: rgb(100 116 139);
 
-  /* Glassmorphism */
+  /* Glass/elevation */
   --glass-bg: var(--glass-panel);
-  --glass-blur: blur(10px);
-  --glass-border: 1px solid rgba(148, 163, 184, 0.1);
+  --glass-blur: blur(16px);
+  --glass-border: 1px solid rgb(255 255 255 / 0.08);
 
-  /* Shadows */
-  --glow-primary: 0 0 20px rgba(34, 211, 238, 0.15), 0 0 60px rgba(34, 211, 238, 0.05);
-  --glow-success: 0 0 20px rgba(0, 255, 65, 0.25);
-  --glow-danger: 0 0 20px rgba(255, 0, 60, 0.3);
-  --glow-warning: 0 0 15px rgba(255, 184, 0, 0.2);
+  /* "Glow" shadows are used as hover elevation in the UI */
+  --glow-primary: 0 16px 42px rgb(var(--primary-rgb) / 0.16);
+  --glow-secondary: 0 16px 42px rgb(var(--secondary-rgb) / 0.14);
+  --glow-success: 0 16px 42px rgb(var(--success-rgb) / 0.14);
+  --glow-danger: 0 20px 56px rgb(var(--danger-rgb) / 0.18);
+  --glow-warning: 0 16px 42px rgb(var(--warning-rgb) / 0.14);
 
   /* Typography */
   --font-ui: "Inter", system-ui, sans-serif;
-  --font-mono: "JetBrains Mono", "Fira Code", monospace;
+  --font-mono: "JetBrains Mono", "Fira Code", ui-monospace, SFMono-Regular, monospace;
 
-  /* Back-compat variables to be phased out or mapped */
+  /* Back-compat mappings */
   --cyber-black: var(--bg-deep);
   --neon-cyan: var(--primary);
   --neon-green: var(--success);

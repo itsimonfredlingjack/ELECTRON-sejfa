@@ -6,9 +6,12 @@ export default {
     extend: {
       colors: {
         primary: 'var(--primary)',
+        secondary: 'var(--secondary)',
         success: 'var(--success)',
         danger: 'var(--danger)',
         warning: 'var(--warning)',
+        'border-subtle': 'var(--border-subtle)',
+        'border-glow': 'var(--border-glow)',
         'bg-deep': 'var(--bg-deep)',
         'bg-panel': 'var(--bg-panel)',
         'bg-panel-hover': 'var(--bg-panel-hover)',
@@ -19,6 +22,7 @@ export default {
       },
       boxShadow: {
         'glow-primary': 'var(--glow-primary)',
+        'glow-secondary': 'var(--glow-secondary)',
         'glow-success': 'var(--glow-success)',
         'glow-danger': 'var(--glow-danger)',
         'glow-warning': 'var(--glow-warning)',

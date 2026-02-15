@@ -86,7 +86,7 @@ export function deriveObjectiveText(
     }
   }
 
-  return { text: 'No objective (disconnected or idle)' };
+  return { text: 'Idle' };
 }
 
 export function deriveGates(
