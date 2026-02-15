@@ -269,17 +269,17 @@ export function MainView() {
         />
       </div>
 
-      {/* Main Content Area: Split View */}
-      <div className="relative grid min-h-0 flex-1 grid-cols-1 lg:grid-cols-12 gap-4 p-6">
-        {/* Left Column: Loop Visualization (4/12) */}
+      {/* Main Content Area: Stacked View */}
+      <div className="relative flex min-h-0 flex-1 flex-col gap-5 p-6">
+        {/* Top: Pipeline Visualization */}
         <motion.div
-          className="col-span-1 lg:col-span-4 flex min-h-0 flex-col"
+          className="shrink-0"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease: 'easeOut' }}
         >
-          <div className="glass-panel flex flex-1 flex-col overflow-hidden relative">
-            <div className="flex-1 p-6">
+          <div className="glass-panel flex flex-col overflow-hidden relative">
+            <div className="px-6 py-2">
               <LoopVisualization
                 gates={derivedGates.gates}
                 activeGateId={derivedGates.activeGateId}
@@ -290,7 +290,7 @@ export function MainView() {
               />
             </div>
 
-            {/* Action Bar inside loop panel */}
+            {/* Action Bar inside pipeline panel */}
             <ActionBar
               mode={appMode}
               startDisabled={!controlsEnabled || anyStartingOrRunning}
@@ -305,9 +305,9 @@ export function MainView() {
           </div>
         </motion.div>
 
-        {/* Right Column: Log Console (8/12) */}
+        {/* Bottom: Log Console */}
         <motion.div
-          className="col-span-1 lg:col-span-8 flex min-h-0 flex-col"
+          className="flex min-h-0 flex-1 flex-col"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease: 'easeOut', delay: 0.1 }}
@@ -322,7 +322,7 @@ export function MainView() {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="absolute inset-0 z-40 flex items-center justify-center bg-bg-deep/80 backdrop-blur-sm rounded-xl"
+            className="absolute inset-0 z-40 flex items-center justify-center bg-bg-deep/85 backdrop-blur-md rounded-xl"
           >
             <button
               type="button"
@@ -336,7 +336,7 @@ export function MainView() {
               <div className="h-16 w-16 rounded-full bg-danger/10 flex items-center justify-center">
                 <WifiOff className="h-8 w-8 text-danger animate-pulse" />
               </div>
-              <h2 className="text-xl font-bold text-text-primary">Backend Unreachable</h2>
+              <h2 className="text-xl font-semibold text-text-primary tracking-tight">Backend Unreachable</h2>
               <p className="text-sm text-text-secondary">
                 Cannot connect to the SEJFA monitor backend.
                 {socketLastError && (

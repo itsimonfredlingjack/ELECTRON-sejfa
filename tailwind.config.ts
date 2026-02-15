@@ -21,6 +21,8 @@ export default {
         'text-muted': 'var(--text-muted)',
       },
       boxShadow: {
+        'panel': 'var(--shadow-panel)',
+        'elevated': 'var(--shadow-elevated)',
         'glow-primary': 'var(--glow-primary)',
         'glow-secondary': 'var(--glow-secondary)',
         'glow-success': 'var(--glow-success)',
@@ -31,6 +33,9 @@ export default {
         ui: ['"Inter"', 'system-ui', 'sans-serif'],
         mono: ['"JetBrains Mono"', '"Fira Code"', 'monospace'],
         heading: ['"Inter"', 'sans-serif'],
+      },
+      borderRadius: {
+        'panel': '14px',
       },
       animation: {
         'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',

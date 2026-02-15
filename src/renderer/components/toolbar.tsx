@@ -43,14 +43,13 @@ function StatusBar({
   onModeChange,
 }: Pick<ToolbarProps, 'connected' | 'alertsCount' | 'mode' | 'onModeChange'>) {
   return (
-    <div className="toolbar-scanline flex items-center justify-between gap-4 px-6 py-1.5 border-b border-[var(--border-subtle)] bg-[var(--bg-panel)]">
+    <div className="toolbar-scanline flex items-center justify-between gap-4 px-6 py-2 border-b border-[var(--border-subtle)] bg-[var(--bg-panel)]">
       {/* Connection Badge */}
       <div
-        className={`relative flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-[11px] font-medium transition-colors ${
-          connected
-            ? 'border-success/20 bg-success/5 text-success'
-            : 'border-danger/20 bg-danger/5 text-danger'
-        }`}
+        className={`relative flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-[11px] font-medium transition-colors ${connected
+          ? 'border-success/20 bg-success/5 text-success'
+          : 'border-danger/20 bg-danger/5 text-danger'
+          }`}
       >
         {connected && (
           <>
@@ -86,9 +85,8 @@ function StatusBar({
           <button
             type="button"
             onClick={() => onModeChange('observe')}
-            className={`relative flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-semibold transition-colors bg-transparent ${
-              mode === 'observe' ? 'text-primary' : 'text-text-muted hover:text-text-secondary'
-            }`}
+            className={`relative flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-semibold transition-colors bg-transparent ${mode === 'observe' ? 'text-primary' : 'text-text-muted hover:text-text-secondary'
+              }`}
           >
             <Eye className="h-3 w-3" />
             Observe
@@ -96,9 +94,8 @@ function StatusBar({
           <button
             type="button"
             onClick={() => onModeChange('control')}
-            className={`relative flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-semibold transition-colors bg-transparent ${
-              mode === 'control' ? 'text-primary' : 'text-text-muted hover:text-text-secondary'
-            }`}
+            className={`relative flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-semibold transition-colors bg-transparent ${mode === 'control' ? 'text-primary' : 'text-text-muted hover:text-text-secondary'
+              }`}
           >
             <Gamepad2 className="h-3 w-3" />
             Control
@@ -129,7 +126,7 @@ function ObjectiveBanner({
   const summary = jiraMatch?.[2] ?? objectiveText;
 
   return (
-    <div className="relative flex items-center justify-between gap-4 px-6 py-2.5 border-b border-[var(--border-subtle)] bg-[var(--bg-panel)]/50">
+    <div className="relative flex items-center justify-between gap-4 px-6 py-3 border-b border-[var(--border-subtle)] bg-[var(--bg-panel)]/40">
       {/* Objective */}
       <div className="flex items-center gap-2 min-w-0 flex-1">
         {jiraKey && (
@@ -138,9 +135,8 @@ function ObjectiveBanner({
           </span>
         )}
         <span
-          className={`text-base truncate ${
-            isIdle ? 'text-text-muted font-medium' : 'text-text-primary font-semibold'
-          }`}
+          className={`text-[15px] truncate ${isIdle ? 'text-text-muted font-medium' : 'text-text-primary font-semibold tracking-tight'
+            }`}
           title={objectiveText}
         >
           {isIdle ? 'No active objective' : summary}
@@ -211,9 +207,8 @@ export function ActionBar({
 
   return (
     <div
-      className={`flex items-center gap-3 border-t border-[var(--border-subtle)] px-4 py-2.5 transition-opacity ${
-        isObserve ? 'opacity-40 pointer-events-none' : ''
-      }`}
+      className={`flex items-center gap-3 border-t border-[var(--border-subtle)] px-4 py-2.5 transition-opacity ${isObserve ? 'opacity-40 pointer-events-none' : ''
+        }`}
     >
       {isObserve && <Lock className="h-3.5 w-3.5 text-text-muted shrink-0" />}
 
@@ -223,11 +218,10 @@ export function ActionBar({
           type="button"
           disabled={startDisabled}
           onClick={onStart}
-          className={`btn-power-ripple flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
-            startDisabled
-              ? 'border-border-subtle text-text-muted/50 cursor-not-allowed'
-              : 'border-success/30 bg-success/5 text-success hover:bg-success/10 hover:shadow-glow-success'
-          }`}
+          className={`btn-power-ripple flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${startDisabled
+            ? 'border-border-subtle text-text-muted/50 cursor-not-allowed'
+            : 'border-success/30 bg-success/5 text-success hover:bg-success/10 hover:shadow-glow-success'
+            }`}
         >
           <Play className="h-3.5 w-3.5 fill-current" />
           Start Agent
@@ -236,11 +230,10 @@ export function ActionBar({
           type="button"
           disabled={pauseDisabled}
           onClick={onPause}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
-            pauseDisabled
-              ? 'border-border-subtle text-text-muted/50 cursor-not-allowed'
-              : 'border-warning/30 bg-warning/5 text-warning hover:bg-warning/10'
-          }`}
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${pauseDisabled
+            ? 'border-border-subtle text-text-muted/50 cursor-not-allowed'
+            : 'border-warning/30 bg-warning/5 text-warning hover:bg-warning/10'
+            }`}
         >
           <Pause className="h-3.5 w-3.5 fill-current" />
           Pause
@@ -274,11 +267,10 @@ export function ActionBar({
             type="button"
             disabled={killDisabled}
             onClick={onArmKill}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold border transition-all ${
-              killDisabled
-                ? 'border-transparent text-text-muted/30 cursor-not-allowed bg-transparent'
-                : 'border-danger/30 text-danger bg-danger/5 hover:bg-danger/10'
-            }`}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold border transition-all ${killDisabled
+              ? 'border-transparent text-text-muted/30 cursor-not-allowed bg-transparent'
+              : 'border-danger/30 text-danger bg-danger/5 hover:bg-danger/10'
+              }`}
           >
             <Power className="h-3.5 w-3.5" />
             ARM KILL

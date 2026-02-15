@@ -6,80 +6,47 @@
     overflow: hidden;
   }
 
-  /* Scrollbar Styling */
+  /* Scrollbar — thin, minimal, fades into the background */
   ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+    width: 5px;
+    height: 5px;
   }
+
   ::-webkit-scrollbar-track {
     background: transparent;
   }
+
   ::-webkit-scrollbar-thumb {
-    background: rgb(var(--primary-rgb) / 0.22);
-    border-radius: 3px;
+    background: rgb(255 255 255 / 0.10);
+    border-radius: 4px;
   }
+
   ::-webkit-scrollbar-thumb:hover {
-    background: rgb(var(--primary-rgb) / 0.34);
+    background: rgb(255 255 255 / 0.18);
   }
 }
 
 @layer components {
-  /* ── Glass panel with edge-lit border + corner accents ───────── */
+
+  /* ── Glass panel — clean, crisp frosted glass ────────────────── */
   .glass-panel {
     position: relative;
-    background: linear-gradient(180deg, rgb(255 255 255 / 0.06), rgb(255 255 255 / 0.02)),
+    background: linear-gradient(180deg,
+        rgb(255 255 255 / 0.03) 0%,
+        rgb(255 255 255 / 0.01) 100%),
       var(--glass-bg);
     backdrop-filter: var(--glass-blur);
     -webkit-backdrop-filter: var(--glass-blur);
-    border: var(--glass-border);
-    border-radius: 12px;
-    box-shadow: 0 1px 0 rgb(255 255 255 / 0.06) inset, 0 0 0 0 rgb(var(--primary-rgb) / 0) inset, 0
-      18px 60px rgb(0 0 0 / 0.35);
-    transition: box-shadow 300ms ease;
+    border: 1px solid rgb(255 255 255 / 0.06);
+    border-radius: 14px;
+    box-shadow: var(--shadow-panel);
+    transition: box-shadow 300ms ease, border-color 300ms ease;
   }
 
-  /* Edge-lit gradient border on hover */
-  .glass-panel::before {
-    content: "";
-    position: absolute;
-    inset: -1px;
-    border-radius: inherit;
-    padding: 1px;
-    background: linear-gradient(
-      135deg,
-      rgb(var(--primary-rgb) / 0.3),
-      rgb(var(--secondary-rgb) / 0.2) 50%,
-      transparent 80%
-    );
-    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    mask-composite: exclude;
-    -webkit-mask-composite: xor;
-    opacity: 0;
-    transition: opacity 400ms ease;
-    pointer-events: none;
-    z-index: 1;
-  }
-  .glass-panel:hover::before {
-    opacity: 1;
-  }
-
-  /* Corner accent marks */
-  .glass-panel::after {
-    content: "";
-    position: absolute;
-    inset: 4px;
-    border-radius: 8px;
-    background: linear-gradient(135deg, rgb(var(--primary-rgb) / 0.15) 0%, transparent 12%) top left
-      / 40px 40px no-repeat,
-      linear-gradient(315deg, rgb(var(--secondary-rgb) / 0.1) 0%, transparent 12%) bottom right /
-      40px 40px no-repeat;
-    pointer-events: none;
-    z-index: 1;
-  }
-
+  /* Subtle border highlight on hover — cleaner than the old gradient */
   .glass-panel:hover {
-    box-shadow: 0 1px 0 rgb(255 255 255 / 0.06) inset, 0 0 30px rgb(var(--primary-rgb) / 0.04) inset,
-      0 18px 60px rgb(0 0 0 / 0.35);
+    border-color: rgb(255 255 255 / 0.10);
+    box-shadow: var(--shadow-elevated);
   }
 
   /* Utility classes for typography */
@@ -87,7 +54,7 @@
     font-family: var(--font-mono);
   }
 
-  /* Gradient text: primary -> violet */
+  /* Gradient text: primary -> secondary */
   .text-gradient-primary {
     background: linear-gradient(135deg, var(--primary), var(--secondary));
     -webkit-background-clip: text;
@@ -95,83 +62,89 @@
     -webkit-text-fill-color: transparent;
   }
 
-  /* Text glow */
+  /* Text glow — very subtle */
   .text-glow {
-    text-shadow: 0 0 12px rgb(var(--primary-rgb) / 0.3), 0 0 30px rgb(var(--primary-rgb) / 0.1);
+    text-shadow: 0 0 20px rgb(var(--primary-rgb) / 0.15);
   }
 
   /* Kill-switch containment zone */
   .kill-zone {
-    border: 1px dashed rgb(var(--danger-rgb) / 0.3);
-    border-radius: 8px;
+    border: 1px dashed rgb(var(--danger-rgb) / 0.25);
+    border-radius: 10px;
     padding: 4px 12px;
-    background: rgb(var(--danger-rgb) / 0.03);
+    background: rgb(var(--danger-rgb) / 0.02);
     transition: all 200ms ease;
   }
+
   .kill-zone[data-armed="true"] {
     animation: kill-armed 1.5s ease-in-out infinite;
     border-style: solid;
-    border-color: rgb(var(--danger-rgb) / 0.6);
+    border-color: rgb(var(--danger-rgb) / 0.5);
   }
 
-  /* Ambient backdrop for the whole app */
+  /* Ambient backdrop — softer, more elegant radial gradients */
   .hud-ambient {
     position: relative;
     overflow: hidden;
     isolation: isolate;
   }
 
-  /* Primary gradient layer - drifts slowly */
+  /* Primary gradient layer — gentle drifting blobs, very low opacity */
   .hud-ambient::before {
     content: "";
     position: absolute;
-    inset: -40px;
-    background: radial-gradient(
-        900px 600px at 18% 18%,
-        rgb(var(--primary-rgb) / 0.12),
-        transparent 60%
-      ), radial-gradient(700px 520px at 86% 8%, rgb(var(--secondary-rgb) / 0.08), transparent 56%),
-      radial-gradient(800px 600px at 72% 88%, rgb(var(--success-rgb) / 0.05), transparent 62%);
+    inset: -60px;
+    background: radial-gradient(800px 600px at 15% 15%,
+        rgb(var(--primary-rgb) / 0.06),
+        transparent 60%),
+      radial-gradient(600px 500px at 85% 10%,
+        rgb(var(--secondary-rgb) / 0.04),
+        transparent 55%);
     pointer-events: none;
     z-index: 0;
-    animation: gradient-shift 28s ease-in-out infinite;
+    animation: gradient-shift 32s ease-in-out infinite;
   }
 
-  /* Secondary gradient layer - drifts in opposite direction */
+  /* Secondary gradient layer */
   .hud-ambient::after {
     content: "";
     position: absolute;
-    inset: -40px;
-    background: radial-gradient(
-        600px 500px at 72% 62%,
-        rgb(var(--secondary-rgb) / 0.06),
-        transparent 55%
-      ), radial-gradient(500px 400px at 24% 78%, rgb(var(--primary-rgb) / 0.05), transparent 50%);
+    inset: -60px;
+    background: radial-gradient(500px 400px at 70% 80%,
+        rgb(var(--secondary-rgb) / 0.03),
+        transparent 50%),
+      radial-gradient(400px 350px at 20% 70%,
+        rgb(var(--primary-rgb) / 0.03),
+        transparent 45%);
     pointer-events: none;
     z-index: 0;
-    animation: gradient-shift-reverse 32s ease-in-out infinite;
+    animation: gradient-shift-reverse 38s ease-in-out infinite;
   }
 
-  .hud-ambient > * {
+  .hud-ambient>* {
     position: relative;
     z-index: 1;
   }
 
-  /* Toolbar scan-line effect */
+  /* Toolbar scan-line — softer, wider sweep */
   .toolbar-scanline {
     position: relative;
     overflow: hidden;
   }
+
   .toolbar-scanline::after {
     content: "";
     position: absolute;
     top: 0;
     left: 0;
-    width: 60px;
+    width: 80px;
     height: 100%;
-    background: linear-gradient(90deg, transparent, rgb(var(--primary-rgb) / 0.06), transparent);
+    background: linear-gradient(90deg,
+        transparent,
+        rgb(255 255 255 / 0.03),
+        transparent);
     pointer-events: none;
-    animation: toolbar-scan 8s ease-in-out infinite;
+    animation: toolbar-scan 12s ease-in-out infinite;
   }
 
   /* Power button ripple (active state) */
@@ -179,12 +152,15 @@
     position: relative;
     overflow: hidden;
   }
+
   .btn-power-ripple:active::after {
     content: "";
     position: absolute;
     inset: 0;
     border-radius: inherit;
-    background: radial-gradient(circle, rgb(var(--success-rgb) / 0.3), transparent 60%);
+    background: radial-gradient(circle,
+        rgb(var(--success-rgb) / 0.2),
+        transparent 60%);
     animation: power-ripple 0.5s ease-out forwards;
     pointer-events: none;
   }
