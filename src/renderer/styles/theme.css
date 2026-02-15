@@ -1,21 +1,22 @@
 :root {
   color-scheme: dark;
 
-  /* Living mission-control dark: deeper surfaces + cyan-sky accent + violet secondary */
-  --bg-deep: #080d1c;
-  --bg-panel: rgb(15 23 42 / 0.72);
-  --bg-panel-hover: rgb(15 23 42 / 0.86);
-  --glass-panel: rgb(15 23 42 / 0.64);
+  /* ── Modern Professional Dark ─────────────────────────────────── */
+  /* Rich, neutral dark canvas — not blue-tinted, not pure black    */
+  --bg-deep: #0a0a0e;
+  --bg-panel: rgb(18 18 22 / 0.82);
+  --bg-panel-hover: rgb(26 26 32 / 0.90);
+  --glass-panel: rgb(18 18 24 / 0.68);
 
-  --border-subtle: rgb(148 163 184 / 0.14);
-  --border-glow: rgb(56 189 248 / 0.18);
+  --border-subtle: rgb(255 255 255 / 0.07);
+  --border-glow: rgb(99 102 241 / 0.20);
 
-  /* Functional colors */
-  --primary-rgb: 56 189 248;
-  --secondary-rgb: 167 139 250;
-  --success-rgb: 52 211 153;
-  --danger-rgb: 239 68 68;
-  --warning-rgb: 245 158 11;
+  /* Functional colors — refined, mature tones */
+  --primary-rgb: 99 102 241;      /* Indigo — sophisticated, modern */
+  --secondary-rgb: 139 92 246;    /* Violet — elegant accent */
+  --success-rgb: 52 211 153;      /* Emerald — confident, clear */
+  --danger-rgb: 239 68 68;        /* Red — unmistakable */
+  --warning-rgb: 251 191 36;      /* Amber — warm, visible */
 
   --primary: rgb(var(--primary-rgb));
   --secondary: rgb(var(--secondary-rgb));
@@ -23,22 +24,26 @@
   --danger: rgb(var(--danger-rgb));
   --warning: rgb(var(--warning-rgb));
 
-  /* Text */
-  --text-primary: rgb(226 232 240);
-  --text-secondary: rgb(148 163 184);
-  --text-muted: rgb(100 116 139);
+  /* Text — high contrast for readability */
+  --text-primary: rgb(237 237 244);
+  --text-secondary: rgb(161 161 176);
+  --text-muted: rgb(100 100 118);
 
-  /* Glass/elevation */
+  /* Glass/elevation — crisp, clean */
   --glass-bg: var(--glass-panel);
-  --glass-blur: blur(16px);
-  --glass-border: 1px solid rgb(255 255 255 / 0.08);
+  --glass-blur: blur(20px);
+  --glass-border: 1px solid rgb(255 255 255 / 0.06);
 
-  /* "Glow" shadows are used as hover elevation in the UI */
-  --glow-primary: 0 16px 42px rgb(var(--primary-rgb) / 0.16);
-  --glow-secondary: 0 16px 42px rgb(var(--secondary-rgb) / 0.14);
-  --glow-success: 0 16px 42px rgb(var(--success-rgb) / 0.14);
-  --glow-danger: 0 20px 56px rgb(var(--danger-rgb) / 0.18);
-  --glow-warning: 0 16px 42px rgb(var(--warning-rgb) / 0.14);
+  /* Shadows — realistic depth, not "glow" */
+  --shadow-panel: 0 1px 2px rgb(0 0 0 / 0.3), 0 8px 32px rgb(0 0 0 / 0.4);
+  --shadow-elevated: 0 4px 6px -1px rgb(0 0 0 / 0.4), 0 16px 48px rgb(0 0 0 / 0.5);
+
+  /* Subtle accent shadows — used sparingly on hover */
+  --glow-primary: 0 0 0 1px rgb(var(--primary-rgb) / 0.15), 0 8px 32px rgb(var(--primary-rgb) / 0.08);
+  --glow-secondary: 0 0 0 1px rgb(var(--secondary-rgb) / 0.12), 0 8px 32px rgb(var(--secondary-rgb) / 0.06);
+  --glow-success: 0 0 0 1px rgb(var(--success-rgb) / 0.15), 0 8px 24px rgb(var(--success-rgb) / 0.08);
+  --glow-danger: 0 0 0 1px rgb(var(--danger-rgb) / 0.18), 0 8px 32px rgb(var(--danger-rgb) / 0.10);
+  --glow-warning: 0 0 0 1px rgb(var(--warning-rgb) / 0.15), 0 8px 24px rgb(var(--warning-rgb) / 0.08);
 
   /* Typography */
   --font-ui: "Inter", system-ui, sans-serif;

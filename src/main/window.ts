@@ -7,7 +7,7 @@ export function createMainWindow({ isDev }: { isDev: boolean }) {
     height: 820,
     minWidth: 1024,
     minHeight: 768,
-    backgroundColor: '#0b0f17',
+    backgroundColor: '#0a0a0e',
     show: false,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
