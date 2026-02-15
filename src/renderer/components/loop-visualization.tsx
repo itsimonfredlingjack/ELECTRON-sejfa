@@ -116,6 +116,25 @@ function PipelineNode({
       aria-label={`Select ${gate.label} gate`}
       aria-pressed={isSelected}
     >
+      {/* Drone avatar — diamond indicator above active node */}
+      {isActive && (
+        <motion.div
+          className="absolute -top-5 left-1/2"
+          layoutId="pipeline-drone"
+          initial={false}
+          transition={{ type: 'spring', stiffness: 300, damping: 28 }}
+        >
+          <div
+            className="h-2.5 w-2.5 -translate-x-1/2 rotate-45 rounded-[2px]"
+            style={{
+              backgroundColor: isRunning ? 'var(--primary)' : isPassed ? 'var(--success)' : isFailed ? 'var(--danger)' : 'var(--text-secondary)',
+              boxShadow: isRunning ? '0 0 8px rgb(var(--primary-rgb) / 0.4)' : 'none',
+              animation: isRunning ? 'drone-bob 1.5s ease-in-out infinite' : 'none',
+            }}
+          />
+        </motion.div>
+      )}
+
       {/* Node circle */}
       <div className="relative">
         {/* Outer glow ring for running state */}
@@ -139,14 +158,14 @@ function PipelineNode({
       <div className="flex flex-col items-center gap-0.5">
         <span
           className={`text-[11px] font-semibold tracking-wide uppercase transition-colors ${isRunning
-              ? 'text-primary'
-              : isPassed
-                ? 'text-success/80'
-                : isFailed
-                  ? 'text-danger/80'
-                  : isSelected
-                    ? 'text-text-primary'
-                    : 'text-text-muted group-hover:text-text-secondary'
+            ? 'text-primary'
+            : isPassed
+              ? 'text-success/80'
+              : isFailed
+                ? 'text-danger/80'
+                : isSelected
+                  ? 'text-text-primary'
+                  : 'text-text-muted group-hover:text-text-secondary'
             }`}
         >
           {gate.label}

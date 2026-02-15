@@ -34,14 +34,16 @@ export type ToolbarProps = {
   onOpenRun: () => void;
 };
 
-/* ── StatusBar ────────────────────────────────────────────────────── */
+/* ── StatusBar (exported for standalone use) ─────────────────────── */
 
-function StatusBar({
+export type StatusBarProps = Pick<ToolbarProps, 'connected' | 'alertsCount' | 'mode' | 'onModeChange'>;
+
+export function StatusBar({
   connected,
   alertsCount,
   mode,
   onModeChange,
-}: Pick<ToolbarProps, 'connected' | 'alertsCount' | 'mode' | 'onModeChange'>) {
+}: StatusBarProps) {
   return (
     <div className="toolbar-scanline flex items-center justify-between gap-4 px-6 py-2 border-b border-[var(--border-subtle)] bg-[var(--bg-panel)]">
       {/* Connection Badge */}
@@ -224,7 +226,7 @@ export function ActionBar({
             }`}
         >
           <Play className="h-3.5 w-3.5 fill-current" />
-          Start Agent
+          Start Task
         </button>
         <button
           type="button"

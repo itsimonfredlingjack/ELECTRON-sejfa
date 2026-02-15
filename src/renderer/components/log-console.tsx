@@ -5,6 +5,13 @@ import { Virtuoso, type VirtuosoHandle } from 'react-virtuoso';
 import type { EventNode, EventSeverity, EventUI } from '../models/ui';
 
 function fmtTime(iso: string) {
+  // ISO format: "2025-10-10T14:30:05.123Z"
+  //              index:      11       19 23
+  // Fast path: slice directly instead of instantiating Date objects.
+  if (iso.length >= 23 && iso[10] === 'T') {
+    return `${iso.substring(11, 19)}.${iso.substring(20, 23)}`;
+  }
+  // Fallback for non-standard formats
   try {
     const d = new Date(iso);
     const h = d.getHours().toString().padStart(2, '0');
@@ -18,6 +25,10 @@ function fmtTime(iso: string) {
 }
 
 function getMinute(iso: string) {
+  // Fast path: ISO string slicing
+  if (iso.length >= 16 && iso[10] === 'T') {
+    return iso.substring(11, 16);
+  }
   try {
     const d = new Date(iso);
     return `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
@@ -114,9 +125,8 @@ const LogRow = React.memo(function LogRow({ event, index }: { event: EventUI; in
       </span>
 
       <span
-        className={`w-24 shrink-0 text-[11px] font-bold uppercase tracking-wider text-right select-none ${
-          isSystem ? 'text-text-secondary' : 'text-primary'
-        }`}
+        className={`w-24 shrink-0 text-[11px] font-bold uppercase tracking-wider text-right select-none ${isSystem ? 'text-text-secondary' : 'text-primary'
+          }`}
       >
         {event.node}
       </span>
@@ -237,11 +247,10 @@ export function LogConsole(props: { events: EventUI[] }) {
             type="button"
             onClick={() => setAutoScroll(!autoScroll)}
             aria-label="Toggle live tail"
-            className={`flex items-center gap-1.5 text-[11px] leading-none font-bold uppercase tracking-wider transition-all px-2.5 py-1.5 rounded border whitespace-nowrap ${
-              autoScroll
+            className={`flex items-center gap-1.5 text-[11px] leading-none font-bold uppercase tracking-wider transition-all px-2.5 py-1.5 rounded border whitespace-nowrap ${autoScroll
                 ? 'text-success border-success/30 bg-success/10'
                 : 'text-text-muted border-border-subtle hover:text-text-primary'
-            }`}
+              }`}
           >
             {autoScroll ? (
               <span className="relative flex h-3 w-3">

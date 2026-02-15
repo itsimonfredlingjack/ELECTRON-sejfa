@@ -8,15 +8,20 @@
   --bg-panel-hover: rgb(26 26 32 / 0.90);
   --glass-panel: rgb(18 18 24 / 0.68);
 
-  --border-subtle: rgb(255 255 255 / 0.07);
+  --border-subtle: rgb(255 255 255 / 0.12);
   --border-glow: rgb(99 102 241 / 0.20);
 
   /* Functional colors — refined, mature tones */
-  --primary-rgb: 99 102 241;      /* Indigo — sophisticated, modern */
-  --secondary-rgb: 139 92 246;    /* Violet — elegant accent */
-  --success-rgb: 52 211 153;      /* Emerald — confident, clear */
-  --danger-rgb: 239 68 68;        /* Red — unmistakable */
-  --warning-rgb: 251 191 36;      /* Amber — warm, visible */
+  --primary-rgb: 99 102 241;
+  /* Indigo — sophisticated, modern */
+  --secondary-rgb: 139 92 246;
+  /* Violet — elegant accent */
+  --success-rgb: 52 211 153;
+  /* Emerald — confident, clear */
+  --danger-rgb: 239 68 68;
+  /* Red — unmistakable */
+  --warning-rgb: 251 191 36;
+  /* Amber — warm, visible */
 
   --primary: rgb(var(--primary-rgb));
   --secondary: rgb(var(--secondary-rgb));
@@ -32,7 +37,7 @@
   /* Glass/elevation — crisp, clean */
   --glass-bg: var(--glass-panel);
   --glass-blur: blur(20px);
-  --glass-border: 1px solid rgb(255 255 255 / 0.06);
+  --glass-border: 1px solid rgb(255 255 255 / 0.12);
 
   /* Shadows — realistic depth, not "glow" */
   --shadow-panel: 0 1px 2px rgb(0 0 0 / 0.3), 0 8px 32px rgb(0 0 0 / 0.4);

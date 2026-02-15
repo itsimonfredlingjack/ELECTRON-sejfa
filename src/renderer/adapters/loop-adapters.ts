@@ -16,11 +16,11 @@ function getString(x: unknown): string | undefined {
 function gateIdLabel(id: GateId) {
   switch (id) {
     case 'local':
-      return 'Local';
+      return 'Jira';
     case 'ci':
-      return 'CI';
+      return 'Agent';
     case 'review':
-      return 'Review';
+      return 'Actions';
     case 'deploy':
       return 'Deploy';
     case 'verify':
