@@ -10,6 +10,12 @@
   ::-webkit-scrollbar {
     width: 5px;
     height: 5px;
+    transition: width 200ms ease, height 200ms ease;
+  }
+
+  ::-webkit-scrollbar:hover {
+    width: 10px;
+    height: 10px;
   }
 
   ::-webkit-scrollbar-track {
@@ -37,7 +43,7 @@
       var(--glass-bg);
     backdrop-filter: var(--glass-blur);
     -webkit-backdrop-filter: var(--glass-blur);
-    border: 1px solid rgb(255 255 255 / 0.06);
+    border: 1px solid rgb(255 255 255 / 0.12);
     border-radius: 14px;
     box-shadow: var(--shadow-panel);
     transition: box-shadow 300ms ease, border-color 300ms ease;
@@ -102,6 +108,7 @@
         transparent 55%);
     pointer-events: none;
     z-index: 0;
+    will-change: transform;
     animation: gradient-shift 32s ease-in-out infinite;
   }
 
@@ -118,6 +125,7 @@
         transparent 45%);
     pointer-events: none;
     z-index: 0;
+    will-change: transform;
     animation: gradient-shift-reverse 38s ease-in-out infinite;
   }
 

@@ -32,7 +32,7 @@ export default {
       fontFamily: {
         ui: ['"Inter"', 'system-ui', 'sans-serif'],
         mono: ['"JetBrains Mono"', '"Fira Code"', 'monospace'],
-        heading: ['"Inter"', 'sans-serif'],
+        heading: ['"Space Grotesk"', 'sans-serif'],
       },
       borderRadius: {
         'panel': '14px',
