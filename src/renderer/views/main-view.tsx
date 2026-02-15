@@ -87,12 +87,33 @@ export function MainView() {
   );
 
   // Reactor state: derived from connection + process + gate status
-  const reactorState: ReactorState = React.useMemo(() => {
+  const derivedReactorState: ReactorState = React.useMemo(() => {
     if (!socketConnected) return 'offline';
     if (derivedGates.gates.some((g) => g.status === 'failed')) return 'critical';
     if (Object.values(processes).some((p) => p?.state === 'running')) return 'active';
     return 'idle';
   }, [socketConnected, processes, derivedGates.gates]);
+
+  // DEV: Shift+D cycles through reactor states for testing sounds/visuals
+  const DEBUG_STATES: ReactorState[] = ['idle', 'active', 'critical', 'offline'];
+  const [debugOverride, setDebugOverride] = React.useState<ReactorState | null>(null);
+
+  React.useEffect(() => {
+    function handleDebugKey(e: KeyboardEvent) {
+      if (e.shiftKey && e.key === 'D') {
+        setDebugOverride((prev) => {
+          if (prev === null) return DEBUG_STATES[0]!;
+          const idx = DEBUG_STATES.indexOf(prev);
+          const next = idx + 1;
+          return next >= DEBUG_STATES.length ? null : DEBUG_STATES[next]!;
+        });
+      }
+    }
+    window.addEventListener('keydown', handleDebugKey);
+    return () => window.removeEventListener('keydown', handleDebugKey);
+  }, []);
+
+  const reactorState = debugOverride ?? derivedReactorState;
 
   // Sound effects — reacts to state transitions
   useSoundEffects(reactorState, killArmedUntil !== null);
