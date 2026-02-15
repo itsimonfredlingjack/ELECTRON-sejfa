@@ -25,27 +25,29 @@ const INITIAL_LOOP_STATE: LoopState = {
 export const useLoopStore = create<LoopState>(() => INITIAL_LOOP_STATE);
 
 function safeEvent(event: LoopEvent): LoopEvent {
-  try {
-    const json = JSON.stringify(event);
-    if (json.length > 200_000) {
-      return {
-        type: 'log',
-        at: new Date().toISOString(),
-        runId: 'renderer',
-        level: 'warn',
-        message: `Dropped oversized event (${json.length} bytes)`,
-      };
-    }
-    return event;
-  } catch {
+  // Fast heuristic: check known large properties instead of serialising the whole object.
+  const msg = 'message' in event && typeof event.message === 'string' ? event.message : '';
+  const payload =
+    'payload' in event && typeof event.payload === 'object' && event.payload !== null
+      ? event.payload
+      : null;
+
+  const estimatedSize =
+    msg.length +
+    (payload && 'details' in payload && typeof (payload as Record<string, unknown>).details === 'string'
+      ? ((payload as Record<string, unknown>).details as string).length
+      : 0);
+
+  if (estimatedSize > 200_000) {
     return {
       type: 'log',
       at: new Date().toISOString(),
       runId: 'renderer',
       level: 'warn',
-      message: 'Dropped unserializable event',
+      message: `Dropped oversized event (~${Math.round(estimatedSize / 1024)}KB)`,
     };
   }
+  return event;
 }
 
 export const loopActions = {

@@ -79,6 +79,7 @@ export class ChildProcessManager extends EventEmitter {
   private readonly maxRestarts = 3;
   private readonly tailPollMs = 250;
   private readonly maxTailBytesPerTick = 256 * 1024;
+  private tailTicking = false;
 
   constructor() {
     super();
@@ -185,6 +186,16 @@ export class ChildProcessManager extends EventEmitter {
   }
 
   private async tailTick(rec: RecordState) {
+    if (this.tailTicking) return; // Skip if previous tick is still running
+    this.tailTicking = true;
+    try {
+      await this.tailTickInner(rec);
+    } finally {
+      this.tailTicking = false;
+    }
+  }
+
+  private async tailTickInner(rec: RecordState) {
     const tail = rec.tail;
     if (!tail) return;
     if (rec.stopRequested) return;
