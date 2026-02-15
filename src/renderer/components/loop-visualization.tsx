@@ -1,20 +1,8 @@
+import { motion } from 'framer-motion';
+import { AlertCircle, CheckCircle2, Circle, Disc, PlayCircle, XCircle } from 'lucide-react';
 import React from 'react';
 
 import type { GateId, GateUI } from '../models/ui';
-import { IconCheck, IconX } from './icons';
-
-function nodeAccent(status: GateUI['status']) {
-  switch (status) {
-    case 'passed':
-      return 'text-[var(--neon-green)]';
-    case 'failed':
-      return 'text-[var(--neon-red)]';
-    case 'running':
-      return 'text-[var(--neon-cyan)]';
-    default:
-      return 'text-[var(--text-secondary)]';
-  }
-}
 
 export type LoopVisualizationProps = {
   gates: GateUI[];
@@ -22,95 +10,213 @@ export type LoopVisualizationProps = {
   onSelectGate: (id: GateId) => void;
 };
 
-export function LoopVisualization(props: LoopVisualizationProps) {
+// Layout constants
+const VIEWBOX_SIZE = 400;
+const CENTER = VIEWBOX_SIZE / 2;
+const RADIUS = 140;
+
+function getCoordinates(index: number, total: number) {
+  // Start from top (-90 degrees) and go clockwise
+  const angle = (index / total) * 360 - 90;
+  const rad = (angle * Math.PI) / 180;
+  return {
+    x: CENTER + RADIUS * Math.cos(rad),
+    y: CENTER + RADIUS * Math.sin(rad),
+  };
+}
+
+function StatusIcon({ status, isActive }: { status: GateUI['status']; isActive: boolean }) {
+  if (status === 'running')
+    return (
+      <PlayCircle
+        className={`h-6 w-6 ${isActive ? 'text-primary' : 'text-primary/70'} animate-pulse`}
+      />
+    );
+  if (status === 'passed')
+    return (
+      <CheckCircle2 className="h-6 w-6 text-success drop-shadow-[0_0_8px_rgba(0,255,65,0.4)]" />
+    );
+  if (status === 'failed')
+    return <XCircle className="h-6 w-6 text-danger drop-shadow-[0_0_8px_rgba(255,0,60,0.4)]" />;
+  if (status === 'pending' && isActive) return <Disc className="h-6 w-6 text-primary" />;
+  return <Circle className="h-6 w-6 text-text-muted/30" />;
+}
+
+export function LoopVisualization({ gates, activeGateId, onSelectGate }: LoopVisualizationProps) {
   return (
-    <section className="glass-panel rounded-xl p-5 shadow-[0_0_20px_rgba(34,211,238,0.1)] border border-[rgba(34,211,238,0.2)]">
-      <div className="flex items-center justify-between">
-        <div className="hud-label">Loop Visualization</div>
-        <div className="hud-meta">Active: {props.activeGateId ?? 'none'}</div>
+    <div className="relative flex h-full w-full flex-col items-center justify-center p-4">
+      {/* Background Ambient Glows */}
+      <div className="absolute inset-0 flex items-center justify-center opacity-10 pointer-events-none">
+        <div className="h-[300px] w-[300px] rounded-full border border-primary/20" />
+        <div className="absolute h-[400px] w-[400px] rounded-full border border-primary/10" />
       </div>
 
-      <div className="mt-5">
-        <div className="flex flex-col gap-3">
-          <div className="flex flex-wrap items-stretch justify-between gap-3">
-            {props.gates.map((gate, i) => {
-              const active = gate.id === props.activeGateId;
-              const status = gate.status;
+      <svg
+        viewBox={`0 0 ${VIEWBOX_SIZE} ${VIEWBOX_SIZE}`}
+        className="h-full w-full max-h-[600px] max-w-[600px] overflow-visible"
+        style={{ minHeight: '300px' }}
+        role="img"
+        aria-label="Orbital loop visualization showing pipeline stages"
+      >
+        <defs>
+          <filter id="glow-primary" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="4" result="coloredBlur" />
+            <feMerge>
+              <feMergeNode in="coloredBlur" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+        </defs>
 
-              return (
-                <React.Fragment key={gate.id}>
-                  <button
-                    type="button"
-                    onClick={() => props.onSelectGate(gate.id)}
-                    className={[
-                      'relative flex min-h-24 flex-1 flex-col items-center justify-center rounded-xl border px-3 py-4',
-                      'border-[var(--border-subtle)] bg-[rgba(15,23,42,0.50)]',
-                      'outline-none transition-colors transition-shadow duration-250',
-                      'focus-visible:ring-2 focus-visible:ring-[var(--neon-cyan)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg-deep)]',
-                      status === 'pending' ? 'opacity-50' : '',
-                      active
-                        ? 'border-[var(--neon-cyan)] shadow-[var(--glow-cyan)] animate-[node-breathe_2.6s_ease-in-out_infinite]'
-                        : '',
-                      status === 'passed'
-                        ? 'border-[rgba(0,255,65,0.30)] shadow-[var(--glow-green)]'
-                        : '',
-                      status === 'failed'
-                        ? 'border-[rgba(255,45,85,0.34)] shadow-[var(--glow-red)] animate-[glitch_2.8s_ease-in-out_infinite]'
-                        : '',
-                    ].join(' ')}
-                    aria-label={`${gate.label} gate`}
+        {/* Base Loop Track */}
+        <circle
+          cx={CENTER}
+          cy={CENTER}
+          r={RADIUS}
+          fill="none"
+          stroke="var(--border-subtle)"
+          strokeWidth="2"
+        />
+
+        {/* Animated Pulse (Orbiting Data Packet) */}
+        {gates.some((g) => g.status === 'running') && (
+          <motion.circle
+            cx={CENTER}
+            cy={CENTER}
+            r={RADIUS}
+            fill="none"
+            stroke="var(--primary)"
+            strokeWidth="3"
+            strokeLinecap="round"
+            strokeDasharray="100 800" // Length of the arc segment
+            animate={{ rotate: 360 }}
+            transition={{ duration: 4, repeat: Number.POSITIVE_INFINITY, ease: 'linear' }}
+            className="opacity-60 drop-shadow-[0_0_8px_rgba(34,211,238,0.5)]"
+          />
+        )}
+
+        {/* Nodes */}
+        {gates.map((gate, i) => {
+          const coords = getCoordinates(i, gates.length);
+          const isSelected = gate.id === activeGateId;
+          const status = gate.status;
+
+          return (
+            <g
+              key={gate.id}
+              onClick={() => onSelectGate(gate.id)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  onSelectGate(gate.id);
+                }
+              }}
+              // biome-ignore lint/a11y/useSemanticElements: SVG interaction element
+              role="button"
+              tabIndex={0}
+              className="cursor-pointer group outline-none focus-visible:opacity-80"
+              style={{ transformBox: 'fill-box', transformOrigin: 'center' }}
+              aria-label={`Select ${gate.label} gate`}
+              aria-pressed={isSelected}
+            >
+              {/* Click target (invisible but larger) */}
+              <circle cx={coords.x} cy={coords.y} r={40} fill="transparent" />
+
+              {/* Animated Selection Ring */}
+              {isSelected && (
+                <motion.circle
+                  cx={coords.x}
+                  cy={coords.y}
+                  r={28}
+                  fill="none"
+                  stroke="var(--primary)"
+                  strokeWidth="1.5"
+                  initial={{ scale: 0.8, opacity: 0 }}
+                  animate={{ scale: 1.1, opacity: 1 }}
+                  transition={{
+                    duration: 1.5,
+                    repeat: Number.POSITIVE_INFINITY,
+                    repeatType: 'reverse',
+                  }}
+                />
+              )}
+
+              {/* Node Background */}
+              <circle
+                cx={coords.x}
+                cy={coords.y}
+                r={24}
+                className={`transition-all duration-300 ${
+                  isSelected
+                    ? 'fill-bg-panel stroke-primary'
+                    : 'fill-bg-deep stroke-border-subtle group-hover:stroke-primary/50'
+                }`}
+                strokeWidth="2"
+              />
+
+              {/* Foreign Object for React Icon */}
+              <foreignObject
+                x={coords.x - 12}
+                y={coords.y - 12}
+                width={24}
+                height={24}
+                className="overflow-visible pointer-events-none"
+              >
+                <div className="flex h-full w-full items-center justify-center">
+                  <StatusIcon status={status} isActive={isSelected} />
+                </div>
+              </foreignObject>
+
+              {/* Label */}
+              <foreignObject
+                x={coords.x - 60}
+                y={coords.y + 30}
+                width={120}
+                height={40}
+                className="overflow-visible pointer-events-none"
+              >
+                <div className="flex flex-col items-center justify-center text-center">
+                  <span
+                    className={`text-[11px] font-semibold tracking-wider uppercase transition-colors ${
+                      isSelected ? 'text-primary' : 'text-text-muted group-hover:text-text-primary'
+                    }`}
                   >
-                    <div
-                      className={[
-                        'font-[var(--font-heading)] text-[13px] font-semibold',
-                        nodeAccent(status),
-                      ].join(' ')}
-                    >
-                      {gate.label}
-                    </div>
-                    <div
-                      className={[
-                        'mt-1 font-[var(--font-mono)] text-[11px] uppercase tracking-widest',
-                        status === 'running'
-                          ? 'text-[var(--neon-cyan)]'
-                          : status === 'passed'
-                            ? 'text-[var(--neon-green)]'
-                            : status === 'failed'
-                              ? 'text-[var(--neon-red)]'
-                              : 'text-[var(--text-secondary)]',
-                      ].join(' ')}
-                    >
-                      {status}
-                    </div>
+                    {gate.label}
+                  </span>
+                  {status === 'failed' && (
+                    <span className="text-[9px] text-danger font-mono mt-0.5">FAILED</span>
+                  )}
+                </div>
+              </foreignObject>
+            </g>
+          );
+        })}
 
-                    {status === 'passed' ? (
-                      <IconCheck className="absolute right-2 top-2 h-5 w-5 text-[var(--neon-green)] drop-shadow-[0_0_14px_rgba(0,255,65,0.35)]" />
-                    ) : null}
-                    {status === 'failed' ? (
-                      <IconX className="absolute right-2 top-2 h-5 w-5 text-[var(--neon-red)] drop-shadow-[0_0_16px_rgba(255,45,85,0.45)]" />
-                    ) : null}
-                  </button>
+        {/* Central Hub Display (Inside the Loop) */}
+        <foreignObject
+          x={CENTER - 80}
+          y={CENTER - 60}
+          width={160}
+          height={120}
+          className="pointer-events-none"
+        >
+          <div className="flex h-full w-full flex-col items-center justify-center text-center">
+            <span className="text-[10px] uppercase tracking-widest text-text-muted mb-1 opacity-60">
+              Selected Gate
+            </span>
+            <span className="text-2xl font-bold text-text-primary tracking-tight font-heading">
+              {activeGateId ? activeGateId.toUpperCase() : 'IDLE'}
+            </span>
 
-                  {i < props.gates.length - 1 ? (
-                    <div
-                      aria-hidden="true"
-                      className="hidden w-10 items-center justify-center sm:flex"
-                    >
-                      <div
-                        className={[
-                          'h-0.5 w-8 rounded-full bg-[var(--border-glow)]',
-                          props.gates[i + 1]?.status === 'running' ? 'connector-active' : '',
-                        ].join(' ')}
-                      />
-                      <div className="-ml-1 h-2 w-2 rotate-45 border-r border-t border-[var(--border-glow)]" />
-                    </div>
-                  ) : null}
-                </React.Fragment>
-              );
-            })}
+            {gates.find((g) => g.id === activeGateId)?.status === 'running' && (
+              <span className="mt-2 flex items-center gap-2 text-[10px] text-primary font-mono uppercase animate-pulse">
+                <span className="h-1.5 w-1.5 rounded-full bg-primary" />
+                Processing
+              </span>
+            )}
           </div>
-        </div>
-      </div>
-    </section>
+        </foreignObject>
+      </svg>
+    </div>
   );
 }

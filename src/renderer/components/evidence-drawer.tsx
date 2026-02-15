@@ -1,3 +1,5 @@
+import { AnimatePresence, motion } from 'framer-motion';
+import { Check, Copy, FileText, X } from 'lucide-react';
 import React from 'react';
 
 import type { GateUI } from '../models/ui';
@@ -17,76 +19,102 @@ function fmtTime(iso: string | undefined) {
   }
 }
 
-export function EvidenceDrawer(props: EvidenceDrawerProps) {
-  const closeRef = React.useRef<HTMLButtonElement | null>(null);
+export function EvidenceDrawer({ open, gate, onClose }: EvidenceDrawerProps) {
+  const [copied, setCopied] = React.useState(false);
 
   React.useEffect(() => {
-    if (!props.open) return;
-    closeRef.current?.focus();
-  }, [props.open]);
+    if (open) {
+      setCopied(false);
+    }
+  }, [open]);
 
-  if (!props.open) return null;
-
-  const title = props.gate ? `${props.gate.label} evidence` : 'Evidence';
-  const evidence = props.gate?.evidence ?? 'No evidence available.';
+  const handleCopy = async () => {
+    if (!gate?.evidence) return;
+    try {
+      await navigator.clipboard.writeText(gate.evidence);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Ignore
+    }
+  };
 
   return (
-    <div className="fixed inset-0 z-50">
-      <button
-        type="button"
-        aria-label="Close evidence drawer"
-        tabIndex={-1}
-        className="absolute inset-0 hud-backdrop"
-        onClick={props.onClose}
-      />
+    <AnimatePresence>
+      {open && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center">
+          {/* Backdrop */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={onClose}
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+          />
 
-      <div className="absolute inset-x-0 bottom-0 mx-auto w-full max-w-5xl px-4 pb-4">
-        <div className="glass-panel glass-panel-heavy relative animate-[drawerIn_220ms_ease-out] rounded-t-2xl p-6 border-t border-[var(--neon-cyan)] shadow-[0_-5px_30px_rgba(34,211,238,0.15)]">
-          <div className="flex items-start justify-between gap-4">
-            <div className="min-w-0">
-              <div className="hud-label">Evidence</div>
-              <div className="hud-title mt-1 truncate text-lg">{title}</div>
-              <div className="hud-meta mt-1">
-                Updated:{' '}
-                <span className="font-semibold text-[var(--text-primary)]">
-                  {fmtTime(props.gate?.updatedAt)}
-                </span>
+          {/* Drawer Panel */}
+          <motion.div
+            initial={{ y: '100%', opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: '100%', opacity: 0 }}
+            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+            className="relative z-10 flex max-h-[85vh] w-full max-w-4xl flex-col overflow-hidden rounded-t-2xl border border-border-subtle bg-bg-panel shadow-2xl sm:rounded-2xl"
+          >
+            {/* Header */}
+            <div className="flex shrink-0 items-center justify-between border-b border-border-subtle px-6 py-4 bg-bg-deep/50">
+              <div className="flex items-center gap-4">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary">
+                  <FileText className="h-5 w-5" />
+                </div>
+                <div>
+                  <h2 className="text-lg font-bold text-text-primary font-heading">
+                    {gate?.label} Evidence
+                  </h2>
+                  <div className="text-xs text-text-secondary font-mono">
+                    Last Updated: {fmtTime(gate?.updatedAt)}
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleCopy}
+                  className="flex items-center gap-2 rounded-lg border border-border-subtle px-3 py-1.5 text-xs font-medium text-text-secondary hover:bg-bg-panel-hover hover:text-text-primary transition-colors"
+                >
+                  {copied ? (
+                    <Check className="h-4 w-4 text-success" />
+                  ) : (
+                    <Copy className="h-4 w-4" />
+                  )}
+                  {copied ? 'Copied' : 'Copy'}
+                </button>
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="flex h-8 w-8 items-center justify-center rounded-full text-text-secondary hover:bg-bg-panel-hover hover:text-text-primary transition-colors"
+                >
+                  <X className="h-5 w-5" />
+                </button>
               </div>
             </div>
 
-            <div className="flex shrink-0 items-center gap-2">
-              <button
-                ref={closeRef}
-                type="button"
-                onClick={props.onClose}
-                aria-label="Close"
-                className="grid h-9 w-9 place-items-center rounded-full border border-[var(--border-subtle)] bg-transparent font-[var(--font-heading)] text-lg text-[var(--text-secondary)] outline-none transition-colors hover:bg-[rgba(255,255,255,0.02)] hover:text-[var(--text-primary)] focus-visible:ring-2 focus-visible:ring-[var(--neon-cyan)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg-deep)]"
-              >
-                ✕
-              </button>
-              <button
-                type="button"
-                onClick={async () => {
-                  try {
-                    await navigator.clipboard.writeText(evidence);
-                  } catch {
-                    // Clipboard access may be blocked; fail silently in Phase 4.
-                  }
-                }}
-                className="rounded-xl border border-[var(--border-subtle)] bg-transparent px-3 py-2 font-[var(--font-heading)] text-sm font-semibold text-[var(--text-secondary)] outline-none transition-colors hover:bg-[var(--bg-panel-hover)] hover:text-[var(--text-primary)] focus-visible:ring-2 focus-visible:ring-[var(--neon-cyan)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg-deep)]"
-              >
-                Copy
-              </button>
+            {/* Content */}
+            <div className="flex-1 overflow-auto bg-bg-deep p-6">
+              {gate?.evidence ? (
+                <pre className="font-mono text-xs leading-relaxed text-text-primary whitespace-pre-wrap break-words rounded-lg bg-black/20 p-4 border border-border-subtle">
+                  {gate.evidence}
+                </pre>
+              ) : (
+                <div className="flex h-32 flex-col items-center justify-center text-text-muted opacity-50">
+                  <FileText className="h-8 w-8 mb-2" />
+                  <span className="text-sm">No evidence collected yet</span>
+                </div>
+              )}
             </div>
-          </div>
-
-          <div className="mt-4 max-h-[50vh] overflow-auto rounded-xl border border-[var(--border-subtle)] bg-[rgba(0,0,0,0.30)] p-4">
-            <pre className="whitespace-pre-wrap break-words font-[var(--font-mono)] text-[13px] leading-relaxed text-[var(--text-primary)]">
-              {evidence}
-            </pre>
-          </div>
+          </motion.div>
         </div>
-      </div>
-    </div>
+      )}
+    </AnimatePresence>
   );
 }

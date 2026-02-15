@@ -1,7 +1,8 @@
+import { Filter, PauseCircle, PlayCircle, Search, Terminal } from 'lucide-react';
 import React from 'react';
 import { Virtuoso, type VirtuosoHandle } from 'react-virtuoso';
 
-import type { EventNode, EventSeverity, EventUI, GateId } from '../models/ui';
+import type { EventNode, EventSeverity, EventUI } from '../models/ui';
 
 function fmtTime(iso: string) {
   try {
@@ -19,50 +20,36 @@ function fmtTime(iso: string) {
 function getLogColor(sev: EventSeverity) {
   switch (sev) {
     case 'error':
-      return 'text-[var(--neon-red)] drop-shadow-[0_0_8px_rgba(255,0,60,0.6)]';
+      return 'text-danger';
     case 'success':
-      return 'text-[var(--neon-green)] drop-shadow-[0_0_8px_rgba(0,255,65,0.6)]';
+      return 'text-success';
     case 'warning':
-      return 'text-[var(--neon-amber)]';
+      return 'text-warning';
     default:
-      return 'text-[var(--text-secondary)] opacity-80';
+      return 'text-text-primary';
   }
 }
 
-const LogRow = React.memo(function LogRow({ event, index }: { event: EventUI; index: number }) {
+const LogRow = React.memo(function LogRow({ event }: { event: EventUI }) {
   const isSystem = event.node === 'system';
 
   return (
-    <div
-      className={[
-        'flex items-start gap-3 py-0.5 px-2 font-mono text-[13px] leading-tight hover:bg-[rgba(255,255,255,0.03)] transition-colors',
-        'border-l-2 border-transparent hover:border-[var(--neon-cyan)]',
-      ].join(' ')}
-    >
-      <span className="w-24 shrink-0 text-[11px] text-[var(--text-label)] opacity-50 select-none font-light">
+    <div className="flex items-start gap-3 py-0.5 px-4 font-mono text-[13px] leading-5 hover:bg-white/5 transition-colors border-l-2 border-transparent hover:border-primary/50">
+      <span className="w-24 shrink-0 text-[11px] text-text-muted select-none font-light">
         {fmtTime(event.at)}
       </span>
 
       <span
-        className={[
-          'w-20 shrink-0 text-[11px] font-bold uppercase tracking-wider text-right select-none',
-          isSystem ? 'text-[var(--neon-blue)]' : 'text-[var(--neon-cyan)]',
-        ].join(' ')}
+        className={`w-24 shrink-0 text-[11px] font-bold uppercase tracking-wider text-right select-none ${
+          isSystem ? 'text-text-secondary' : 'text-primary'
+        }`}
       >
         {event.node}
       </span>
 
       <div
-        className={[
-          'flex-1 break-words whitespace-pre-wrap font-medium',
-          getLogColor(event.severity),
-        ].join(' ')}
+        className={`flex-1 break-words whitespace-pre-wrap font-medium ${getLogColor(event.severity)}`}
       >
-        {!isSystem && (
-          <span className="mr-2 text-[var(--text-secondary)] opacity-40 select-none pointer-events-none">
-            &gt;
-          </span>
-        )}
         {event.message}
       </div>
     </div>
@@ -74,13 +61,13 @@ export function LogConsole(props: { events: EventUI[] }) {
   const [autoScroll, setAutoScroll] = React.useState(true);
 
   // Filter state
-  const [nodeFilter, setNodeFilter] = React.useState<GateId | 'all'>('all');
+  const [nodeFilter, setNodeFilter] = React.useState<string>('all');
   const [sevFilters, setSevFilters] = React.useState<Set<EventSeverity>>(
     () => new Set<EventSeverity>(['info', 'success', 'warning', 'error']),
   );
 
   const allNodes = React.useMemo(() => {
-    const s = new Set<EventNode>();
+    const s = new Set<string>();
     for (const e of props.events) s.add(e.node);
     const out = Array.from(s);
     out.sort((a, b) => String(a).localeCompare(String(b)));
@@ -105,35 +92,30 @@ export function LogConsole(props: { events: EventUI[] }) {
   };
 
   return (
-    <section className="glass-panel flex h-full min-h-0 flex-col rounded-xl overflow-hidden shadow-[0_0_20px_rgba(0,0,0,0.5)] border border-[rgba(0,255,65,0.1)] relative">
+    <section className="flex h-full w-full flex-col overflow-hidden bg-bg-deep/50">
       {/* Header / Controls */}
-      <div className="flex shrink-0 items-center justify-between border-b border-[rgba(0,255,65,0.1)] bg-[rgba(5,10,15,0.95)] px-3 py-2 z-10">
-        <div className="flex items-center gap-4">
-          <h2 className="text-[11px] font-bold uppercase tracking-[0.15em] text-[var(--neon-green)] drop-shadow-[0_0_5px_rgba(0,255,65,0.5)] flex items-center gap-2">
-            <span className="inline-block w-2 h-2 bg-[var(--neon-green)] animate-pulse rounded-full shadow-[0_0_8px_var(--neon-green)]" />
-            CONSOLE_OUTPUT
-          </h2>
+      <div className="flex shrink-0 items-center justify-between border-b border-border-subtle bg-bg-panel px-4 py-3">
+        <div className="flex items-center gap-6">
+          <div className="flex items-center gap-2 text-sm font-semibold text-text-primary font-heading">
+            <Terminal className="h-4 w-4 text-primary" />
+            <span>Console</span>
+          </div>
 
-          <div className="h-4 w-px bg-[var(--border-subtle)] mx-2" />
+          <div className="h-4 w-px bg-border-subtle" />
 
+          {/* Severity Filters */}
           <div className="flex items-center gap-1">
             {(['info', 'success', 'warning', 'error'] as const).map((sev) => {
               const active = sevFilters.has(sev);
-              let colorClass =
-                'text-[var(--text-secondary)] border-transparent bg-transparent opacity-50';
+              let colorClass = 'text-text-muted hover:text-text-primary opacity-60';
               if (active) {
                 if (sev === 'error')
-                  colorClass =
-                    'text-[var(--neon-red)] border-[var(--neon-red)] bg-[rgba(255,0,60,0.1)] opacity-100 shadow-[0_0_8px_rgba(255,0,60,0.2)]';
+                  colorClass = 'text-danger bg-danger/10 border-danger/20 opacity-100';
                 else if (sev === 'success')
-                  colorClass =
-                    'text-[var(--neon-green)] border-[var(--neon-green)] bg-[rgba(0,255,65,0.1)] opacity-100 shadow-[0_0_8px_rgba(0,255,65,0.2)]';
+                  colorClass = 'text-success bg-success/10 border-success/20 opacity-100';
                 else if (sev === 'warning')
-                  colorClass =
-                    'text-[var(--neon-amber)] border-[var(--neon-amber)] bg-[rgba(255,184,0,0.1)] opacity-100 shadow-[0_0_8px_rgba(255,184,0,0.2)]';
-                else
-                  colorClass =
-                    'text-[var(--neon-cyan)] border-[var(--neon-cyan)] bg-[rgba(34,211,238,0.1)] opacity-100 shadow-[0_0_8px_rgba(34,211,238,0.2)]';
+                  colorClass = 'text-warning bg-warning/10 border-warning/20 opacity-100';
+                else colorClass = 'text-primary bg-primary/10 border-primary/20 opacity-100';
               }
 
               return (
@@ -141,8 +123,7 @@ export function LogConsole(props: { events: EventUI[] }) {
                   key={sev}
                   type="button"
                   onClick={() => toggleSeverity(sev)}
-                  className={`h-5 px-2 rounded-sm border text-[9px] font-bold uppercase tracking-wider transition-all hover:opacity-100 ${colorClass}`}
-                  title={`Toggle ${sev}`}
+                  className={`h-6 px-2.5 rounded text-[10px] font-bold uppercase tracking-wider border border-transparent transition-all ${colorClass}`}
                 >
                   {sev}
                 </button>
@@ -150,56 +131,52 @@ export function LogConsole(props: { events: EventUI[] }) {
             })}
           </div>
 
-          <div className="h-4 w-px bg-[var(--border-subtle)] mx-2" />
-
-          <select
-            value={nodeFilter}
-            onChange={(e) => setNodeFilter(e.target.value as GateId | 'all')}
-            className="h-5 rounded bg-[rgba(0,0,0,0.3)] px-2 text-[10px] text-[var(--neon-cyan)] border border-[rgba(34,211,238,0.3)] outline-none focus:border-[var(--neon-cyan)] uppercase font-mono cursor-pointer hover:bg-[rgba(34,211,238,0.1)] transition-colors"
-          >
-            <option value="all">ALL NODES</option>
-            {allNodes
-              .filter((n) => n !== 'system')
-              .map((n) => (
+          {/* Node Filter */}
+          <div className="relative flex items-center">
+            <Filter className="absolute left-2 h-3 w-3 text-text-muted pointer-events-none" />
+            <select
+              value={nodeFilter}
+              onChange={(e) => setNodeFilter(e.target.value)}
+              className="h-6 w-32 appearance-none rounded bg-bg-deep pl-7 pr-2 text-[10px] font-bold uppercase text-text-secondary border border-border-subtle focus:border-primary focus:text-primary outline-none cursor-pointer transition-colors"
+            >
+              <option value="all">All Nodes</option>
+              {allNodes.map((n) => (
                 <option key={n} value={n}>
                   {n.toUpperCase()}
                 </option>
               ))}
-            {allNodes.includes('system') && <option value="system">SYSTEM</option>}
-          </select>
+            </select>
+          </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-4">
+          <div className="text-[10px] font-mono text-text-muted">
+            {filteredEvents.length} events
+          </div>
+
           <button
             type="button"
             onClick={() => setAutoScroll(!autoScroll)}
-            className={[
-              'flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider transition-all px-2 py-1 rounded border',
+            className={`flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider transition-all px-2.5 py-1 rounded border ${
               autoScroll
-                ? 'text-[var(--neon-green)] border-[var(--neon-green)] bg-[rgba(0,255,65,0.1)] shadow-[0_0_10px_rgba(0,255,65,0.2)]'
-                : 'text-[var(--text-secondary)] border-[var(--border-subtle)] hover:text-[var(--text-primary)]',
-            ].join(' ')}
+                ? 'text-success border-success/30 bg-success/10'
+                : 'text-text-muted border-border-subtle hover:text-text-primary'
+            }`}
           >
-            <span
-              className={`inline-block w-1.5 h-1.5 rounded-full ${autoScroll ? 'bg-[var(--neon-green)] animate-pulse' : 'bg-[var(--text-secondary)]'}`}
-            />
-            {autoScroll ? 'LIVE TAIL' : 'PAUSED'}
+            {autoScroll ? <PlayCircle className="h-3 w-3" /> : <PauseCircle className="h-3 w-3" />}
+            {autoScroll ? 'Live' : 'Paused'}
           </button>
-
-          <div className="text-[10px] font-mono text-[var(--text-secondary)] opacity-70 bg-[rgba(255,255,255,0.05)] px-2 py-0.5 rounded">
-            {filteredEvents.length} LINES
-          </div>
         </div>
       </div>
 
       {/* Log Area */}
-      <div className="scanlines-heavy relative min-h-0 flex-1 bg-[rgba(5,8,12,0.95)]">
+      <div className="relative min-h-0 flex-1 bg-bg-deep/80 backdrop-blur-sm">
         <Virtuoso
           ref={virtuosoRef}
           data={filteredEvents}
           followOutput={autoScroll ? 'auto' : false}
-          itemContent={(index, event) => <LogRow index={index} event={event} />}
-          className="scrollbar-thin scrollbar-track-transparent scrollbar-thumb-[var(--neon-green)]/20 hover:scrollbar-thumb-[var(--neon-green)]/40"
+          itemContent={(index, event) => <LogRow event={event} />}
+          className="scrollbar-thin scrollbar-track-transparent scrollbar-thumb-primary/20 hover:scrollbar-thumb-primary/40"
         />
       </div>
     </section>
