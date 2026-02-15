@@ -1,52 +1,43 @@
 :root {
-  /* Base */
-  --cyber-black: #050505;
-  --bg-deep: var(--cyber-black);
-  --bg-panel: rgba(10, 18, 36, 0.65);
-  --bg-panel-hover: rgba(15, 25, 50, 0.75);
-  --glass-panel: rgba(10, 20, 30, 0.7);
+  /* Base - Dark Navy */
+  --bg-deep: #0a0f1a;
+  --bg-panel: rgba(10, 15, 26, 0.65);
+  --bg-panel-hover: rgba(15, 25, 40, 0.75);
+  --glass-panel: rgba(10, 15, 26, 0.7);
 
   --border-glow: rgba(34, 211, 238, 0.15);
   --border-subtle: rgba(148, 163, 184, 0.08);
 
-  /* Neon accents */
-  --neon-cyan: #22d3ee;
-  --neon-green: #00ff41;
-  --neon-red: #ff003c;
-  --neon-amber: #ffb800;
-  --neon-blue: #3b82f6;
+  /* Functional Colors */
+  --primary: #22d3ee; /* Cyan - Interactive/Focus */
+  --success: #00ff41; /* Green - Healthy/Success */
+  --danger: #ff003c; /* Red - Error/Kill */
+  --warning: #ffb800; /* Amber - Warning */
 
   /* Text */
   --text-primary: #e2e8f0;
-  --text-secondary: #64748b;
-  --text-label: #94a3b8;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
 
   /* Glassmorphism */
   --glass-bg: var(--glass-panel);
   --glass-blur: blur(10px);
-  --glass-blur-strong: blur(24px);
-  --glass-blur-soft: blur(4px);
   --glass-border: 1px solid rgba(148, 163, 184, 0.1);
 
   /* Shadows */
-  --glow-cyan: 0 0 20px rgba(34, 211, 238, 0.15), 0 0 60px rgba(34, 211, 238, 0.05);
-  --glow-red: 0 0 20px rgba(255, 0, 60, 0.5);
-  --glow-green: 0 0 20px rgba(0, 255, 65, 0.5);
-  --glow-amber: 0 0 15px rgba(255, 184, 0, 0.2);
-  --glow-cyan-soft: 0 0 12px rgba(34, 211, 238, 0.1), 0 0 30px rgba(34, 211, 238, 0.04);
+  --glow-primary: 0 0 20px rgba(34, 211, 238, 0.15), 0 0 60px rgba(34, 211, 238, 0.05);
+  --glow-success: 0 0 20px rgba(0, 255, 65, 0.25);
+  --glow-danger: 0 0 20px rgba(255, 0, 60, 0.3);
+  --glow-warning: 0 0 15px rgba(255, 184, 0, 0.2);
 
-  --font-heading: "JetBrains Mono", "Fira Code", monospace;
+  /* Typography */
+  --font-ui: "Inter", system-ui, sans-serif;
   --font-mono: "JetBrains Mono", "Fira Code", monospace;
 
-  /* Back-compat tokens */
-  --bg: var(--bg-deep);
-  --panel: rgba(10, 18, 36, 0.85);
-  --panel-2: rgba(15, 23, 42, 0.7);
-  --border: rgba(148, 163, 184, 0.12);
-  --text: var(--text-primary);
-  --muted: var(--text-label);
-  --cyan: var(--neon-cyan);
-  --green: var(--neon-green);
-  --amber: var(--neon-amber);
-  --red: var(--neon-red);
+  /* Back-compat variables to be phased out or mapped */
+  --cyber-black: var(--bg-deep);
+  --neon-cyan: var(--primary);
+  --neon-green: var(--success);
+  --neon-red: var(--danger);
+  --neon-amber: var(--warning);
 }

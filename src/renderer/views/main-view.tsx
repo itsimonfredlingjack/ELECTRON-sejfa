@@ -3,7 +3,6 @@ import React from 'react';
 import type { Result } from '../../shared/api';
 import { deriveGates, deriveObjectiveText, deriveTimelineEvents } from '../adapters/loop-adapters';
 import { EvidenceDrawer } from '../components/evidence-drawer';
-import { GateBar } from '../components/gate-bar';
 import { KeyboardHelp } from '../components/keyboard-help';
 import { LogConsole } from '../components/log-console';
 import { LoopVisualization } from '../components/loop-visualization';
@@ -178,8 +177,9 @@ export function MainView() {
   });
 
   return (
-    <div className="min-h-full bg-[var(--bg)] text-[var(--text)]">
-      <div className="mx-auto flex min-h-full max-w-[1400px] flex-col gap-4 px-4 py-5 lg:px-6">
+    <div className="flex h-screen w-full flex-col overflow-hidden bg-[var(--bg-deep)] text-[var(--text-primary)]">
+      {/* Top Toolbar Area */}
+      <div className="shrink-0 border-b border-[var(--border-subtle)] bg-[var(--bg-panel)] px-6 py-3">
         <Toolbar
           objectiveText={derivedObjective.text}
           mode={appMode}
@@ -242,29 +242,21 @@ export function MainView() {
             }
           }}
         />
+      </div>
 
-        {!socketConnected ? (
-          <div className="hud-panel offline-banner rounded-2xl px-4 py-3">
-            <span className="font-[var(--font-mono)] text-sm font-semibold uppercase tracking-widest text-[var(--neon-red)] animate-[offline-pulse_2s_ease-in-out_infinite]">
-              OFFLINE
-            </span>
-            <span className="ml-2 font-[var(--font-mono)] text-sm text-[var(--text-primary)]">
-              Monitor backend not reachable{socketLastError ? `: ${socketLastError}` : '.'}
-            </span>
-          </div>
-        ) : null}
-
-        <GateBar
-          gates={derivedGates.gates}
-          selectedGateId={selectedGateId}
-          onSelectGate={(id) => {
-            setSelectedGateId(id);
-            openDrawer();
-          }}
-        />
-
-        <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 lg:grid-cols-5">
-          <div className="min-h-0 lg:col-span-2">
+      {/* Main Content Area: Split View */}
+      <div className="grid min-h-0 flex-1 grid-cols-12 gap-6 p-6">
+        {/* Left Column: Loop Visualization (40%) */}
+        <div className="col-span-5 flex min-h-0 flex-col">
+          <div className="glass-panel flex flex-1 flex-col overflow-hidden p-6 relative">
+            {!socketConnected && (
+              <div className="absolute top-4 left-4 right-4 z-50 flex items-center justify-between rounded bg-danger/10 px-3 py-2 border border-danger/30 text-danger text-sm">
+                <span className="font-bold">OFFLINE</span>
+                <span className="opacity-80">
+                  Monitor backend unreachable{socketLastError ? `: ${socketLastError}` : ''}
+                </span>
+              </div>
+            )}
             <LoopVisualization
               gates={derivedGates.gates}
               activeGateId={derivedGates.activeGateId}
@@ -274,7 +266,11 @@ export function MainView() {
               }}
             />
           </div>
-          <div className="min-h-0 lg:col-span-3">
+        </div>
+
+        {/* Right Column: Log Console (60%) */}
+        <div className="col-span-7 flex min-h-0 flex-col">
+          <div className="glass-panel flex flex-1 flex-col overflow-hidden">
             <LogConsole events={timelineEvents} />
           </div>
         </div>
