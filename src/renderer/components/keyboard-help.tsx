@@ -36,7 +36,7 @@ export function KeyboardHelp(props: KeyboardHelpProps) {
               ref={closeRef}
               type="button"
               onClick={props.onClose}
-              className="rounded-xl border border-[var(--border-subtle)] bg-transparent px-3 py-2 font-[var(--font-heading)] text-sm font-semibold text-[var(--text-secondary)] outline-none transition-colors hover:bg-[var(--bg-panel-hover)] hover:text-[var(--text-primary)] focus-visible:ring-2 focus-visible:ring-[var(--neon-cyan)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg-deep)]"
+              className="rounded-xl border border-[var(--border-subtle)] bg-transparent px-3 py-2 font-heading text-sm font-semibold text-[var(--text-secondary)] outline-none transition-colors hover:bg-[var(--bg-panel-hover)] hover:text-[var(--text-primary)] focus-visible:ring-2 focus-visible:ring-[var(--neon-cyan)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg-deep)]"
             >
               Close
             </button>

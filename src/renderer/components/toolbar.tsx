@@ -35,6 +35,7 @@ export type ToolbarProps = {
 
 export function Toolbar(props: ToolbarProps) {
   const killArmed = Boolean(props.killArmedUntil);
+  const objectiveIsIdle = props.objectiveText === 'Idle';
 
   return (
     <div className="flex flex-col gap-4 w-full max-w-7xl mx-auto">
@@ -53,12 +54,14 @@ export function Toolbar(props: ToolbarProps) {
         </div>
 
         {/* Objective - Center Stage */}
-        <div className="flex-1 text-center">
+        <div className="flex-1 min-w-0 text-center">
           <h1
-            className="text-lg font-bold text-text-primary tracking-tight truncate px-4 font-heading"
+            className={`text-lg tracking-tight truncate px-4 font-heading ${
+              objectiveIsIdle ? 'font-semibold text-text-secondary' : 'font-bold text-text-primary'
+            }`}
             title={props.objectiveText}
           >
-            {props.objectiveText || 'No Active Objective'}
+            {props.objectiveText || 'Idle'}
           </h1>
         </div>
 
@@ -140,7 +143,7 @@ export function Toolbar(props: ToolbarProps) {
             type="button"
             disabled={props.openPrDisabled}
             onClick={props.onOpenPr}
-            className="flex items-center gap-2 px-3 py-2 text-xs font-medium text-text-secondary hover:text-primary transition-colors disabled:opacity-30 disabled:hover:text-text-secondary"
+            className="flex items-center gap-2 rounded-lg border border-border-subtle bg-bg-deep/30 px-3 py-2 text-xs font-semibold text-text-primary/80 transition-colors hover:bg-bg-panel-hover hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:bg-bg-deep/30 disabled:hover:text-text-primary/80"
           >
             Open PR <ExternalLink className="h-3 w-3" />
           </button>
@@ -149,7 +152,7 @@ export function Toolbar(props: ToolbarProps) {
             type="button"
             disabled={props.openRunDisabled}
             onClick={props.onOpenRun}
-            className="flex items-center gap-2 px-3 py-2 text-xs font-medium text-text-secondary hover:text-primary transition-colors disabled:opacity-30 disabled:hover:text-text-secondary"
+            className="flex items-center gap-2 rounded-lg border border-border-subtle bg-bg-deep/30 px-3 py-2 text-xs font-semibold text-text-primary/80 transition-colors hover:bg-bg-panel-hover hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:bg-bg-deep/30 disabled:hover:text-text-primary/80"
           >
             Open Run <ExternalLink className="h-3 w-3" />
           </button>

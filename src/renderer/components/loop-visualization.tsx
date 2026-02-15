@@ -34,10 +34,12 @@ function StatusIcon({ status, isActive }: { status: GateUI['status']; isActive: 
     );
   if (status === 'passed')
     return (
-      <CheckCircle2 className="h-6 w-6 text-success drop-shadow-[0_0_8px_rgba(0,255,65,0.4)]" />
+      <CheckCircle2 className="h-6 w-6 text-success drop-shadow-[0_0_10px_rgb(var(--success-rgb)_/_0.24)]" />
     );
   if (status === 'failed')
-    return <XCircle className="h-6 w-6 text-danger drop-shadow-[0_0_8px_rgba(255,0,60,0.4)]" />;
+    return (
+      <XCircle className="h-6 w-6 text-danger drop-shadow-[0_0_12px_rgb(var(--danger-rgb)_/_0.26)]" />
+    );
   if (status === 'pending' && isActive) return <Disc className="h-6 w-6 text-primary" />;
   return <Circle className="h-6 w-6 text-text-muted/30" />;
 }
@@ -91,7 +93,7 @@ export function LoopVisualization({ gates, activeGateId, onSelectGate }: LoopVis
             strokeDasharray="100 800" // Length of the arc segment
             animate={{ rotate: 360 }}
             transition={{ duration: 4, repeat: Number.POSITIVE_INFINITY, ease: 'linear' }}
-            className="opacity-60 drop-shadow-[0_0_8px_rgba(34,211,238,0.5)]"
+            className="opacity-60 drop-shadow-[0_0_14px_rgb(var(--primary-rgb)_/_0.28)]"
           />
         )}
 
@@ -177,7 +179,7 @@ export function LoopVisualization({ gates, activeGateId, onSelectGate }: LoopVis
               >
                 <div className="flex flex-col items-center justify-center text-center">
                   <span
-                    className={`text-[11px] font-semibold tracking-wider uppercase transition-colors ${
+                    className={`text-[11px] font-semibold tracking-wide transition-colors ${
                       isSelected ? 'text-primary' : 'text-text-muted group-hover:text-text-primary'
                     }`}
                   >
@@ -201,7 +203,7 @@ export function LoopVisualization({ gates, activeGateId, onSelectGate }: LoopVis
           className="pointer-events-none"
         >
           <div className="flex h-full w-full flex-col items-center justify-center text-center">
-            <span className="text-[10px] uppercase tracking-widest text-text-muted mb-1 opacity-60">
+            <span className="text-[11px] font-medium tracking-wide text-text-muted mb-1 opacity-70">
               Selected Gate
             </span>
             <span className="text-2xl font-bold text-text-primary tracking-tight font-heading">

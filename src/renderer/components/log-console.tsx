@@ -1,4 +1,4 @@
-import { Filter, PauseCircle, PlayCircle, Search, Terminal } from 'lucide-react';
+import { Filter, PauseCircle, PlayCircle, Terminal } from 'lucide-react';
 import React from 'react';
 import { Virtuoso, type VirtuosoHandle } from 'react-virtuoso';
 
@@ -94,8 +94,8 @@ export function LogConsole(props: { events: EventUI[] }) {
   return (
     <section className="flex h-full w-full flex-col overflow-hidden bg-bg-deep/50">
       {/* Header / Controls */}
-      <div className="flex shrink-0 items-center justify-between border-b border-border-subtle bg-bg-panel px-4 py-3">
-        <div className="flex items-center gap-6">
+      <div className="flex shrink-0 flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b border-border-subtle bg-bg-panel px-4 py-3">
+        <div className="flex min-w-0 items-center gap-6">
           <div className="flex items-center gap-2 text-sm font-semibold text-text-primary font-heading">
             <Terminal className="h-4 w-4 text-primary" />
             <span>Console</span>
@@ -123,21 +123,24 @@ export function LogConsole(props: { events: EventUI[] }) {
                   key={sev}
                   type="button"
                   onClick={() => toggleSeverity(sev)}
-                  className={`h-6 px-2.5 rounded text-[10px] font-bold uppercase tracking-wider border border-transparent transition-all ${colorClass}`}
+                  className={`h-7 px-2.5 rounded text-[11px] leading-none font-bold uppercase tracking-wider border border-transparent transition-all ${colorClass}`}
                 >
                   {sev}
                 </button>
               );
             })}
           </div>
+        </div>
 
+        <div className="flex flex-wrap items-center justify-end gap-x-3 gap-y-2">
           {/* Node Filter */}
           <div className="relative flex items-center">
             <Filter className="absolute left-2 h-3 w-3 text-text-muted pointer-events-none" />
             <select
+              aria-label="Filter nodes"
               value={nodeFilter}
               onChange={(e) => setNodeFilter(e.target.value)}
-              className="h-6 w-32 appearance-none rounded bg-bg-deep pl-7 pr-2 text-[10px] font-bold uppercase text-text-secondary border border-border-subtle focus:border-primary focus:text-primary outline-none cursor-pointer transition-colors"
+              className="h-7 w-36 appearance-none rounded bg-bg-deep pl-7 pr-2 text-[11px] leading-none font-bold uppercase text-text-secondary border border-border-subtle focus:border-primary focus:text-primary outline-none cursor-pointer transition-colors"
             >
               <option value="all">All Nodes</option>
               {allNodes.map((n) => (
@@ -147,17 +150,19 @@ export function LogConsole(props: { events: EventUI[] }) {
               ))}
             </select>
           </div>
-        </div>
 
-        <div className="flex items-center gap-4">
-          <div className="text-[10px] font-mono text-text-muted">
+          <div
+            data-testid="events-count"
+            className="text-[11px] font-medium text-text-secondary whitespace-nowrap tabular-nums"
+          >
             {filteredEvents.length} events
           </div>
 
           <button
             type="button"
             onClick={() => setAutoScroll(!autoScroll)}
-            className={`flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider transition-all px-2.5 py-1 rounded border ${
+            aria-label="Toggle live tail"
+            className={`flex items-center gap-1.5 text-[11px] leading-none font-bold uppercase tracking-wider transition-all px-2.5 py-1.5 rounded border whitespace-nowrap ${
               autoScroll
                 ? 'text-success border-success/30 bg-success/10'
                 : 'text-text-muted border-border-subtle hover:text-text-primary'

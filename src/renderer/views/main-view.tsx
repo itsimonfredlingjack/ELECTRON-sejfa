@@ -177,7 +177,7 @@ export function MainView() {
   });
 
   return (
-    <div className="flex h-screen w-full flex-col overflow-hidden bg-[var(--bg-deep)] text-[var(--text-primary)]">
+    <div className="hud-ambient flex h-screen w-full flex-col overflow-hidden bg-[var(--bg-deep)] text-[var(--text-primary)]">
       {/* Top Toolbar Area */}
       <div className="shrink-0 border-b border-[var(--border-subtle)] bg-[var(--bg-panel)] px-6 py-3">
         <Toolbar

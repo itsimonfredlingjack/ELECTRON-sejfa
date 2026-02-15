@@ -9,6 +9,8 @@ export default {
         success: 'var(--success)',
         danger: 'var(--danger)',
         warning: 'var(--warning)',
+        'border-subtle': 'var(--border-subtle)',
+        'border-glow': 'var(--border-glow)',
         'bg-deep': 'var(--bg-deep)',
         'bg-panel': 'var(--bg-panel)',
         'bg-panel-hover': 'var(--bg-panel-hover)',
