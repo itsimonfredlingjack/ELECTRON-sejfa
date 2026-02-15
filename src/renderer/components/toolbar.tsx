@@ -55,7 +55,7 @@ export function Toolbar(props: ToolbarProps) {
   const killArmed = Boolean(props.killArmedUntil);
 
   return (
-    <header className="hud-panel rounded-2xl px-5 py-4 shadow-[0_0_0_1px_var(--border-glow)_inset]">
+    <header className="glass-panel rounded-xl px-5 py-4 shadow-[0_0_20px_rgba(0,0,0,0.4)] border border-[rgba(255,255,255,0.05)]">
       <div className="flex flex-col gap-3">
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0">

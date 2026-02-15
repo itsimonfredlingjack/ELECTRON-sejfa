@@ -24,7 +24,7 @@ export type LoopVisualizationProps = {
 
 export function LoopVisualization(props: LoopVisualizationProps) {
   return (
-    <section className="hud-panel rounded-2xl p-5 shadow-[0_0_0_1px_var(--border-glow)_inset]">
+    <section className="glass-panel rounded-xl p-5 shadow-[0_0_20px_rgba(34,211,238,0.1)] border border-[rgba(34,211,238,0.2)]">
       <div className="flex items-center justify-between">
         <div className="hud-label">Loop Visualization</div>
         <div className="hud-meta">Active: {props.activeGateId ?? 'none'}</div>

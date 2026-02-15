@@ -41,7 +41,7 @@ export function EvidenceDrawer(props: EvidenceDrawerProps) {
       />
 
       <div className="absolute inset-x-0 bottom-0 mx-auto w-full max-w-5xl px-4 pb-4">
-        <div className="hud-panel hud-panel--strong relative animate-[drawerIn_220ms_ease-out] rounded-2xl p-5 before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-[var(--neon-cyan)] before:shadow-[var(--glow-cyan)] before:content-['']">
+        <div className="glass-panel glass-panel-heavy relative animate-[drawerIn_220ms_ease-out] rounded-t-2xl p-6 border-t border-[var(--neon-cyan)] shadow-[0_-5px_30px_rgba(34,211,238,0.15)]">
           <div className="flex items-start justify-between gap-4">
             <div className="min-w-0">
               <div className="hud-label">Evidence</div>

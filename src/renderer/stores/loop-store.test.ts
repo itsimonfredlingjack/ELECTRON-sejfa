@@ -37,7 +37,7 @@ describe('loop-store', () => {
 
   it('addEvent appends and caps events', () => {
     loopActions.reset();
-    for (let i = 0; i < 600; i += 1) {
+    for (let i = 0; i < 1100; i += 1) {
       const e: LoopEvent = {
         type: 'log',
         at: new Date().toISOString(),
@@ -48,7 +48,7 @@ describe('loop-store', () => {
       loopActions.addEvent(e);
     }
 
-    expect(useLoopStore.getState().events.length).toBeLessThanOrEqual(500);
+    expect(useLoopStore.getState().events.length).toBeLessThanOrEqual(1000);
     expect(useLoopStore.getState().events.at(-1)?.type).toBe('log');
   });
 });
