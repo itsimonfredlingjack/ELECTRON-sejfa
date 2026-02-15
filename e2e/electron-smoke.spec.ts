@@ -48,7 +48,7 @@ test('electron smoke (offline backend)', async () => {
   await expect(
     page.getByRole('img', { name: 'Orbital loop visualization showing pipeline stages' }),
   ).toBeVisible({ timeout: 15_000 });
-  await expect(page.getByText('OFFLINE', { exact: true })).toBeVisible();
+  await expect(page.getByText(/offline/i)).toBeVisible();
   await expect(page.getByRole('button', { name: 'Control' })).toBeVisible();
   await page.waitForTimeout(900);
   await attachScreenshot(page, 'main-offline');
@@ -79,6 +79,13 @@ test('electron smoke (offline backend)', async () => {
   expect(intersects(rects.eventsCount, rects.liveToggle)).toBeFalsy();
 
   await page.setViewportSize({ width: 1152, height: 768 });
+
+  // Dismiss disconnected overlay so gates are clickable.
+  const overlay = page.locator('.z-40').first();
+  if (await overlay.isVisible({ timeout: 2000 }).catch(() => false)) {
+    await page.getByLabel('Dismiss overlay').click({ force: true });
+    await expect(overlay).toBeHidden({ timeout: 3000 });
+  }
 
   // Evidence drawer opens and closes with Escape.
   await page.getByLabel('Select CI gate').click();

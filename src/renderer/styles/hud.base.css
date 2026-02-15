@@ -24,15 +24,62 @@
 }
 
 @layer components {
-  /* Enterprise "surface" panel: subtle glass + elevation (no neon glow) */
+  /* ── Glass panel with edge-lit border + corner accents ───────── */
   .glass-panel {
+    position: relative;
     background: linear-gradient(180deg, rgb(255 255 255 / 0.06), rgb(255 255 255 / 0.02)),
       var(--glass-bg);
     backdrop-filter: var(--glass-blur);
     -webkit-backdrop-filter: var(--glass-blur);
     border: var(--glass-border);
     border-radius: 12px;
-    box-shadow: 0 1px 0 rgb(255 255 255 / 0.06) inset, 0 18px 60px rgb(0 0 0 / 0.35);
+    box-shadow: 0 1px 0 rgb(255 255 255 / 0.06) inset, 0 0 0 0 rgb(var(--primary-rgb) / 0) inset, 0
+      18px 60px rgb(0 0 0 / 0.35);
+    transition: box-shadow 300ms ease;
+  }
+
+  /* Edge-lit gradient border on hover */
+  .glass-panel::before {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(
+      135deg,
+      rgb(var(--primary-rgb) / 0.3),
+      rgb(var(--secondary-rgb) / 0.2) 50%,
+      transparent 80%
+    );
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask-composite: exclude;
+    -webkit-mask-composite: xor;
+    opacity: 0;
+    transition: opacity 400ms ease;
+    pointer-events: none;
+    z-index: 1;
+  }
+  .glass-panel:hover::before {
+    opacity: 1;
+  }
+
+  /* Corner accent marks */
+  .glass-panel::after {
+    content: "";
+    position: absolute;
+    inset: 4px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, rgb(var(--primary-rgb) / 0.15) 0%, transparent 12%) top left
+      / 40px 40px no-repeat,
+      linear-gradient(315deg, rgb(var(--secondary-rgb) / 0.1) 0%, transparent 12%) bottom right /
+      40px 40px no-repeat;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .glass-panel:hover {
+    box-shadow: 0 1px 0 rgb(255 255 255 / 0.06) inset, 0 0 30px rgb(var(--primary-rgb) / 0.04) inset,
+      0 18px 60px rgb(0 0 0 / 0.35);
   }
 
   /* Utility classes for typography */
@@ -40,29 +87,105 @@
     font-family: var(--font-mono);
   }
 
-  /* Ambient backdrop for the whole app (apply class to a top-level wrapper) */
+  /* Gradient text: primary -> violet */
+  .text-gradient-primary {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  /* Text glow */
+  .text-glow {
+    text-shadow: 0 0 12px rgb(var(--primary-rgb) / 0.3), 0 0 30px rgb(var(--primary-rgb) / 0.1);
+  }
+
+  /* Kill-switch containment zone */
+  .kill-zone {
+    border: 1px dashed rgb(var(--danger-rgb) / 0.3);
+    border-radius: 8px;
+    padding: 4px 12px;
+    background: rgb(var(--danger-rgb) / 0.03);
+    transition: all 200ms ease;
+  }
+  .kill-zone[data-armed="true"] {
+    animation: kill-armed 1.5s ease-in-out infinite;
+    border-style: solid;
+    border-color: rgb(var(--danger-rgb) / 0.6);
+  }
+
+  /* Ambient backdrop for the whole app */
   .hud-ambient {
     position: relative;
     overflow: hidden;
     isolation: isolate;
   }
 
+  /* Primary gradient layer - drifts slowly */
   .hud-ambient::before {
     content: "";
     position: absolute;
-    inset: 0;
+    inset: -40px;
     background: radial-gradient(
         900px 600px at 18% 18%,
         rgb(var(--primary-rgb) / 0.12),
         transparent 60%
-      ), radial-gradient(700px 520px at 86% 8%, rgb(var(--warning-rgb) / 0.07), transparent 56%),
+      ), radial-gradient(700px 520px at 86% 8%, rgb(var(--secondary-rgb) / 0.08), transparent 56%),
       radial-gradient(800px 600px at 72% 88%, rgb(var(--success-rgb) / 0.05), transparent 62%);
     pointer-events: none;
     z-index: 0;
+    animation: gradient-shift 28s ease-in-out infinite;
+  }
+
+  /* Secondary gradient layer - drifts in opposite direction */
+  .hud-ambient::after {
+    content: "";
+    position: absolute;
+    inset: -40px;
+    background: radial-gradient(
+        600px 500px at 72% 62%,
+        rgb(var(--secondary-rgb) / 0.06),
+        transparent 55%
+      ), radial-gradient(500px 400px at 24% 78%, rgb(var(--primary-rgb) / 0.05), transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+    animation: gradient-shift-reverse 32s ease-in-out infinite;
   }
 
   .hud-ambient > * {
     position: relative;
     z-index: 1;
+  }
+
+  /* Toolbar scan-line effect */
+  .toolbar-scanline {
+    position: relative;
+    overflow: hidden;
+  }
+  .toolbar-scanline::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 60px;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgb(var(--primary-rgb) / 0.06), transparent);
+    pointer-events: none;
+    animation: toolbar-scan 8s ease-in-out infinite;
+  }
+
+  /* Power button ripple (active state) */
+  .btn-power-ripple {
+    position: relative;
+    overflow: hidden;
+  }
+  .btn-power-ripple:active::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: radial-gradient(circle, rgb(var(--success-rgb) / 0.3), transparent 60%);
+    animation: power-ripple 0.5s ease-out forwards;
+    pointer-events: none;
   }
 }

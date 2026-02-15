@@ -1,3 +1,5 @@
+import { motion } from 'framer-motion';
+import { WifiOff, X } from 'lucide-react';
 import React from 'react';
 
 import type { Result } from '../../shared/api';
@@ -6,7 +8,7 @@ import { EvidenceDrawer } from '../components/evidence-drawer';
 import { KeyboardHelp } from '../components/keyboard-help';
 import { LogConsole } from '../components/log-console';
 import { LoopVisualization } from '../components/loop-visualization';
-import { Toolbar, type ToolbarMode } from '../components/toolbar';
+import { ActionBar, Toolbar, type ToolbarMode } from '../components/toolbar';
 import { useElectronApi } from '../hooks/use-electron-api';
 import { useKeyboardShortcuts } from '../hooks/use-keyboard-shortcuts';
 import type { GateId } from '../models/ui';
@@ -50,6 +52,13 @@ export function MainView() {
   const [selectedGateId, setSelectedGateId] = React.useState<GateId>('local');
   const [drawerOpen, setDrawerOpen] = React.useState(false);
   const [helpOpen, setHelpOpen] = React.useState(false);
+
+  const [overlayDismissed, setOverlayDismissed] = React.useState(false);
+
+  // Reset dismiss when connection comes back (so overlay reappears on next disconnect)
+  React.useEffect(() => {
+    if (socketConnected) setOverlayDismissed(false);
+  }, [socketConnected]);
 
   const [killArmedUntil, setKillArmedUntil] = React.useState<string | null>(null);
   const [killToken, setKillToken] = React.useState<string | null>(null);
@@ -156,6 +165,37 @@ export function MainView() {
     }
   }, [api]);
 
+  const startAll = React.useCallback(async () => {
+    try {
+      await api.socket.connect();
+      await api.processes.start('monitor');
+      await api.processes.start('agent');
+      await api.processes.start('logTail');
+    } catch (err) {
+      loopActions.addEvent({
+        type: 'log',
+        at: nowIso(),
+        runId: 'ui',
+        level: 'error',
+        message: `Start failed: ${err instanceof Error ? err.message : String(err)}`,
+      });
+    }
+  }, [api]);
+
+  const retryConnect = React.useCallback(async () => {
+    try {
+      await api.socket.connect();
+    } catch (err) {
+      loopActions.addEvent({
+        type: 'log',
+        at: nowIso(),
+        runId: 'ui',
+        level: 'error',
+        message: `Retry failed: ${err instanceof Error ? err.message : String(err)}`,
+      });
+    }
+  }, [api]);
+
   const setMode = React.useCallback((m: ToolbarMode) => {
     loopActions.setAppMode(m);
   }, []);
@@ -178,8 +218,8 @@ export function MainView() {
 
   return (
     <div className="hud-ambient flex h-screen w-full flex-col overflow-hidden bg-[var(--bg-deep)] text-[var(--text-primary)]">
-      {/* Top Toolbar Area */}
-      <div className="shrink-0 border-b border-[var(--border-subtle)] bg-[var(--bg-panel)] px-6 py-3">
+      {/* Top Toolbar: StatusBar + ObjectiveBanner */}
+      <div className="shrink-0">
         <Toolbar
           objectiveText={derivedObjective.text}
           mode={appMode}
@@ -196,22 +236,7 @@ export function MainView() {
           killArmedUntil={killArmedUntil}
           onArmKill={armKill}
           onConfirmKill={confirmKill}
-          onStart={async () => {
-            try {
-              await api.socket.connect();
-              await api.processes.start('monitor');
-              await api.processes.start('agent');
-              await api.processes.start('logTail');
-            } catch (err) {
-              loopActions.addEvent({
-                type: 'log',
-                at: nowIso(),
-                runId: 'ui',
-                level: 'error',
-                message: `Start failed: ${err instanceof Error ? err.message : String(err)}`,
-              });
-            }
-          }}
+          onStart={startAll}
           onPause={pauseAgent}
           onOpenPr={async () => {
             if (!derivedObjective.prUrl) return;
@@ -245,35 +270,100 @@ export function MainView() {
       </div>
 
       {/* Main Content Area: Split View */}
-      <div className="grid min-h-0 flex-1 grid-cols-12 gap-6 p-6">
-        {/* Left Column: Loop Visualization (40%) */}
-        <div className="col-span-5 flex min-h-0 flex-col">
-          <div className="glass-panel flex flex-1 flex-col overflow-hidden p-6 relative">
-            {!socketConnected && (
-              <div className="absolute top-4 left-4 right-4 z-50 flex items-center justify-between rounded bg-danger/10 px-3 py-2 border border-danger/30 text-danger text-sm">
-                <span className="font-bold">OFFLINE</span>
-                <span className="opacity-80">
-                  Monitor backend unreachable{socketLastError ? `: ${socketLastError}` : ''}
-                </span>
-              </div>
-            )}
-            <LoopVisualization
-              gates={derivedGates.gates}
-              activeGateId={derivedGates.activeGateId}
-              onSelectGate={(id) => {
-                setSelectedGateId(id);
-                openDrawer();
-              }}
+      <div className="relative grid min-h-0 flex-1 grid-cols-1 lg:grid-cols-12 gap-4 p-6">
+        {/* Left Column: Loop Visualization (4/12) */}
+        <motion.div
+          className="col-span-1 lg:col-span-4 flex min-h-0 flex-col"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, ease: 'easeOut' }}
+        >
+          <div className="glass-panel flex flex-1 flex-col overflow-hidden relative">
+            <div className="flex-1 p-6">
+              <LoopVisualization
+                gates={derivedGates.gates}
+                activeGateId={derivedGates.activeGateId}
+                onSelectGate={(id) => {
+                  setSelectedGateId(id);
+                  openDrawer();
+                }}
+              />
+            </div>
+
+            {/* Action Bar inside loop panel */}
+            <ActionBar
+              mode={appMode}
+              startDisabled={!controlsEnabled || anyStartingOrRunning}
+              pauseDisabled={!controlsEnabled}
+              killDisabled={!controlsEnabled}
+              killArmedUntil={killArmedUntil}
+              onStart={startAll}
+              onPause={pauseAgent}
+              onArmKill={armKill}
+              onConfirmKill={confirmKill}
             />
           </div>
-        </div>
+        </motion.div>
 
-        {/* Right Column: Log Console (60%) */}
-        <div className="col-span-7 flex min-h-0 flex-col">
+        {/* Right Column: Log Console (8/12) */}
+        <motion.div
+          className="col-span-1 lg:col-span-8 flex min-h-0 flex-col"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, ease: 'easeOut', delay: 0.1 }}
+        >
           <div className="glass-panel flex flex-1 flex-col overflow-hidden">
             <LogConsole events={timelineEvents} />
           </div>
-        </div>
+        </motion.div>
+
+        {/* Disconnected Overlay */}
+        {!socketConnected && !overlayDismissed && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="absolute inset-0 z-40 flex items-center justify-center bg-bg-deep/80 backdrop-blur-sm rounded-xl"
+          >
+            <button
+              type="button"
+              onClick={() => setOverlayDismissed(true)}
+              className="absolute top-4 right-4 p-1.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-white/5 transition-colors"
+              aria-label="Dismiss overlay"
+            >
+              <X className="h-5 w-5" />
+            </button>
+            <div className="flex flex-col items-center gap-4 text-center max-w-md">
+              <div className="h-16 w-16 rounded-full bg-danger/10 flex items-center justify-center">
+                <WifiOff className="h-8 w-8 text-danger animate-pulse" />
+              </div>
+              <h2 className="text-xl font-bold text-text-primary">Backend Unreachable</h2>
+              <p className="text-sm text-text-secondary">
+                Cannot connect to the SEJFA monitor backend.
+                {socketLastError && (
+                  <span className="block mt-1 font-mono text-xs text-danger">
+                    {socketLastError}
+                  </span>
+                )}
+              </p>
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={retryConnect}
+                  className="px-4 py-2 rounded-lg border border-primary/30 text-primary text-sm font-semibold hover:bg-primary/10 transition-colors"
+                >
+                  Retry Connection
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setOverlayDismissed(true)}
+                  className="px-4 py-2 rounded-lg border border-border-subtle text-text-secondary text-sm font-medium hover:bg-white/5 transition-colors"
+                >
+                  Dismiss
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        )}
       </div>
 
       <EvidenceDrawer open={drawerOpen} gate={selectedGate} onClose={closeDrawer} />

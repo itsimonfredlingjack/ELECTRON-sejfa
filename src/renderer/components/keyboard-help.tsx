@@ -26,11 +26,11 @@ export function KeyboardHelp(props: KeyboardHelpProps) {
       />
 
       <div className="absolute inset-0 flex items-center justify-center p-4">
-        <div className="hud-panel w-full max-w-2xl animate-[drawerIn_220ms_ease-out] rounded-2xl p-6 shadow-[0_0_0_1px_var(--border-glow)_inset]">
+        <div className="glass-panel w-full max-w-2xl animate-[drawerIn_220ms_ease-out] rounded-2xl p-6 shadow-[0_0_0_1px_var(--border-glow)_inset]">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <div className="hud-label">Keyboard</div>
-              <div className="hud-title mt-1 text-xl">Shortcuts</div>
+              <div className="hud-label text-gradient-primary">Keyboard</div>
+              <div className="hud-title mt-1 text-xl text-gradient-primary">Shortcuts</div>
             </div>
             <button
               ref={closeRef}
