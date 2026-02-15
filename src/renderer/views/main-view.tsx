@@ -8,6 +8,9 @@ import { EvidenceDrawer } from '../components/evidence-drawer';
 import { KeyboardHelp } from '../components/keyboard-help';
 import { LogConsole } from '../components/log-console';
 import { LoopVisualization } from '../components/loop-visualization';
+import { MissionHeader } from '../components/mission-header';
+import { QualityGates } from '../components/quality-gates';
+import { RalphReactor } from '../components/ralph-reactor';
 import { ActionBar, Toolbar, type ToolbarMode } from '../components/toolbar';
 import { useElectronApi } from '../hooks/use-electron-api';
 import { useKeyboardShortcuts } from '../hooks/use-keyboard-shortcuts';
@@ -217,8 +220,8 @@ export function MainView() {
   });
 
   return (
-    <div className="hud-ambient flex h-screen w-full flex-col overflow-hidden bg-[var(--bg-deep)] text-[var(--text-primary)]">
-      {/* Top Toolbar: StatusBar + ObjectiveBanner */}
+    <div className="hud-ambient flex h-screen w-full flex-col overflow-hidden bg-bg-deep text-text-primary">
+      {/* ── Top: StatusBar (connection, mode, alerts) ──────────── */}
       <div className="shrink-0">
         <Toolbar
           objectiveText={derivedObjective.text}
@@ -269,28 +272,90 @@ export function MainView() {
         />
       </div>
 
-      {/* Main Content Area: Stacked View */}
-      <div className="relative flex min-h-0 flex-1 flex-col gap-5 p-6">
-        {/* Top: Pipeline Visualization */}
-        <motion.div
-          className="shrink-0"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, ease: 'easeOut' }}
-        >
-          <div className="glass-panel flex flex-col overflow-hidden relative">
-            <div className="px-6 py-2">
-              <LoopVisualization
-                gates={derivedGates.gates}
-                activeGateId={derivedGates.activeGateId}
-                onSelectGate={(id) => {
-                  setSelectedGateId(id);
-                  openDrawer();
-                }}
-              />
-            </div>
+      {/* ── Main Content ──────────────────────────────────────── */}
+      <div className="relative flex min-h-0 flex-1 flex-col gap-0">
 
-            {/* Action Bar inside pipeline panel */}
+        {/* Pipeline Track — full-width subway map */}
+        <motion.div
+          className="shrink-0 glass-panel mx-4 mt-4 mb-2 overflow-hidden"
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, ease: 'easeOut' }}
+        >
+          <div className="px-4 py-1">
+            <LoopVisualization
+              gates={derivedGates.gates}
+              activeGateId={derivedGates.activeGateId}
+              onSelectGate={(id) => {
+                setSelectedGateId(id);
+                openDrawer();
+              }}
+            />
+          </div>
+        </motion.div>
+
+        {/* Mission Header — Jira ticket + objective */}
+        <motion.div
+          className="shrink-0 glass-panel mx-4 mb-2 overflow-hidden"
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, ease: 'easeOut', delay: 0.05 }}
+        >
+          <MissionHeader
+            objectiveText={derivedObjective.text}
+            prUrl={derivedObjective.prUrl}
+            runUrl={derivedObjective.runUrl}
+            onOpenPr={async () => {
+              if (!derivedObjective.prUrl) return;
+              try { await api.shell.openExternal(derivedObjective.prUrl); } catch { /* handled */ }
+            }}
+            onOpenRun={async () => {
+              if (!derivedObjective.runUrl) return;
+              try { await api.shell.openExternal(derivedObjective.runUrl); } catch { /* handled */ }
+            }}
+            openPrDisabled={!controlsEnabled || !derivedObjective.prUrl}
+            openRunDisabled={!controlsEnabled || !derivedObjective.runUrl}
+          />
+        </motion.div>
+
+        {/* Center: Reactor + Log Console side by side */}
+        <div className="flex min-h-0 flex-1 gap-3 px-4 mb-2">
+          {/* Ralph Reactor */}
+          <motion.div
+            className="glass-panel flex w-[320px] shrink-0 items-center justify-center overflow-hidden"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5, ease: 'easeOut', delay: 0.1 }}
+          >
+            <RalphReactor gates={derivedGates.gates} />
+          </motion.div>
+
+          {/* Log Console */}
+          <motion.div
+            className="glass-panel flex min-h-0 flex-1 flex-col overflow-hidden"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5, ease: 'easeOut', delay: 0.1 }}
+          >
+            <LogConsole events={timelineEvents} />
+          </motion.div>
+        </div>
+
+        {/* Bottom: Quality Gates + Action Bar */}
+        <motion.div
+          className="shrink-0 glass-panel mx-4 mb-4 overflow-hidden"
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, ease: 'easeOut', delay: 0.15 }}
+        >
+          <div className="flex items-center gap-4 px-4 py-3">
+            {/* Quality Gate Sentinels */}
+            <QualityGates gates={derivedGates.gates} />
+
+            {/* Spacer */}
+            <div className="flex-1" />
+
+            {/* Action Bar */}
             <ActionBar
               mode={appMode}
               startDisabled={!controlsEnabled || anyStartingOrRunning}
@@ -302,18 +367,6 @@ export function MainView() {
               onArmKill={armKill}
               onConfirmKill={confirmKill}
             />
-          </div>
-        </motion.div>
-
-        {/* Bottom: Log Console */}
-        <motion.div
-          className="flex min-h-0 flex-1 flex-col"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, ease: 'easeOut', delay: 0.1 }}
-        >
-          <div className="glass-panel flex flex-1 flex-col overflow-hidden">
-            <LogConsole events={timelineEvents} />
           </div>
         </motion.div>
 
@@ -336,7 +389,7 @@ export function MainView() {
               <div className="h-16 w-16 rounded-full bg-danger/10 flex items-center justify-center">
                 <WifiOff className="h-8 w-8 text-danger animate-pulse" />
               </div>
-              <h2 className="text-xl font-semibold text-text-primary tracking-tight">Backend Unreachable</h2>
+              <h2 className="font-heading text-xl font-semibold text-text-primary tracking-tight">Backend Unreachable</h2>
               <p className="text-sm text-text-secondary">
                 Cannot connect to the SEJFA monitor backend.
                 {socketLastError && (

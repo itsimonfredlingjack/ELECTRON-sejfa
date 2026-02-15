@@ -292,6 +292,139 @@
   }
 }
 
+/* ── Reactor & Sentinel Animations ────────────────────────── */
+
+/* Reactor core pulse — danger/red phase */
+@keyframes reactor-pulse-red {
+
+  0%,
+  100% {
+    box-shadow: 0 0 30px 8px rgb(var(--danger-rgb) / 0.15),
+      0 0 60px 20px rgb(var(--danger-rgb) / 0.06);
+    transform: scale(1);
+  }
+
+  50% {
+    box-shadow: 0 0 40px 12px rgb(var(--danger-rgb) / 0.25),
+      0 0 80px 30px rgb(var(--danger-rgb) / 0.10);
+    transform: scale(1.02);
+  }
+}
+
+/* Reactor core pulse — success/green phase */
+@keyframes reactor-pulse-green {
+
+  0%,
+  100% {
+    box-shadow: 0 0 30px 8px rgb(var(--success-rgb) / 0.15),
+      0 0 60px 20px rgb(var(--success-rgb) / 0.06);
+    transform: scale(1);
+  }
+
+  50% {
+    box-shadow: 0 0 40px 12px rgb(var(--success-rgb) / 0.20),
+      0 0 80px 30px rgb(var(--success-rgb) / 0.08);
+    transform: scale(1.01);
+  }
+}
+
+/* Reactor core pulse — primary/refactor phase */
+@keyframes reactor-pulse-blue {
+
+  0%,
+  100% {
+    box-shadow: 0 0 30px 8px rgb(var(--primary-rgb) / 0.15),
+      0 0 60px 20px rgb(var(--primary-rgb) / 0.06);
+    transform: scale(1);
+  }
+
+  50% {
+    box-shadow: 0 0 40px 12px rgb(var(--primary-rgb) / 0.22),
+      0 0 80px 30px rgb(var(--primary-rgb) / 0.09);
+    transform: scale(1.015);
+  }
+}
+
+/* Reactor core pulse — secondary/violet/verify phase */
+@keyframes reactor-pulse-violet {
+
+  0%,
+  100% {
+    box-shadow: 0 0 25px 6px rgb(var(--secondary-rgb) / 0.12),
+      0 0 50px 18px rgb(var(--secondary-rgb) / 0.05);
+    transform: scale(1);
+  }
+
+  50% {
+    box-shadow: 0 0 35px 10px rgb(var(--secondary-rgb) / 0.18),
+      0 0 70px 25px rgb(var(--secondary-rgb) / 0.08);
+    transform: scale(1.01);
+  }
+}
+
+/* Reactor ring rotation */
+@keyframes reactor-ring-spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Sentinel shield — horizontal scanning laser */
+@keyframes sentinel-scan {
+  0% {
+    left: -20%;
+    opacity: 0;
+  }
+
+  10% {
+    opacity: 1;
+  }
+
+  90% {
+    opacity: 1;
+  }
+
+  100% {
+    left: 120%;
+    opacity: 0;
+  }
+}
+
+/* Sentinel shield — brief flash on pass */
+@keyframes sentinel-flash {
+  0% {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+
+  30% {
+    opacity: 1;
+    transform: scale(1.02);
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(1.08);
+  }
+}
+
+/* Drone traveling along pipeline track */
+@keyframes drone-bob {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-2px);
+  }
+}
+
 /* ── Accessibility ────────────────────────────────────────────── */
 
 @media (prefers-reduced-motion: reduce) {
