@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import { WifiOff, X } from 'lucide-react';
 import React from 'react';
 
@@ -7,14 +7,15 @@ import { deriveGates, deriveObjectiveText, deriveTimelineEvents } from '../adapt
 import { EvidenceDrawer } from '../components/evidence-drawer';
 import { KeyboardHelp } from '../components/keyboard-help';
 import { LogConsole } from '../components/log-console';
-import { LoopVisualization } from '../components/loop-visualization';
 import { MissionHeader } from '../components/mission-header';
 import { QualityGates } from '../components/quality-gates';
-import { RalphReactor } from '../components/ralph-reactor';
-import { ActionBar, StatusBar, type ToolbarMode } from '../components/toolbar';
+import { RalphReactor, type ReactorState } from '../components/ralph-reactor';
+import { ActionBar, type ToolbarMode } from '../components/toolbar';
 import { useElectronApi } from '../hooks/use-electron-api';
 import { useKeyboardShortcuts } from '../hooks/use-keyboard-shortcuts';
+import { useSoundEffects } from '../hooks/use-sound-effects';
 import type { GateId } from '../models/ui';
+import { runSimulation } from '../simulation';
 import {
   loopActions,
   useAppMode,
@@ -25,19 +26,21 @@ import {
 } from '../stores/loop-store';
 import { useProcesses, useSocketConnected, useSocketLastError } from '../stores/system-store';
 
+/* ── Helpers ──────────────────────────────────────────────── */
+
 function nowIso() {
   return new Date().toISOString();
 }
-
 function msUntil(iso: string) {
   const ms = Date.parse(iso);
   if (Number.isNaN(ms)) return 0;
   return Math.max(0, ms - Date.now());
 }
-
 function isOk(res: Result): res is { ok: true } {
   return res.ok;
 }
+
+/* ── MainView ─────────────────────────────────────────────── */
 
 export function MainView() {
   const api = useElectronApi();
@@ -65,21 +68,56 @@ export function MainView() {
   const [killToken, setKillToken] = React.useState<string | null>(null);
   const killTimerRef = React.useRef<number | null>(null);
 
-  const derivedObjective = React.useMemo(() => {
-    return deriveObjectiveText(objective, eventsRaw);
-  }, [objective, eventsRaw]);
+  /* ── Derived State ─────────────────────────────────────── */
 
-  const derivedGates = React.useMemo(() => {
-    return deriveGates(gateStates, currentNode);
-  }, [gateStates, currentNode]);
+  const derivedObjective = React.useMemo(
+    () => deriveObjectiveText(objective, eventsRaw),
+    [objective, eventsRaw],
+  );
+  const derivedGates = React.useMemo(
+    () => deriveGates(gateStates, currentNode),
+    [gateStates, currentNode],
+  );
+  const timelineEvents = React.useMemo(
+    () => deriveTimelineEvents(eventsRaw),
+    [eventsRaw],
+  );
+  const selectedGate = React.useMemo(
+    () => derivedGates.gates.find((g) => g.id === selectedGateId) ?? null,
+    [derivedGates.gates, selectedGateId],
+  );
 
-  const timelineEvents = React.useMemo(() => {
-    return deriveTimelineEvents(eventsRaw);
-  }, [eventsRaw]);
+  // Reactor state: derived from connection + process + gate status
+  const derivedReactorState: ReactorState = React.useMemo(() => {
+    if (!socketConnected) return 'offline';
+    if (derivedGates.gates.some((g) => g.status === 'failed')) return 'critical';
+    if (Object.values(processes).some((p) => p?.state === 'running')) return 'active';
+    return 'idle';
+  }, [socketConnected, processes, derivedGates.gates]);
 
-  const selectedGate = React.useMemo(() => {
-    return derivedGates.gates.find((g) => g.id === selectedGateId) ?? null;
-  }, [derivedGates.gates, selectedGateId]);
+  // DEV: Shift+D cycles through reactor states for testing sounds/visuals
+  const DEBUG_STATES: ReactorState[] = ['idle', 'active', 'critical', 'offline'];
+  const [debugOverride, setDebugOverride] = React.useState<ReactorState | null>(null);
+
+  React.useEffect(() => {
+    function handleDebugKey(e: KeyboardEvent) {
+      if (e.shiftKey && e.key === 'D') {
+        setDebugOverride((prev) => {
+          if (prev === null) return DEBUG_STATES[0]!;
+          const idx = DEBUG_STATES.indexOf(prev);
+          const next = idx + 1;
+          return next >= DEBUG_STATES.length ? null : DEBUG_STATES[next]!;
+        });
+      }
+    }
+    window.addEventListener('keydown', handleDebugKey);
+    return () => window.removeEventListener('keydown', handleDebugKey);
+  }, []);
+
+  const reactorState = debugOverride ?? derivedReactorState;
+
+  // Sound effects — reacts to state transitions
+  useSoundEffects(reactorState, killArmedUntil !== null);
 
   const controlsEnabled = appMode === 'control';
   const anyStartingOrRunning = Object.values(processes).some(
@@ -89,6 +127,8 @@ export function MainView() {
       p?.state === 'stopping' ||
       p?.state === 'backing_off',
   );
+
+  /* ── Callbacks ─────────────────────────────────────────── */
 
   React.useEffect(() => {
     return () => {
@@ -182,10 +222,6 @@ export function MainView() {
     loopActions.setAppMode(m);
   }, []);
 
-  const openExternal = React.useCallback(async (url: string) => {
-    try { await api.shell.openExternal(url); } catch { /* handled */ }
-  }, [api]);
-
   const gateIds = React.useMemo(() => derivedGates.gates.map((g) => g.id), [derivedGates.gates]);
 
   useKeyboardShortcuts({
@@ -202,77 +238,69 @@ export function MainView() {
     onDisarmKill: disarmKill,
   });
 
-  const alertsCount = timelineEvents.filter(
-    (e) => e.severity === 'warning' || e.severity === 'error',
-  ).length;
+  /* ── Render ────────────────────────────────────────────── */
 
   return (
-    <div className="hud-ambient flex h-screen w-full flex-col overflow-hidden bg-bg-deep text-text-primary">
+    <div className="relative h-screen w-screen overflow-hidden bg-bg-deep text-white select-none">
 
-      {/* ─── 1. TOP: Status Deck (Information Only) ─────────────── */}
-      <div className="z-10 shrink-0 border-b border-white/5 bg-bg-panel/50 backdrop-blur-md">
-        <StatusBar
-          connected={socketConnected}
-          alertsCount={alertsCount}
-          mode={appMode}
-          onModeChange={(m) => setMode(m as ToolbarMode)}
-        />
+      {/* ── BACKGROUND LAYERS (atmosphere) ──────────────── */}
+      <div className="pointer-events-none absolute inset-0 z-0">
+        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/60" />
+        <div className="scanline" />
       </div>
 
-      {/* ─── 2. MIDDLE: Command Stage (The Hero) ───────────────── */}
-      <div className="relative z-0 flex flex-1 flex-col items-center justify-center overflow-y-auto p-6">
-        <motion.div
-          className="w-full max-w-5xl"
-          initial={{ scale: 0.95, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ duration: 0.5, ease: 'easeOut' }}
-        >
-          {/* Single cohesive hero panel */}
-          <div className="glass-panel relative overflow-hidden rounded-2xl">
+      {/* ── LAYOUT GRID: Header / Stage / Footer ───────── */}
+      <div className="relative z-10 grid h-full grid-rows-[auto_1fr_auto]">
 
-            {/* Mission Header — objective + Jira badge */}
-            <MissionHeader
-              objectiveText={derivedObjective.text}
-              prUrl={derivedObjective.prUrl}
-              runUrl={derivedObjective.runUrl}
-              onOpenPr={() => derivedObjective.prUrl && void openExternal(derivedObjective.prUrl)}
-              onOpenRun={() => derivedObjective.runUrl && void openExternal(derivedObjective.runUrl)}
-              openPrDisabled={!derivedObjective.prUrl}
-              openRunDisabled={!derivedObjective.runUrl}
-            />
+        {/* ROW 1: MISSION HEADER */}
+        <header className="border-b border-white/5 bg-black/20 backdrop-blur-sm">
+          <MissionHeader
+            objectiveText={derivedObjective.text}
+            connected={socketConnected}
+          />
+        </header>
 
-            {/* Pipeline Track — visual flow */}
-            <div className="border-t border-white/5 bg-black/20 px-4 py-2">
-              <LoopVisualization
-                gates={derivedGates.gates}
-                activeGateId={derivedGates.activeGateId}
-                onSelectGate={(id) => {
-                  setSelectedGateId(id);
-                  openDrawer();
-                }}
-              />
-            </div>
+        {/* ROW 2: THE REACTOR (Center Stage) */}
+        <main className="relative flex items-center justify-center">
 
-            {/* Reactor + Quality Gates — side by side */}
-            <div className="flex border-t border-white/5">
-              {/* Ralph Reactor */}
-              <div className="flex flex-1 items-center justify-center py-6 px-4">
-                <RalphReactor gates={derivedGates.gates} />
-              </div>
+          {/* GOD MODE — simulation trigger */}
+          <button
+            type="button"
+            onClick={() => void runSimulation()}
+            className="absolute top-4 right-4 z-50 rounded-full border border-cyan-500/30 bg-cyan-950/40 px-4 py-1.5 font-mono text-xs font-bold text-cyan-400 backdrop-blur-md transition-all hover:border-cyan-400/60 hover:bg-cyan-900/30 hover:shadow-[0_0_20px_rgb(6_182_212/0.15)] active:scale-95"
+          >
+            ⚡ RUN SIMULATION
+          </button>
 
-              {/* Divider */}
-              <div className="w-px bg-white/5" />
+          {/* The Arc Reactor */}
+          <motion.div
+            className="relative z-20"
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 0.6, ease: 'easeOut' }}
+          >
+            <RalphReactor state={reactorState} currentNode={currentNode} />
+          </motion.div>
 
-              {/* Quality Gate Sentinels */}
-              <div className="flex items-center justify-center px-6 py-6">
-                <div className="grid grid-cols-2 gap-3">
-                  <QualityGates gates={derivedGates.gates} />
-                </div>
-              </div>
-            </div>
+          {/* Anchored bottom bar: Quality Gates (left) + Controls (right) */}
+          <div className="absolute bottom-6 left-6 right-6 z-30 flex items-end justify-between">
+            {/* Quality Gate Sentinels */}
+            <motion.div
+              className="glass-panel rounded-xl px-3 py-2"
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ duration: 0.4, delay: 0.2 }}
+            >
+              <QualityGates gates={derivedGates.gates} />
+            </motion.div>
 
-            {/* Action Bar — sole control surface */}
-            <div className="border-t border-white/5 bg-white/[0.03] backdrop-blur-xl">
+            {/* Action Controls */}
+            <motion.div
+              className="glass-panel rounded-xl px-3 py-2"
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ duration: 0.4, delay: 0.3 }}
+            >
               <ActionBar
                 mode={appMode}
                 startDisabled={!controlsEnabled || anyStartingOrRunning}
@@ -284,68 +312,62 @@ export function MainView() {
                 onArmKill={armKill}
                 onConfirmKill={confirmKill}
               />
-            </div>
+            </motion.div>
           </div>
-        </motion.div>
+        </main>
+
+        {/* ROW 3: CONSOLE DRAWER (Anchored Footer) */}
+        <footer className="h-48 border-t border-white/10 bg-black/40 backdrop-blur-md">
+          <LogConsole events={timelineEvents} />
+        </footer>
       </div>
 
-      {/* ─── 3. BOTTOM: Console Drawer (Anchored) ──────────────── */}
-      <motion.div
-        className="z-10 shrink-0 h-52 border-t border-white/10 bg-bg-deep/90 backdrop-blur-xl"
-        initial={{ y: 100, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.4, ease: 'easeOut', delay: 0.15 }}
-      >
-        <LogConsole events={timelineEvents} />
-      </motion.div>
-
-      {/* ─── 4. OVERLAYS (Outside everything, full-screen) ──────── */}
-      {!socketConnected && !overlayDismissed && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="absolute inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm"
-        >
-          <button
-            type="button"
-            onClick={() => setOverlayDismissed(true)}
-            className="absolute top-4 right-4 p-1.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-white/5 transition-colors"
-            aria-label="Dismiss overlay"
+      {/* ── OVERLAYS (absolute over everything) ────────── */}
+      <AnimatePresence>
+        {!socketConnected && !overlayDismissed && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm"
           >
-            <X className="h-5 w-5" />
-          </button>
-          <div className="flex flex-col items-center gap-4 text-center max-w-md">
-            <div className="h-16 w-16 rounded-full bg-danger/10 flex items-center justify-center">
-              <WifiOff className="h-8 w-8 text-danger animate-pulse" />
+            <button
+              type="button"
+              onClick={() => setOverlayDismissed(true)}
+              className="absolute top-4 right-4 p-1.5 rounded-lg text-white/40 hover:text-white hover:bg-white/5 transition-colors"
+              aria-label="Dismiss overlay"
+            >
+              <X className="h-5 w-5" />
+            </button>
+            <div className="flex flex-col items-center gap-4 text-center max-w-md">
+              <div className="h-16 w-16 rounded-full bg-red-500/10 flex items-center justify-center">
+                <WifiOff className="h-8 w-8 text-red-400 animate-pulse" />
+              </div>
+              <h2 className="font-heading text-xl font-semibold text-white tracking-tight">
+                Backend Unreachable
+              </h2>
+              <p className="text-sm text-white/50">
+                Cannot connect to the SEJFA monitor backend.
+                {socketLastError && (
+                  <span className="block mt-1 font-mono text-xs text-red-400">
+                    {socketLastError}
+                  </span>
+                )}
+              </p>
+              <div className="flex items-center gap-3">
+                <button type="button" onClick={retryConnect}
+                  className="px-4 py-2 rounded-lg border border-cyan-500/30 text-cyan-400 text-sm font-semibold hover:bg-cyan-500/10 transition-colors">
+                  Retry Connection
+                </button>
+                <button type="button" onClick={() => setOverlayDismissed(true)}
+                  className="px-4 py-2 rounded-lg border border-white/10 text-white/50 text-sm font-medium hover:bg-white/5 transition-colors">
+                  Dismiss
+                </button>
+              </div>
             </div>
-            <h2 className="font-heading text-xl font-semibold text-text-primary tracking-tight">Backend Unreachable</h2>
-            <p className="text-sm text-text-secondary">
-              Cannot connect to the SEJFA monitor backend.
-              {socketLastError && (
-                <span className="block mt-1 font-mono text-xs text-danger">
-                  {socketLastError}
-                </span>
-              )}
-            </p>
-            <div className="flex items-center gap-3">
-              <button
-                type="button"
-                onClick={retryConnect}
-                className="px-4 py-2 rounded-lg border border-primary/30 text-primary text-sm font-semibold hover:bg-primary/10 transition-colors"
-              >
-                Retry Connection
-              </button>
-              <button
-                type="button"
-                onClick={() => setOverlayDismissed(true)}
-                className="px-4 py-2 rounded-lg border border-border-subtle text-text-secondary text-sm font-medium hover:bg-white/5 transition-colors"
-              >
-                Dismiss
-              </button>
-            </div>
-          </div>
-        </motion.div>
-      )}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <EvidenceDrawer open={drawerOpen} gate={selectedGate} onClose={closeDrawer} />
       <KeyboardHelp open={helpOpen} onClose={() => setHelpOpen(false)} />
