@@ -15,6 +15,7 @@ import { useElectronApi } from '../hooks/use-electron-api';
 import { useKeyboardShortcuts } from '../hooks/use-keyboard-shortcuts';
 import { useSoundEffects } from '../hooks/use-sound-effects';
 import type { GateId } from '../models/ui';
+import { runSimulation } from '../simulation';
 import {
   loopActions,
   useAppMode,
@@ -261,6 +262,15 @@ export function MainView() {
 
         {/* ROW 2: THE REACTOR (Center Stage) */}
         <main className="relative flex items-center justify-center">
+
+          {/* GOD MODE — simulation trigger */}
+          <button
+            type="button"
+            onClick={() => void runSimulation()}
+            className="absolute top-4 right-4 z-50 rounded-full border border-cyan-500/30 bg-cyan-950/40 px-4 py-1.5 font-mono text-xs font-bold text-cyan-400 backdrop-blur-md transition-all hover:border-cyan-400/60 hover:bg-cyan-900/30 hover:shadow-[0_0_20px_rgb(6_182_212/0.15)] active:scale-95"
+          >
+            ⚡ RUN SIMULATION
+          </button>
 
           {/* The Arc Reactor */}
           <motion.div
