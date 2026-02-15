@@ -224,7 +224,7 @@ export function ActionBar({
             }`}
         >
           <Play className="h-3.5 w-3.5 fill-current" />
-          Start Agent
+          Start Task
         </button>
         <button
           type="button"
