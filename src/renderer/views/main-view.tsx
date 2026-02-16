@@ -5,9 +5,11 @@ import React from 'react';
 import type { Result } from '../../shared/api';
 import { deriveGates, deriveObjectiveText, deriveTimelineEvents } from '../adapters/loop-adapters';
 import { EvidenceDrawer } from '../components/evidence-drawer';
+import { FileMonitorToggle } from '../components/file-monitor-toggle';
 import { KeyboardHelp } from '../components/keyboard-help';
 import { LogConsole } from '../components/log-console';
 import { MissionHeader } from '../components/mission-header';
+import { PowerUpSequence } from '../components/power-up-sequence';
 import { QualityGates } from '../components/quality-gates';
 import { RalphReactor, type ReactorState } from '../components/ralph-reactor';
 import { ActionBar, type ToolbarMode } from '../components/toolbar';
@@ -59,6 +61,7 @@ export function MainView() {
   const [drawerOpen, setDrawerOpen] = React.useState(false);
   const [helpOpen, setHelpOpen] = React.useState(false);
   const [overlayDismissed, setOverlayDismissed] = React.useState(false);
+  const [showPowerUp, setShowPowerUp] = React.useState(true);
 
   React.useEffect(() => {
     if (socketConnected) setOverlayDismissed(false);
@@ -78,10 +81,7 @@ export function MainView() {
     () => deriveGates(gateStates, currentNode),
     [gateStates, currentNode],
   );
-  const timelineEvents = React.useMemo(
-    () => deriveTimelineEvents(eventsRaw),
-    [eventsRaw],
-  );
+  const timelineEvents = React.useMemo(() => deriveTimelineEvents(eventsRaw), [eventsRaw]);
   const selectedGate = React.useMemo(
     () => derivedGates.gates.find((g) => g.id === selectedGateId) ?? null,
     [derivedGates.gates, selectedGateId],
@@ -156,7 +156,10 @@ export function MainView() {
       killTimerRef.current = window.setTimeout(() => disarmKill(), msUntil(armed.expiresAt));
     } catch (err) {
       loopActions.addEvent({
-        type: 'log', at: nowIso(), runId: 'ui', level: 'error',
+        type: 'log',
+        at: nowIso(),
+        runId: 'ui',
+        level: 'error',
         message: `Failed to arm kill: ${err instanceof Error ? err.message : String(err)}`,
       });
     }
@@ -168,13 +171,19 @@ export function MainView() {
       const res = await api.killSwitch.confirm(killToken);
       if (!isOk(res)) {
         loopActions.addEvent({
-          type: 'log', at: nowIso(), runId: 'ui', level: 'error',
+          type: 'log',
+          at: nowIso(),
+          runId: 'ui',
+          level: 'error',
           message: `Kill rejected: ${res.error.message}`,
         });
       }
     } catch (err) {
       loopActions.addEvent({
-        type: 'log', at: nowIso(), runId: 'ui', level: 'error',
+        type: 'log',
+        at: nowIso(),
+        runId: 'ui',
+        level: 'error',
         message: `Kill failed: ${err instanceof Error ? err.message : String(err)}`,
       });
     } finally {
@@ -187,7 +196,10 @@ export function MainView() {
       await api.processes.stop('agent');
     } catch (err) {
       loopActions.addEvent({
-        type: 'log', at: nowIso(), runId: 'ui', level: 'error',
+        type: 'log',
+        at: nowIso(),
+        runId: 'ui',
+        level: 'error',
         message: `Pause failed: ${err instanceof Error ? err.message : String(err)}`,
       });
     }
@@ -201,7 +213,10 @@ export function MainView() {
       await api.processes.start('logTail');
     } catch (err) {
       loopActions.addEvent({
-        type: 'log', at: nowIso(), runId: 'ui', level: 'error',
+        type: 'log',
+        at: nowIso(),
+        runId: 'ui',
+        level: 'error',
         message: `Start failed: ${err instanceof Error ? err.message : String(err)}`,
       });
     }
@@ -212,7 +227,10 @@ export function MainView() {
       await api.socket.connect();
     } catch (err) {
       loopActions.addEvent({
-        type: 'log', at: nowIso(), runId: 'ui', level: 'error',
+        type: 'log',
+        at: nowIso(),
+        runId: 'ui',
+        level: 'error',
         message: `Retry failed: ${err instanceof Error ? err.message : String(err)}`,
       });
     }
@@ -245,7 +263,6 @@ export function MainView() {
       className="relative h-screen w-screen overflow-hidden bg-bg-deep text-white select-none hud-ambient noise-overlay"
       data-reactor={reactorState}
     >
-
       {/* ── BACKGROUND LAYERS (atmosphere) ──────────────── */}
       <div className="pointer-events-none absolute inset-0 z-0">
         <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/60" />
@@ -255,7 +272,8 @@ export function MainView() {
           <div
             className="absolute inset-0"
             style={{
-              background: 'radial-gradient(ellipse at center, rgb(239 68 68 / 0.08), transparent 70%)',
+              background:
+                'radial-gradient(ellipse at center, rgb(239 68 68 / 0.08), transparent 70%)',
               animation: 'ambient-pulse 2s ease-in-out infinite',
             }}
           />
@@ -267,18 +285,18 @@ export function MainView() {
 
       {/* ── LAYOUT GRID: Header / Stage / Footer ───────── */}
       <div className="relative z-10 grid h-full grid-rows-[auto_1fr_auto]">
-
         {/* ROW 1: MISSION HEADER */}
         <header className="border-b border-white/5 bg-black/20 backdrop-blur-sm">
-          <MissionHeader
-            objectiveText={derivedObjective.text}
-            connected={socketConnected}
-          />
+          <MissionHeader objectiveText={derivedObjective.text} connected={socketConnected} />
         </header>
+
+        {/* File Monitor Toggle - positioned at top right */}
+        <div className="absolute top-4 left-4 z-40">
+          <FileMonitorToggle />
+        </div>
 
         {/* ROW 2: THE REACTOR (Center Stage) */}
         <main className="relative flex items-center justify-center">
-
           {/* GOD MODE — simulation trigger */}
           <button
             type="button"
@@ -307,8 +325,14 @@ export function MainView() {
               animate={{ y: 0, opacity: 1 }}
               transition={{ duration: 0.4, delay: 0.2 }}
             >
-              <span className="corner-bl absolute -bottom-px -left-px block h-[10px] w-[10px] border-b-2 border-l-2 rounded-bl" style={{ borderColor: 'rgb(var(--ambient-primary-rgb))' }} />
-              <span className="corner-br absolute -bottom-px -right-px block h-[10px] w-[10px] border-b-2 border-r-2 rounded-br" style={{ borderColor: 'rgb(var(--ambient-primary-rgb))' }} />
+              <span
+                className="corner-bl absolute -bottom-px -left-px block h-[10px] w-[10px] border-b-2 border-l-2 rounded-bl"
+                style={{ borderColor: 'rgb(var(--ambient-primary-rgb))' }}
+              />
+              <span
+                className="corner-br absolute -bottom-px -right-px block h-[10px] w-[10px] border-b-2 border-r-2 rounded-br"
+                style={{ borderColor: 'rgb(var(--ambient-primary-rgb))' }}
+              />
               <QualityGates gates={derivedGates.gates} />
             </motion.div>
 
@@ -319,8 +343,14 @@ export function MainView() {
               animate={{ y: 0, opacity: 1 }}
               transition={{ duration: 0.4, delay: 0.3 }}
             >
-              <span className="corner-bl absolute -bottom-px -left-px block h-[10px] w-[10px] border-b-2 border-l-2 rounded-bl" style={{ borderColor: 'rgb(var(--ambient-primary-rgb))' }} />
-              <span className="corner-br absolute -bottom-px -right-px block h-[10px] w-[10px] border-b-2 border-r-2 rounded-br" style={{ borderColor: 'rgb(var(--ambient-primary-rgb))' }} />
+              <span
+                className="corner-bl absolute -bottom-px -left-px block h-[10px] w-[10px] border-b-2 border-l-2 rounded-bl"
+                style={{ borderColor: 'rgb(var(--ambient-primary-rgb))' }}
+              />
+              <span
+                className="corner-br absolute -bottom-px -right-px block h-[10px] w-[10px] border-b-2 border-r-2 rounded-br"
+                style={{ borderColor: 'rgb(var(--ambient-primary-rgb))' }}
+              />
               <ActionBar
                 mode={appMode}
                 startDisabled={!controlsEnabled || anyStartingOrRunning}
@@ -344,7 +374,11 @@ export function MainView() {
 
       {/* ── OVERLAYS (absolute over everything) ────────── */}
       <AnimatePresence>
-        {!socketConnected && !overlayDismissed && (
+        {/* POWER-UP SEQUENCE - shows on first load */}
+        {showPowerUp && <PowerUpSequence onComplete={() => setShowPowerUp(false)} />}
+
+        {/* NO CONNECTION OVERLAY - only shows if WebSocket disconnected and power-up complete */}
+        {!socketConnected && !overlayDismissed && !showPowerUp && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -375,12 +409,18 @@ export function MainView() {
                 )}
               </p>
               <div className="flex items-center gap-3">
-                <button type="button" onClick={retryConnect}
-                  className="px-4 py-2 rounded-lg border border-cyan-500/30 text-cyan-400 text-sm font-semibold hover:bg-cyan-500/10 transition-colors">
+                <button
+                  type="button"
+                  onClick={retryConnect}
+                  className="px-4 py-2 rounded-lg border border-cyan-500/30 text-cyan-400 text-sm font-semibold hover:bg-cyan-500/10 transition-colors"
+                >
                   Retry Connection
                 </button>
-                <button type="button" onClick={() => setOverlayDismissed(true)}
-                  className="px-4 py-2 rounded-lg border border-white/10 text-white/50 text-sm font-medium hover:bg-white/5 transition-colors">
+                <button
+                  type="button"
+                  onClick={() => setOverlayDismissed(true)}
+                  className="px-4 py-2 rounded-lg border border-white/10 text-white/50 text-sm font-medium hover:bg-white/5 transition-colors"
+                >
                   Dismiss
                 </button>
               </div>
