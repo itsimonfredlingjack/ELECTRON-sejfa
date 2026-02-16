@@ -1,6 +1,15 @@
 :root {
   color-scheme: dark;
 
+  /* ── Reactive Ambient Lighting ─────────────────────────────────── */
+  /* These are overridden by JS based on ReactorState                */
+  --ambient-primary-rgb: 99 102 241;
+  /* defaults to --primary */
+  --ambient-secondary-rgb: 139 92 246;
+  /* defaults to --secondary */
+  --ambient-intensity: 0.06;
+  --ambient-speed: 32s;
+
   /* ── Modern Professional Dark ─────────────────────────────────── */
   /* Rich, neutral dark canvas — not blue-tinted, not pure black    */
   --bg-deep: #0a0a0e;
@@ -60,4 +69,43 @@
   --neon-green: var(--success);
   --neon-red: var(--danger);
   --neon-amber: var(--warning);
+}
+
+/* ── Reactor-State Ambient Presets ──────────────────────────────── */
+/* Applied by main-view via inline style or data-attribute          */
+
+[data-reactor="idle"] {
+  --ambient-primary-rgb: 99 102 241;
+  /* indigo */
+  --ambient-secondary-rgb: 6 182 212;
+  /* cyan */
+  --ambient-intensity: 0.05;
+  --ambient-speed: 32s;
+}
+
+[data-reactor="active"] {
+  --ambient-primary-rgb: 139 92 246;
+  /* violet */
+  --ambient-secondary-rgb: 99 102 241;
+  /* indigo */
+  --ambient-intensity: 0.08;
+  --ambient-speed: 18s;
+}
+
+[data-reactor="critical"] {
+  --ambient-primary-rgb: 239 68 68;
+  /* red */
+  --ambient-secondary-rgb: 234 88 12;
+  /* orange */
+  --ambient-intensity: 0.12;
+  --ambient-speed: 8s;
+}
+
+[data-reactor="offline"] {
+  --ambient-primary-rgb: 63 63 70;
+  /* zinc-600 */
+  --ambient-secondary-rgb: 39 39 42;
+  /* zinc-800 */
+  --ambient-intensity: 0.03;
+  --ambient-speed: 50s;
 }

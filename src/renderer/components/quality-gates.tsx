@@ -65,7 +65,7 @@ function SentinelCard({
 
     return (
         <motion.div
-            className={`relative flex flex-col items-center gap-2 px-4 py-3 rounded-xl border overflow-hidden transition-all duration-300 ${statusBg(status)} ${statusBorder(status)}`}
+            className={`relative flex flex-col items-center gap-2 px-4 py-3 rounded-xl border overflow-hidden transition-all duration-300 shine-sweep ${statusBg(status)} ${statusBorder(status)}`}
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: def.gateIndex * 0.08 }}
@@ -117,7 +117,12 @@ function SentinelCard({
             {/* Label */}
             <span
                 className="text-[10px] font-bold uppercase tracking-[0.15em] transition-colors duration-300"
-                style={{ color }}
+                style={{
+                    color,
+                    ...(isPassed && {
+                        filter: `drop-shadow(0 0 6px ${color})`,
+                    }),
+                }}
             >
                 {def.label}
             </span>

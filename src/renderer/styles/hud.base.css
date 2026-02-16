@@ -88,50 +88,186 @@
     border-color: rgb(var(--danger-rgb) / 0.5);
   }
 
-  /* Ambient backdrop — softer, more elegant radial gradients */
+  /* Ambient backdrop — reactive to engine state via CSS variables */
   .hud-ambient {
     position: relative;
     overflow: hidden;
     isolation: isolate;
   }
 
-  /* Primary gradient layer — gentle drifting blobs, very low opacity */
+  /* Primary gradient layer — bound to --ambient-primary-rgb */
   .hud-ambient::before {
     content: "";
     position: absolute;
     inset: -60px;
     background: radial-gradient(800px 600px at 15% 15%,
-        rgb(var(--primary-rgb) / 0.06),
+        rgb(var(--ambient-primary-rgb) / var(--ambient-intensity)),
         transparent 60%),
       radial-gradient(600px 500px at 85% 10%,
-        rgb(var(--secondary-rgb) / 0.04),
+        rgb(var(--ambient-secondary-rgb) / calc(var(--ambient-intensity) * 0.66)),
         transparent 55%);
     pointer-events: none;
     z-index: 0;
     will-change: transform;
-    animation: gradient-shift 32s ease-in-out infinite;
+    animation: gradient-shift var(--ambient-speed) ease-in-out infinite;
+    transition: background 1.5s ease;
   }
 
-  /* Secondary gradient layer */
+  /* Secondary gradient layer — bound to --ambient-secondary-rgb */
   .hud-ambient::after {
     content: "";
     position: absolute;
     inset: -60px;
     background: radial-gradient(500px 400px at 70% 80%,
-        rgb(var(--secondary-rgb) / 0.03),
+        rgb(var(--ambient-secondary-rgb) / calc(var(--ambient-intensity) * 0.5)),
         transparent 50%),
       radial-gradient(400px 350px at 20% 70%,
-        rgb(var(--primary-rgb) / 0.03),
+        rgb(var(--ambient-primary-rgb) / calc(var(--ambient-intensity) * 0.5)),
         transparent 45%);
     pointer-events: none;
     z-index: 0;
     will-change: transform;
-    animation: gradient-shift-reverse 38s ease-in-out infinite;
+    animation: gradient-shift-reverse calc(var(--ambient-speed) * 1.2) ease-in-out infinite;
+    transition: background 1.5s ease;
   }
 
   .hud-ambient>* {
     position: relative;
     z-index: 1;
+  }
+
+  /* ── Vignette — cinematic frame ─────────────────────────── */
+  .vignette {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 50;
+    box-shadow: inset 0 0 120px 40px rgba(0, 0, 0, 0.85);
+  }
+
+  /* ── TechPanel — HUD-style panel with corner brackets ──── */
+  .tech-panel {
+    position: relative;
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid rgb(255 255 255 / 0.08);
+    border-radius: 14px;
+    box-shadow: var(--shadow-panel);
+    transition: box-shadow 300ms ease, border-color 300ms ease;
+  }
+
+  .tech-panel::before,
+  .tech-panel::after,
+  .tech-panel>.corner-bl,
+  .tech-panel>.corner-br {
+    content: "";
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    pointer-events: none;
+    opacity: 0.4;
+    transition: opacity 300ms ease;
+  }
+
+  /* Top-left */
+  .tech-panel::before {
+    top: -1px;
+    left: -1px;
+    border-top: 2px solid rgb(var(--ambient-primary-rgb));
+    border-left: 2px solid rgb(var(--ambient-primary-rgb));
+    border-top-left-radius: 4px;
+  }
+
+  /* Top-right */
+  .tech-panel::after {
+    top: -1px;
+    right: -1px;
+    border-top: 2px solid rgb(var(--ambient-primary-rgb));
+    border-right: 2px solid rgb(var(--ambient-primary-rgb));
+    border-top-right-radius: 4px;
+  }
+
+  .tech-panel:hover::before,
+  .tech-panel:hover::after,
+  .tech-panel:hover>.corner-bl,
+  .tech-panel:hover>.corner-br {
+    opacity: 0.9;
+  }
+
+  .tech-panel:hover {
+    border-color: rgb(255 255 255 / 0.12);
+    box-shadow: var(--shadow-elevated),
+      0 0 30px rgb(var(--ambient-primary-rgb) / 0.06);
+  }
+
+  /* ── Shine Sweep — hover shimmer across surfaces ────────── */
+  .shine-sweep {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .shine-sweep::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(105deg,
+        transparent 40%,
+        rgb(255 255 255 / 0.04) 45%,
+        rgb(255 255 255 / 0.06) 50%,
+        rgb(255 255 255 / 0.04) 55%,
+        transparent 60%);
+    transform: translateX(-100%);
+    pointer-events: none;
+    transition: none;
+  }
+
+  .shine-sweep:hover::after {
+    animation: shine-sweep 0.8s ease-out forwards;
+  }
+
+  /* ── Noise Overlay — subtle film grain ──────────────────── */
+  .noise-overlay::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 49;
+    pointer-events: none;
+    opacity: 0.025;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-repeat: repeat;
+    background-size: 256px 256px;
+  }
+
+  /* ── Text Glitch — used on error/disconnect states ──────── */
+  .text-glitch {
+    position: relative;
+  }
+
+  .text-glitch::before,
+  .text-glitch::after {
+    content: attr(data-text);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+
+  .text-glitch::before {
+    color: rgb(var(--danger-rgb));
+    animation: glitch-clip-1 3s linear infinite;
+    clip-path: inset(20% 0 30% 0);
+    transform: translate(-2px, 0);
+  }
+
+  .text-glitch::after {
+    color: rgb(var(--primary-rgb));
+    animation: glitch-clip-2 3s linear infinite;
+    clip-path: inset(50% 0 10% 0);
+    transform: translate(2px, 0);
   }
 
   /* Toolbar scan-line — softer, wider sweep */
