@@ -241,13 +241,29 @@ export function MainView() {
   /* ── Render ────────────────────────────────────────────── */
 
   return (
-    <div className="relative h-screen w-screen overflow-hidden bg-bg-deep text-white select-none">
+    <div
+      className="relative h-screen w-screen overflow-hidden bg-bg-deep text-white select-none hud-ambient noise-overlay"
+      data-reactor={reactorState}
+    >
 
       {/* ── BACKGROUND LAYERS (atmosphere) ──────────────── */}
       <div className="pointer-events-none absolute inset-0 z-0">
         <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/60" />
         <div className="scanline" />
+        {/* Critical-state red pulse overlay */}
+        {reactorState === 'critical' && (
+          <div
+            className="absolute inset-0"
+            style={{
+              background: 'radial-gradient(ellipse at center, rgb(239 68 68 / 0.08), transparent 70%)',
+              animation: 'ambient-pulse 2s ease-in-out infinite',
+            }}
+          />
+        )}
       </div>
+
+      {/* Cinematic vignette frame */}
+      <div className="vignette" />
 
       {/* ── LAYOUT GRID: Header / Stage / Footer ───────── */}
       <div className="relative z-10 grid h-full grid-rows-[auto_1fr_auto]">
@@ -286,21 +302,25 @@ export function MainView() {
           <div className="absolute bottom-6 left-6 right-6 z-30 flex items-end justify-between">
             {/* Quality Gate Sentinels */}
             <motion.div
-              className="glass-panel rounded-xl px-3 py-2"
+              className="tech-panel shine-sweep rounded-xl px-3 py-2"
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ duration: 0.4, delay: 0.2 }}
             >
+              <span className="corner-bl absolute -bottom-px -left-px block h-[10px] w-[10px] border-b-2 border-l-2 rounded-bl" style={{ borderColor: 'rgb(var(--ambient-primary-rgb))' }} />
+              <span className="corner-br absolute -bottom-px -right-px block h-[10px] w-[10px] border-b-2 border-r-2 rounded-br" style={{ borderColor: 'rgb(var(--ambient-primary-rgb))' }} />
               <QualityGates gates={derivedGates.gates} />
             </motion.div>
 
             {/* Action Controls */}
             <motion.div
-              className="glass-panel rounded-xl px-3 py-2"
+              className="tech-panel shine-sweep rounded-xl px-3 py-2"
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ duration: 0.4, delay: 0.3 }}
             >
+              <span className="corner-bl absolute -bottom-px -left-px block h-[10px] w-[10px] border-b-2 border-l-2 rounded-bl" style={{ borderColor: 'rgb(var(--ambient-primary-rgb))' }} />
+              <span className="corner-br absolute -bottom-px -right-px block h-[10px] w-[10px] border-b-2 border-r-2 rounded-br" style={{ borderColor: 'rgb(var(--ambient-primary-rgb))' }} />
               <ActionBar
                 mode={appMode}
                 startDisabled={!controlsEnabled || anyStartingOrRunning}

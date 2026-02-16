@@ -139,11 +139,18 @@ function PipelineNode({
       <div className="relative">
         {/* Outer glow ring for running state */}
         {isRunning && (
-          <motion.div
-            className="absolute -inset-1.5 rounded-full border border-primary/30"
-            animate={{ scale: [1, 1.15, 1], opacity: [0.5, 0, 0.5] }}
-            transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY, ease: 'easeInOut' }}
-          />
+          <>
+            <motion.div
+              className="absolute -inset-1.5 rounded-full border border-primary/30"
+              animate={{ scale: [1, 1.15, 1], opacity: [0.5, 0, 0.5] }}
+              transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY, ease: 'easeInOut' }}
+            />
+            <motion.div
+              className="absolute -inset-3 rounded-full border border-primary/15"
+              animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0, 0.3] }}
+              transition={{ duration: 2.5, repeat: Number.POSITIVE_INFINITY, ease: 'easeInOut', delay: 0.5 }}
+            />
+          </>
         )}
 
         <div
@@ -205,14 +212,22 @@ function PipelineConnector({ fromStatus }: { fromStatus: GateStatusUI }) {
       {/* Track */}
       <div className={`h-[2px] w-full rounded-full ${colorClass} ${glowClass} transition-colors duration-500`} />
 
-      {/* Animated data pulse for running connectors */}
+      {/* Animated data pulses for running connectors */}
       {isRunning && (
-        <motion.div
-          className="absolute top-1/2 -translate-y-1/2 h-1 w-4 rounded-full bg-primary/50"
-          style={{ filter: 'blur(1px)' }}
-          animate={{ left: ['0%', '100%'] }}
-          transition={{ duration: 1.2, repeat: Number.POSITIVE_INFINITY, ease: 'easeInOut' }}
-        />
+        <>
+          <motion.div
+            className="absolute top-1/2 -translate-y-1/2 h-1.5 w-6 rounded-full bg-primary/60"
+            style={{ filter: 'blur(1.5px)', boxShadow: '0 0 8px rgb(var(--primary-rgb) / 0.4)' }}
+            animate={{ left: ['-10%', '110%'] }}
+            transition={{ duration: 1, repeat: Number.POSITIVE_INFINITY, ease: 'easeInOut' }}
+          />
+          <motion.div
+            className="absolute top-1/2 -translate-y-1/2 h-1 w-3 rounded-full bg-primary/30"
+            style={{ filter: 'blur(1px)' }}
+            animate={{ left: ['-10%', '110%'] }}
+            transition={{ duration: 1, repeat: Number.POSITIVE_INFINITY, ease: 'easeInOut', delay: 0.4 }}
+          />
+        </>
       )}
 
       {/* Chevron arrow */}

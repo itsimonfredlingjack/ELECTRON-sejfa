@@ -39,6 +39,8 @@ export default {
       },
       animation: {
         'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+        'shine-sweep': 'shine-sweep 0.8s ease-out forwards',
+        'ambient-pulse': 'ambient-pulse 2s ease-in-out infinite',
       },
     },
   },
