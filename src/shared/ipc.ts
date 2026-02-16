@@ -14,6 +14,10 @@ export enum Channel {
   SocketConnect = 'sejfa:socket/connect',
   SocketDisconnect = 'sejfa:socket/disconnect',
 
+  FileTailStart = 'sejfa:fileTail/start',
+  FileTailStop = 'sejfa:fileTail/stop',
+  FileTailGetStatus = 'sejfa:fileTail/getStatus',
+
   ShellOpenExternal = 'sejfa:shell/openExternal',
 
   LoopEventPush = 'sejfa:loop/event',
@@ -34,6 +38,9 @@ export const IPC_INVOKE_CHANNELS = [
   Channel.SocketGetStatus,
   Channel.SocketConnect,
   Channel.SocketDisconnect,
+  Channel.FileTailStart,
+  Channel.FileTailStop,
+  Channel.FileTailGetStatus,
   Channel.ShellOpenExternal,
 ] as const;
 export type IpcInvokeChannel = (typeof IPC_INVOKE_CHANNELS)[number];

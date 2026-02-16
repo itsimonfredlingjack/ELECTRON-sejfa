@@ -123,9 +123,12 @@ export function deriveGates(
   return { gates: uiGates, activeGateId };
 }
 
-function severityFromLogLevel(level: 'debug' | 'info' | 'warn' | 'error'): EventSeverity {
+function severityFromLogLevel(
+  level: 'debug' | 'info' | 'warn' | 'error' | 'success',
+): EventSeverity {
   if (level === 'warn') return 'warning';
   if (level === 'error') return 'error';
+  if (level === 'success') return 'success';
   return 'info';
 }
 

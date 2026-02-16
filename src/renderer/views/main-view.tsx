@@ -285,26 +285,25 @@ export function MainView() {
 
       {/* ── LAYOUT GRID: Header / Stage / Footer ───────── */}
       <div className="relative z-10 grid h-full grid-rows-[auto_1fr_auto]">
-        {/* ROW 1: MISSION HEADER */}
-        <header className="border-b border-white/5 bg-black/20 backdrop-blur-sm">
+        <header className="flex items-center justify-between border-b border-white/5 bg-black/20 backdrop-blur-sm">
           <MissionHeader objectiveText={derivedObjective.text} connected={socketConnected} />
+          <div className="shrink-0 pr-4">
+            <FileMonitorToggle />
+          </div>
         </header>
-
-        {/* File Monitor Toggle - positioned at top right */}
-        <div className="absolute top-4 left-4 z-40">
-          <FileMonitorToggle />
-        </div>
 
         {/* ROW 2: THE REACTOR (Center Stage) */}
         <main className="relative flex items-center justify-center">
-          {/* GOD MODE — simulation trigger */}
-          <button
-            type="button"
-            onClick={() => void runSimulation()}
-            className="absolute top-4 right-4 z-50 rounded-full border border-cyan-500/30 bg-cyan-950/40 px-4 py-1.5 font-mono text-xs font-bold text-cyan-400 backdrop-blur-md transition-all hover:border-cyan-400/60 hover:bg-cyan-900/30 hover:shadow-[0_0_20px_rgb(6_182_212/0.15)] active:scale-95"
-          >
-            ⚡ RUN SIMULATION
-          </button>
+          {/* GOD MODE — simulation trigger (dev only) */}
+          {import.meta.env.DEV && (
+            <button
+              type="button"
+              onClick={() => void runSimulation()}
+              className="absolute top-4 right-4 z-50 rounded-full border border-cyan-500/30 bg-cyan-950/40 px-4 py-1.5 font-mono text-xs font-bold text-cyan-400 backdrop-blur-md transition-all hover:border-cyan-400/60 hover:bg-cyan-900/30 hover:shadow-[0_0_20px_rgb(6_182_212/0.15)] active:scale-95"
+            >
+              ⚡ RUN SIMULATION
+            </button>
+          )}
 
           {/* The Arc Reactor */}
           <motion.div
@@ -317,7 +316,7 @@ export function MainView() {
           </motion.div>
 
           {/* Anchored bottom bar: Quality Gates (left) + Controls (right) */}
-          <div className="absolute bottom-6 left-6 right-6 z-30 flex items-end justify-between">
+          <div className="absolute bottom-8 left-6 right-6 z-30 flex items-end justify-between">
             {/* Quality Gate Sentinels */}
             <motion.div
               className="tech-panel shine-sweep rounded-xl px-3 py-2"
@@ -367,7 +366,7 @@ export function MainView() {
         </main>
 
         {/* ROW 3: CONSOLE DRAWER (Anchored Footer) */}
-        <footer className="h-48 border-t border-white/10 bg-black/40 backdrop-blur-md">
+        <footer className="min-h-32 max-h-[40vh] h-48 resize-y overflow-auto bg-black/40 backdrop-blur-md">
           <LogConsole events={timelineEvents} />
         </footer>
       </div>

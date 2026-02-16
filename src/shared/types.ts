@@ -132,6 +132,6 @@ export type LoopEvent =
       type: 'log';
       at: IsoTimestamp;
       runId: string;
-      level: 'debug' | 'info' | 'warn' | 'error';
+      level: 'debug' | 'info' | 'warn' | 'error' | 'success';
       message: string;
     };

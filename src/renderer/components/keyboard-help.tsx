@@ -26,7 +26,7 @@ export function KeyboardHelp(props: KeyboardHelpProps) {
       />
 
       <div className="absolute inset-0 flex items-center justify-center p-4">
-        <div className="glass-panel w-full max-w-2xl animate-[drawerIn_220ms_ease-out] rounded-2xl p-6 shadow-[0_0_0_1px_var(--border-glow)_inset]">
+        <div className="tech-panel w-full max-w-2xl animate-[drawerIn_220ms_ease-out] rounded-2xl p-6 shadow-[0_0_0_1px_var(--border-glow)_inset]">
           <div className="flex items-start justify-between gap-3">
             <div>
               <div className="hud-label text-gradient-primary">Keyboard</div>
@@ -36,7 +36,7 @@ export function KeyboardHelp(props: KeyboardHelpProps) {
               ref={closeRef}
               type="button"
               onClick={props.onClose}
-              className="rounded-xl border border-[var(--border-subtle)] bg-transparent px-3 py-2 font-heading text-sm font-semibold text-[var(--text-secondary)] outline-none transition-colors hover:bg-[var(--bg-panel-hover)] hover:text-[var(--text-primary)] focus-visible:ring-2 focus-visible:ring-[var(--neon-cyan)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg-deep)]"
+              className="rounded-xl border border-(--border-subtle) bg-transparent px-3 py-2 font-heading text-sm font-semibold text-(--text-secondary) outline-none transition-colors hover:bg-(--bg-panel-hover) hover:text-(--text-primary) focus-visible:ring-2 focus-visible:ring-(--neon-cyan) focus-visible:ring-offset-2 focus-visible:ring-offset-(--bg-deep)"
             >
               Close
             </button>
@@ -54,10 +54,10 @@ export function KeyboardHelp(props: KeyboardHelpProps) {
             ].map(([k, d]) => (
               <div
                 key={k}
-                className="rounded-xl border border-[var(--border-subtle)] bg-[rgba(15,23,42,0.45)] p-4"
+                className="rounded-xl border border-(--border-subtle) bg-[rgba(15,23,42,0.45)] p-4"
               >
                 <kbd className="hud-kbd">{k}</kbd>
-                <div className="mt-2 text-sm text-[var(--text-primary)]">{d}</div>
+                <div className="mt-2 text-sm text-(--text-primary)">{d}</div>
               </div>
             ))}
           </div>

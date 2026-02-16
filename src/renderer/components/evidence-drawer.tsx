@@ -97,15 +97,27 @@ export function EvidenceDrawer({ open, gate, onClose }: EvidenceDrawerProps) {
                   <X className="h-5 w-5" />
                 </button>
               </div>
-              <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-primary via-secondary to-transparent" />
+              <div className="absolute bottom-0 left-0 right-0 h-px bg-linear-to-r from-primary via-secondary to-transparent" />
             </div>
 
             {/* Content */}
             <div className="flex-1 overflow-auto bg-bg-deep p-6">
               {gate?.evidence ? (
-                <pre className="font-mono text-xs leading-relaxed text-text-primary whitespace-pre-wrap break-words rounded-lg bg-black/20 p-4 border border-border-subtle">
-                  {gate.evidence}
-                </pre>
+                <div className="font-mono text-xs leading-relaxed text-text-primary rounded-lg bg-black/20 border border-border-subtle overflow-auto">
+                  {gate.evidence.split('\n').map((line, i) => (
+                    <div
+                      key={i}
+                      className={`flex gap-3 px-4 py-0.5 ${i % 2 === 0 ? '' : 'bg-white/2'} hover:bg-white/5 transition-colors`}
+                    >
+                      <span className="select-none shrink-0 w-8 text-right text-text-muted/50 tabular-nums text-[10px] leading-relaxed">
+                        {i + 1}
+                      </span>
+                      <span className="whitespace-pre-wrap wrap-break-word">
+                        {line || '\u00A0'}
+                      </span>
+                    </div>
+                  ))}
+                </div>
               ) : (
                 <div className="flex h-32 flex-col items-center justify-center text-text-muted opacity-50">
                   <FileText className="h-8 w-8 mb-2" />

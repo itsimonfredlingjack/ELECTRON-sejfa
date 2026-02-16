@@ -6,6 +6,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 SEJFA Command Center is an Electron 33 desktop app that monitors and controls an autonomous DevOps agent loop: Jira ticket -> Claude agent -> local tests -> PR -> CI -> deploy -> verify/rollback. It connects to a Flask/SocketIO backend via Socket.IO for real-time loop events.
 
+**NEW:** The app now includes **Ralph Loop file monitoring** - it can monitor local Claude Code Ralph loops by watching `ralph-state.json` without any code changes to the loop project. See `docs/RALPH_LOOP_MONITORING.md` for details.
+
 ## Commands
 
 ```bash
@@ -61,6 +63,10 @@ The typed API surface is defined in `src/shared/api.ts` (`SejfaApi` interface). 
 
 Processes auto-restart with exponential backoff (max 3 restarts, reset after 30s healthy).
 
+### Ralph Loop Monitoring (FileTailService)
+
+`FileTailService` watches `ralph-state.json` from a local Ralph loop project (default: `~/Desktop/DEV-PROJECTS/grupp-ett-github`). Configured via `SEJFA_LOOP_PROJECT_PATH` env var. Uses chokidar for push-based file watching with race condition handling. See `docs/RALPH_LOOP_MONITORING.md`.
+
 ### State Management
 
 Two Zustand stores, both using the actions-outside-store pattern (exported `loopActions` / `systemActions` objects, not methods inside the store):
@@ -107,3 +113,4 @@ Custom colors and shadows are defined via CSS custom properties in `tailwind.con
 | `SEJFA_AGENT_ARGS` | Agent args |
 | `SEJFA_AGENT_CWD` | Agent working directory |
 | `SEJFA_AGENT_LOG_PATH` | Log file for virtual tail (default: `<userData>/sejfa-agent.log`) |
+| `SEJFA_LOOP_PROJECT_PATH` | Ralph loop project path (default: `~/Desktop/DEV-PROJECTS/grupp-ett-github`) |

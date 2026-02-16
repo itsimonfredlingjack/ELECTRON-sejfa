@@ -4,6 +4,7 @@ import started from 'electron-squirrel-startup';
 import type { LoopEvent, ManagedProcessStatus, SocketStatus } from './shared/types';
 
 import { ChildProcessManager } from './main/child-processes';
+import { FileTailService } from './main/file-tail-service';
 import { registerIpcHandlers } from './main/ipc-handlers';
 import { registerAppSecurityHandlers } from './main/security';
 import { registerGlobalShortcuts } from './main/shortcuts';
@@ -22,6 +23,7 @@ const isDev = Boolean(MAIN_WINDOW_VITE_DEV_SERVER_URL);
 let tray: TrayController | null = null;
 let processes: ChildProcessManager | null = null;
 let socket: SocketBridge | null = null;
+let fileTail: FileTailService | null = null;
 
 let lastObjective: string | undefined;
 let lastGate: string | undefined;
@@ -93,6 +95,7 @@ app.whenReady().then(() => {
 
   processes = new ChildProcessManager();
   socket = new SocketBridge(process.env.SEJFA_MONITOR_URL ?? 'http://localhost:5000');
+  fileTail = new FileTailService(process.env.SEJFA_LOOP_PROJECT_PATH);
 
   const win = showOrCreateWindow();
   registerGlobalShortcuts({ toggleWindow: toggleWindowVisibility });
@@ -118,6 +121,7 @@ app.whenReady().then(() => {
   registerIpcHandlers({
     processes,
     socket,
+    fileTail,
     tray,
     broadcast,
   });
@@ -196,8 +200,45 @@ app.whenReady().then(() => {
     updateTray();
   });
 
+  // FileTail events - Ralph loop monitoring
+  fileTail.on('change', (state) => {
+    const at = new Date().toISOString();
+
+    // Emit different events based on state
+    if (state.loop_active) {
+      broadcast({
+        type: 'log',
+        at,
+        runId: 'ralph-loop',
+        level: 'info',
+        message: `Ralph loop active - iteration ${state.iterations}`,
+      });
+    } else if (state.completed_at) {
+      broadcast({
+        type: 'log',
+        at,
+        runId: 'ralph-loop',
+        level: 'success',
+        message: `Ralph loop completed after ${state.iterations} iteration${state.iterations !== 1 ? 's' : ''}`,
+      });
+    }
+  });
+
+  fileTail.on('error', (error) => {
+    broadcast({
+      type: 'log',
+      at: new Date().toISOString(),
+      runId: 'ralph-loop',
+      level: 'error',
+      message: `FileTail error: ${error.message}`,
+    });
+  });
+
   // Default behavior: try connecting immediately, but tolerate backend absence.
   socket.connect();
+
+  // Start FileTail monitoring (always enabled)
+  fileTail.start();
 
   // Seed a first event so the renderer bridge can be validated immediately.
   broadcast({

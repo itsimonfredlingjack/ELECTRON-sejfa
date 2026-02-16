@@ -125,8 +125,9 @@ const LogRow = React.memo(function LogRow({ event, index }: { event: EventUI; in
       </span>
 
       <span
-        className={`w-24 shrink-0 text-[11px] font-bold uppercase tracking-wider text-right select-none ${isSystem ? 'text-text-secondary' : 'text-primary'
-          }`}
+        className={`w-24 shrink-0 text-[11px] font-bold uppercase tracking-wider text-right select-none ${
+          isSystem ? 'text-text-secondary' : 'text-primary'
+        }`}
       >
         {event.node}
       </span>
@@ -247,10 +248,11 @@ export function LogConsole(props: { events: EventUI[] }) {
             type="button"
             onClick={() => setAutoScroll(!autoScroll)}
             aria-label="Toggle live tail"
-            className={`flex items-center gap-1.5 text-[11px] leading-none font-bold uppercase tracking-wider transition-all px-2.5 py-1.5 rounded border whitespace-nowrap ${autoScroll
+            className={`flex items-center gap-1.5 text-[11px] leading-none font-bold uppercase tracking-wider transition-all px-2.5 py-1.5 rounded border whitespace-nowrap ${
+              autoScroll
                 ? 'text-success border-success/30 bg-success/10'
                 : 'text-text-muted border-border-subtle hover:text-text-primary'
-              }`}
+            }`}
           >
             {autoScroll ? (
               <span className="relative flex h-3 w-3">

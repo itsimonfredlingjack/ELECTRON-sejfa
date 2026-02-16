@@ -5,6 +5,7 @@ import { Channel } from '../shared/ipc';
 import type { LoopEvent, ProcessStatusSnapshot, SocketStatus } from '../shared/types';
 
 import type { ChildProcessManager } from './child-processes';
+import type { FileTailService } from './file-tail-service';
 import { createKillSwitch } from './kill-switch';
 import type { SocketBridge } from './socket-bridge';
 import type { TrayController } from './tray';
@@ -31,6 +32,7 @@ function nowIso() {
 export type IpcContext = {
   processes: ChildProcessManager;
   socket: SocketBridge;
+  fileTail: FileTailService;
   tray: TrayController;
   broadcast: (event: LoopEvent) => void;
 };
@@ -151,6 +153,45 @@ export function registerIpcHandlers(ctx: IpcContext) {
     } catch (err) {
       return fail('SOCKET_DISCONNECT_FAILED', err instanceof Error ? err.message : String(err));
     }
+  });
+
+  ipcMain.handle(Channel.FileTailStart, async (): Promise<Result> => {
+    try {
+      ctx.fileTail.start();
+      ctx.broadcast({
+        type: 'log',
+        at: nowIso(),
+        runId: 'system',
+        level: 'info',
+        message: 'Ralph loop file monitoring started',
+      });
+      return ok();
+    } catch (err) {
+      return fail('FILETAIL_START_FAILED', err instanceof Error ? err.message : String(err));
+    }
+  });
+
+  ipcMain.handle(Channel.FileTailStop, async (): Promise<Result> => {
+    try {
+      ctx.fileTail.stop();
+      ctx.broadcast({
+        type: 'log',
+        at: nowIso(),
+        runId: 'system',
+        level: 'info',
+        message: 'Ralph loop file monitoring stopped',
+      });
+      return ok();
+    } catch (err) {
+      return fail('FILETAIL_STOP_FAILED', err instanceof Error ? err.message : String(err));
+    }
+  });
+
+  ipcMain.handle(Channel.FileTailGetStatus, async () => {
+    return {
+      watching: ctx.fileTail.isWatching(),
+      lastState: ctx.fileTail.getLastState(),
+    };
   });
 
   ipcMain.handle(Channel.ShellOpenExternal, async (_event, payload: unknown): Promise<Result> => {

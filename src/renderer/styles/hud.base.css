@@ -23,7 +23,7 @@
   }
 
   ::-webkit-scrollbar-thumb {
-    background: rgb(255 255 255 / 0.10);
+    background: rgb(255 255 255 / 0.1);
     border-radius: 4px;
   }
 
@@ -33,13 +33,10 @@
 }
 
 @layer components {
-
   /* ── Glass panel — clean, crisp frosted glass ────────────────── */
   .glass-panel {
     position: relative;
-    background: linear-gradient(180deg,
-        rgb(255 255 255 / 0.03) 0%,
-        rgb(255 255 255 / 0.01) 100%),
+    background: linear-gradient(180deg, rgb(255 255 255 / 0.03) 0%, rgb(255 255 255 / 0.01) 100%),
       var(--glass-bg);
     backdrop-filter: var(--glass-blur);
     -webkit-backdrop-filter: var(--glass-blur);
@@ -51,7 +48,7 @@
 
   /* Subtle border highlight on hover — cleaner than the old gradient */
   .glass-panel:hover {
-    border-color: rgb(255 255 255 / 0.10);
+    border-color: rgb(255 255 255 / 0.1);
     box-shadow: var(--shadow-elevated);
   }
 
@@ -100,12 +97,16 @@
     content: "";
     position: absolute;
     inset: -60px;
-    background: radial-gradient(800px 600px at 15% 15%,
+    background: radial-gradient(
+        800px 600px at 15% 15%,
         rgb(var(--ambient-primary-rgb) / var(--ambient-intensity)),
-        transparent 60%),
-      radial-gradient(600px 500px at 85% 10%,
+        transparent 60%
+      ),
+      radial-gradient(
+        600px 500px at 85% 10%,
         rgb(var(--ambient-secondary-rgb) / calc(var(--ambient-intensity) * 0.66)),
-        transparent 55%);
+        transparent 55%
+      );
     pointer-events: none;
     z-index: 0;
     will-change: transform;
@@ -118,12 +119,16 @@
     content: "";
     position: absolute;
     inset: -60px;
-    background: radial-gradient(500px 400px at 70% 80%,
+    background: radial-gradient(
+        500px 400px at 70% 80%,
         rgb(var(--ambient-secondary-rgb) / calc(var(--ambient-intensity) * 0.5)),
-        transparent 50%),
-      radial-gradient(400px 350px at 20% 70%,
+        transparent 50%
+      ),
+      radial-gradient(
+        400px 350px at 20% 70%,
         rgb(var(--ambient-primary-rgb) / calc(var(--ambient-intensity) * 0.5)),
-        transparent 45%);
+        transparent 45%
+      );
     pointer-events: none;
     z-index: 0;
     will-change: transform;
@@ -131,7 +136,7 @@
     transition: background 1.5s ease;
   }
 
-  .hud-ambient>* {
+  .hud-ambient > * {
     position: relative;
     z-index: 1;
   }
@@ -141,8 +146,8 @@
     position: fixed;
     inset: 0;
     pointer-events: none;
-    z-index: 50;
-    box-shadow: inset 0 0 120px 40px rgba(0, 0, 0, 0.85);
+    z-index: 40;
+    box-shadow: inset 0 0 100px 30px rgba(0, 0, 0, 0.45);
   }
 
   /* ── TechPanel — HUD-style panel with corner brackets ──── */
@@ -159,8 +164,8 @@
 
   .tech-panel::before,
   .tech-panel::after,
-  .tech-panel>.corner-bl,
-  .tech-panel>.corner-br {
+  .tech-panel > .corner-bl,
+  .tech-panel > .corner-br {
     content: "";
     position: absolute;
     width: 10px;
@@ -190,15 +195,14 @@
 
   .tech-panel:hover::before,
   .tech-panel:hover::after,
-  .tech-panel:hover>.corner-bl,
-  .tech-panel:hover>.corner-br {
+  .tech-panel:hover > .corner-bl,
+  .tech-panel:hover > .corner-br {
     opacity: 0.9;
   }
 
   .tech-panel:hover {
     border-color: rgb(255 255 255 / 0.12);
-    box-shadow: var(--shadow-elevated),
-      0 0 30px rgb(var(--ambient-primary-rgb) / 0.06);
+    box-shadow: var(--shadow-elevated), 0 0 30px rgb(var(--ambient-primary-rgb) / 0.06);
   }
 
   /* ── Shine Sweep — hover shimmer across surfaces ────────── */
@@ -211,12 +215,14 @@
     content: "";
     position: absolute;
     inset: 0;
-    background: linear-gradient(105deg,
-        transparent 40%,
-        rgb(255 255 255 / 0.04) 45%,
-        rgb(255 255 255 / 0.06) 50%,
-        rgb(255 255 255 / 0.04) 55%,
-        transparent 60%);
+    background: linear-gradient(
+      105deg,
+      transparent 40%,
+      rgb(255 255 255 / 0.04) 45%,
+      rgb(255 255 255 / 0.06) 50%,
+      rgb(255 255 255 / 0.04) 55%,
+      transparent 60%
+    );
     transform: translateX(-100%);
     pointer-events: none;
     transition: none;
@@ -235,6 +241,8 @@
     pointer-events: none;
     opacity: 0.025;
     mix-blend-mode: overlay;
+    contain: strict;
+    will-change: auto;
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
     background-repeat: repeat;
     background-size: 256px 256px;
@@ -283,10 +291,7 @@
     left: 0;
     width: 80px;
     height: 100%;
-    background: linear-gradient(90deg,
-        transparent,
-        rgb(255 255 255 / 0.03),
-        transparent);
+    background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.03), transparent);
     pointer-events: none;
     animation: toolbar-scan 12s ease-in-out infinite;
   }
@@ -302,9 +307,7 @@
     position: absolute;
     inset: 0;
     border-radius: inherit;
-    background: radial-gradient(circle,
-        rgb(var(--success-rgb) / 0.2),
-        transparent 60%);
+    background: radial-gradient(circle, rgb(var(--success-rgb) / 0.2), transparent 60%);
     animation: power-ripple 0.5s ease-out forwards;
     pointer-events: none;
   }
@@ -312,17 +315,14 @@
   /* Full-screen scanline sweep — CRT atmosphere */
   .scanline {
     width: 100%;
-    height: 100px;
+    height: 60px;
     position: absolute;
-    top: -100px;
+    top: -60px;
     left: 0;
-    background: linear-gradient(0deg,
-        transparent 0%,
-        rgb(255 255 255 / 0.02) 50%,
-        transparent 100%);
-    opacity: 0.15;
+    background: linear-gradient(0deg, transparent 0%, rgb(255 255 255 / 0.02) 50%, transparent 100%);
+    opacity: 0.06;
     pointer-events: none;
-    animation: scanline-sweep 10s linear infinite;
+    animation: scanline-sweep 14s linear infinite;
   }
 }
 

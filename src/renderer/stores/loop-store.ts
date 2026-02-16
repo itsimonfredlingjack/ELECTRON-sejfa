@@ -34,7 +34,9 @@ function safeEvent(event: LoopEvent): LoopEvent {
 
   const estimatedSize =
     msg.length +
-    (payload && 'details' in payload && typeof (payload as Record<string, unknown>).details === 'string'
+    (payload &&
+    'details' in payload &&
+    typeof (payload as Record<string, unknown>).details === 'string'
       ? ((payload as Record<string, unknown>).details as string).length
       : 0);
 

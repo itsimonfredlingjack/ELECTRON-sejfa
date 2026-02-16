@@ -66,9 +66,7 @@ function NodeIcon({ status, isActive }: { status: GateStatusUI; isActive: boolea
   }
   // pending
   return (
-    <Circle
-      className={`${size} ${isActive ? 'text-text-secondary' : 'text-text-muted/30'}`}
-    />
+    <Circle className={`${size} ${isActive ? 'text-text-secondary' : 'text-text-muted/30'}`} />
   );
 }
 
@@ -127,7 +125,13 @@ function PipelineNode({
           <div
             className="h-2.5 w-2.5 -translate-x-1/2 rotate-45 rounded-[2px]"
             style={{
-              backgroundColor: isRunning ? 'var(--primary)' : isPassed ? 'var(--success)' : isFailed ? 'var(--danger)' : 'var(--text-secondary)',
+              backgroundColor: isRunning
+                ? 'var(--primary)'
+                : isPassed
+                  ? 'var(--success)'
+                  : isFailed
+                    ? 'var(--danger)'
+                    : 'var(--text-secondary)',
               boxShadow: isRunning ? '0 0 8px rgb(var(--primary-rgb) / 0.4)' : 'none',
               animation: isRunning ? 'drone-bob 1.5s ease-in-out infinite' : 'none',
             }}
@@ -148,14 +152,20 @@ function PipelineNode({
             <motion.div
               className="absolute -inset-3 rounded-full border border-primary/15"
               animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0, 0.3] }}
-              transition={{ duration: 2.5, repeat: Number.POSITIVE_INFINITY, ease: 'easeInOut', delay: 0.5 }}
+              transition={{
+                duration: 2.5,
+                repeat: Number.POSITIVE_INFINITY,
+                ease: 'easeInOut',
+                delay: 0.5,
+              }}
             />
           </>
         )}
 
         <div
-          className={`relative flex h-11 w-11 items-center justify-center rounded-full border-2 transition-all duration-300 ${ringClass} ${bgClass} ${isSelected && !isRunning ? 'shadow-glow-primary' : ''
-            }`}
+          className={`relative flex h-11 w-11 items-center justify-center rounded-full border-2 transition-all duration-300 ${ringClass} ${bgClass} ${
+            isSelected && !isRunning ? 'shadow-glow-primary' : ''
+          }`}
         >
           <NodeIcon status={gate.status} isActive={isActive} />
         </div>
@@ -164,16 +174,17 @@ function PipelineNode({
       {/* Label */}
       <div className="flex flex-col items-center gap-0.5">
         <span
-          className={`text-[11px] font-semibold tracking-wide uppercase transition-colors ${isRunning
-            ? 'text-primary'
-            : isPassed
-              ? 'text-success/80'
-              : isFailed
-                ? 'text-danger/80'
-                : isSelected
-                  ? 'text-text-primary'
-                  : 'text-text-muted group-hover:text-text-secondary'
-            }`}
+          className={`text-[11px] font-semibold tracking-wide uppercase transition-colors ${
+            isRunning
+              ? 'text-primary'
+              : isPassed
+                ? 'text-success/80'
+                : isFailed
+                  ? 'text-danger/80'
+                  : isSelected
+                    ? 'text-text-primary'
+                    : 'text-text-muted group-hover:text-text-secondary'
+          }`}
         >
           {gate.label}
         </span>
@@ -191,9 +202,7 @@ function PipelineNode({
 
         {/* Failed label */}
         {isFailed && (
-          <span className="text-[9px] font-mono font-bold text-danger/70 uppercase">
-            Failed
-          </span>
+          <span className="text-[9px] font-mono font-bold text-danger/70 uppercase">Failed</span>
         )}
       </div>
     </motion.button>
@@ -210,7 +219,9 @@ function PipelineConnector({ fromStatus }: { fromStatus: GateStatusUI }) {
   return (
     <div className="relative flex items-center flex-1 min-w-[24px] self-start mt-[22px]">
       {/* Track */}
-      <div className={`h-[2px] w-full rounded-full ${colorClass} ${glowClass} transition-colors duration-500`} />
+      <div
+        className={`h-[2px] w-full rounded-full ${colorClass} ${glowClass} transition-colors duration-500`}
+      />
 
       {/* Animated data pulses for running connectors */}
       {isRunning && (
@@ -225,7 +236,12 @@ function PipelineConnector({ fromStatus }: { fromStatus: GateStatusUI }) {
             className="absolute top-1/2 -translate-y-1/2 h-1 w-3 rounded-full bg-primary/30"
             style={{ filter: 'blur(1px)' }}
             animate={{ left: ['-10%', '110%'] }}
-            transition={{ duration: 1, repeat: Number.POSITIVE_INFINITY, ease: 'easeInOut', delay: 0.4 }}
+            transition={{
+              duration: 1,
+              repeat: Number.POSITIVE_INFINITY,
+              ease: 'easeInOut',
+              delay: 0.4,
+            }}
           />
         </>
       )}
@@ -339,7 +355,7 @@ export function LoopVisualization({ gates, activeGateId, onSelectGate }: LoopVis
     <div className="flex h-full w-full flex-col justify-center gap-6 px-4 py-6">
       {/* Pipeline track */}
       <motion.div
-        className="flex items-start justify-center gap-0 w-full px-2"
+        className="relative flex items-start justify-center gap-0 w-full px-2"
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, ease: 'easeOut' }}
@@ -354,12 +370,36 @@ export function LoopVisualization({ gates, activeGateId, onSelectGate }: LoopVis
                 isSelected={isActive}
                 onSelect={() => onSelectGate(gate.id)}
               />
-              {i < gates.length - 1 && (
-                <PipelineConnector fromStatus={gate.status} />
-              )}
+              {i < gates.length - 1 && <PipelineConnector fromStatus={gate.status} />}
             </React.Fragment>
           );
         })}
+
+        {/* Return-path arc: visual loop indicator (last gate → first gate) */}
+        {gates.length > 1 && (
+          <svg
+            className="absolute left-1/2 -translate-x-1/2 pointer-events-none"
+            style={{ top: '100%', marginTop: '4px' }}
+            width="80%"
+            height="28"
+            viewBox="0 0 400 28"
+            preserveAspectRatio="none"
+            fill="none"
+          >
+            <path
+              d="M 20 0 C 20 24, 380 24, 380 0"
+              stroke={allPassed ? 'rgb(var(--success-rgb) / 0.35)' : 'rgb(255 255 255 / 0.08)'}
+              strokeWidth="1.5"
+              strokeDasharray="6 4"
+              fill="none"
+            />
+            {/* Arrow head on left (return direction) */}
+            <path
+              d="M 20 0 L 24 5 L 16 5 Z"
+              fill={allPassed ? 'rgb(var(--success-rgb) / 0.35)' : 'rgb(255 255 255 / 0.08)'}
+            />
+          </svg>
+        )}
       </motion.div>
 
       {/* Summary */}
