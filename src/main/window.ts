@@ -22,9 +22,6 @@ export function createMainWindow({ isDev }: { isDev: boolean }) {
     },
   });
 
-  // Reduce surface area for unexpected shortcuts/menus.
-  win.removeMenu();
-
   win.once('ready-to-show', () => win.show());
 
   if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {

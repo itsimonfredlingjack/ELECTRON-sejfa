@@ -21,8 +21,8 @@ export default {
         'text-muted': 'var(--text-muted)',
       },
       boxShadow: {
-        'panel': 'var(--shadow-panel)',
-        'elevated': 'var(--shadow-elevated)',
+        panel: 'var(--shadow-panel)',
+        elevated: 'var(--shadow-elevated)',
         'glow-primary': 'var(--glow-primary)',
         'glow-secondary': 'var(--glow-secondary)',
         'glow-success': 'var(--glow-success)',
@@ -30,12 +30,12 @@ export default {
         'glow-warning': 'var(--glow-warning)',
       },
       fontFamily: {
-        ui: ['"Inter"', 'system-ui', 'sans-serif'],
-        mono: ['"JetBrains Mono"', '"Fira Code"', 'monospace'],
-        heading: ['"Space Grotesk"', 'sans-serif'],
+        ui: ['var(--font-ui)', 'system-ui', 'sans-serif'],
+        mono: ['var(--font-mono)', 'monospace'],
+        heading: ['var(--font-heading)', 'system-ui', 'sans-serif'],
       },
       borderRadius: {
-        'panel': '14px',
+        panel: '14px',
       },
       animation: {
         'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',

@@ -3,7 +3,6 @@
 
 /* Breathing pulse for active elements */
 @keyframes breathe {
-
   0%,
   100% {
     opacity: 0.7;
@@ -16,16 +15,13 @@
 
 /* Node/gate active glow — gentle */
 @keyframes node-breathe {
-
   0%,
   100% {
-    box-shadow: 0 0 0 1px rgb(var(--primary-rgb) / 0.08),
-      0 8px 24px rgb(var(--primary-rgb) / 0.06);
+    box-shadow: 0 0 0 1px rgb(var(--primary-rgb) / 0.08), 0 8px 24px rgb(var(--primary-rgb) / 0.06);
   }
 
   50% {
-    box-shadow: 0 0 0 1px rgb(var(--primary-rgb) / 0.14),
-      0 12px 32px rgb(var(--primary-rgb) / 0.10);
+    box-shadow: 0 0 0 1px rgb(var(--primary-rgb) / 0.14), 0 12px 32px rgb(var(--primary-rgb) / 0.1);
   }
 }
 
@@ -42,18 +38,15 @@
 
 /* Kill button armed — clear, not flashy */
 @keyframes kill-armed {
-
   0%,
   100% {
-    box-shadow: 0 0 0 1px rgb(var(--danger-rgb) / 0.20),
-      0 8px 24px rgb(var(--danger-rgb) / 0.08);
+    box-shadow: 0 0 0 1px rgb(var(--danger-rgb) / 0.2), 0 8px 24px rgb(var(--danger-rgb) / 0.08);
     background-color: rgb(var(--danger-rgb) / 0.06);
   }
 
   50% {
-    box-shadow: 0 0 0 1px rgb(var(--danger-rgb) / 0.30),
-      0 12px 32px rgb(var(--danger-rgb) / 0.14);
-    background-color: rgb(var(--danger-rgb) / 0.10);
+    box-shadow: 0 0 0 1px rgb(var(--danger-rgb) / 0.3), 0 12px 32px rgb(var(--danger-rgb) / 0.14);
+    background-color: rgb(var(--danger-rgb) / 0.1);
   }
 }
 
@@ -84,7 +77,6 @@
 
 /* OFFLINE text pulse */
 @keyframes offline-pulse {
-
   0%,
   100% {
     opacity: 0.6;
@@ -97,7 +89,6 @@
 
 /* Failed node — subtle shake instead of glitch */
 @keyframes glitch {
-
   0%,
   96%,
   100% {
@@ -115,7 +106,6 @@
 
 /* Disconnected dot pulse */
 @keyframes dot-pulse {
-
   0%,
   100% {
     opacity: 1;
@@ -234,7 +224,6 @@
 
 /* Terminal cursor blink */
 @keyframes type-cursor {
-
   0%,
   100% {
     opacity: 1;
@@ -296,68 +285,64 @@
 
 /* Reactor core pulse — danger/red phase */
 @keyframes reactor-pulse-red {
-
   0%,
   100% {
-    box-shadow: 0 0 30px 8px rgb(var(--danger-rgb) / 0.15),
-      0 0 60px 20px rgb(var(--danger-rgb) / 0.06);
+    box-shadow: 0 0 30px 8px rgb(var(--danger-rgb) / 0.15), 0 0 60px 20px
+      rgb(var(--danger-rgb) / 0.06);
     transform: scale(1);
   }
 
   50% {
-    box-shadow: 0 0 40px 12px rgb(var(--danger-rgb) / 0.25),
-      0 0 80px 30px rgb(var(--danger-rgb) / 0.10);
+    box-shadow: 0 0 40px 12px rgb(var(--danger-rgb) / 0.25), 0 0 80px 30px
+      rgb(var(--danger-rgb) / 0.1);
     transform: scale(1.02);
   }
 }
 
 /* Reactor core pulse — success/green phase */
 @keyframes reactor-pulse-green {
-
   0%,
   100% {
-    box-shadow: 0 0 30px 8px rgb(var(--success-rgb) / 0.15),
-      0 0 60px 20px rgb(var(--success-rgb) / 0.06);
+    box-shadow: 0 0 30px 8px rgb(var(--success-rgb) / 0.15), 0 0 60px 20px
+      rgb(var(--success-rgb) / 0.06);
     transform: scale(1);
   }
 
   50% {
-    box-shadow: 0 0 40px 12px rgb(var(--success-rgb) / 0.20),
-      0 0 80px 30px rgb(var(--success-rgb) / 0.08);
+    box-shadow: 0 0 40px 12px rgb(var(--success-rgb) / 0.2), 0 0 80px 30px
+      rgb(var(--success-rgb) / 0.08);
     transform: scale(1.01);
   }
 }
 
 /* Reactor core pulse — primary/refactor phase */
 @keyframes reactor-pulse-blue {
-
   0%,
   100% {
-    box-shadow: 0 0 30px 8px rgb(var(--primary-rgb) / 0.15),
-      0 0 60px 20px rgb(var(--primary-rgb) / 0.06);
+    box-shadow: 0 0 30px 8px rgb(var(--primary-rgb) / 0.15), 0 0 60px 20px
+      rgb(var(--primary-rgb) / 0.06);
     transform: scale(1);
   }
 
   50% {
-    box-shadow: 0 0 40px 12px rgb(var(--primary-rgb) / 0.22),
-      0 0 80px 30px rgb(var(--primary-rgb) / 0.09);
+    box-shadow: 0 0 40px 12px rgb(var(--primary-rgb) / 0.22), 0 0 80px 30px
+      rgb(var(--primary-rgb) / 0.09);
     transform: scale(1.015);
   }
 }
 
 /* Reactor core pulse — secondary/violet/verify phase */
 @keyframes reactor-pulse-violet {
-
   0%,
   100% {
-    box-shadow: 0 0 25px 6px rgb(var(--secondary-rgb) / 0.12),
-      0 0 50px 18px rgb(var(--secondary-rgb) / 0.05);
+    box-shadow: 0 0 25px 6px rgb(var(--secondary-rgb) / 0.12), 0 0 50px 18px
+      rgb(var(--secondary-rgb) / 0.05);
     transform: scale(1);
   }
 
   50% {
-    box-shadow: 0 0 35px 10px rgb(var(--secondary-rgb) / 0.18),
-      0 0 70px 25px rgb(var(--secondary-rgb) / 0.08);
+    box-shadow: 0 0 35px 10px rgb(var(--secondary-rgb) / 0.18), 0 0 70px 25px
+      rgb(var(--secondary-rgb) / 0.08);
     transform: scale(1.01);
   }
 }
@@ -414,7 +399,6 @@
 
 /* Drone traveling along pipeline track */
 @keyframes drone-bob {
-
   0%,
   100% {
     transform: translateY(0);
@@ -423,6 +407,104 @@
   50% {
     transform: translateY(-2px);
   }
+}
+
+/* ── Activity Card Enter ─────────────────────────────────────── */
+
+@keyframes activity-card-enter {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ── Orbital Reactor Animations ───────────────────────────────── */
+
+/* Particle fade in/out while drifting along orbital paths */
+@keyframes orbital-particle-drift {
+  0%,
+  100% {
+    opacity: 0.1;
+  }
+
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.orbital-particle-drift {
+  animation: orbital-particle-drift 6s ease-in-out infinite;
+}
+
+/* Scale + opacity breathing for offline pipeline nodes */
+@keyframes orbital-node-breathe {
+  0%,
+  100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.5;
+    transform: scale(1.04);
+  }
+}
+
+.orbital-node-breathe {
+  animation: orbital-node-breathe 4s ease-in-out infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+/* Subtle shake for failed nodes in critical state */
+@keyframes orbital-node-shake {
+  0%,
+  90%,
+  100% {
+    transform: translate(0);
+  }
+
+  92% {
+    transform: translate(-1.5px, 0.5px);
+  }
+
+  94% {
+    transform: translate(1px, -0.5px);
+  }
+
+  96% {
+    transform: translate(-0.5px, 1px);
+  }
+
+  98% {
+    transform: translate(1px, 0);
+  }
+}
+
+.orbital-node-shake {
+  animation: orbital-node-shake 2s ease-in-out infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+/* Slow dash-flow for idle connector paths */
+@keyframes orbital-connector-flow {
+  from {
+    stroke-dashoffset: 0;
+  }
+
+  to {
+    stroke-dashoffset: -20;
+  }
+}
+
+.orbital-connector-flow {
+  animation: orbital-connector-flow 4s linear infinite;
 }
 
 /* ── Shine Sweep (holographic hover) ──────────────────────────── */
@@ -440,7 +522,6 @@
 /* ── Text Glitch Clip Layers ─────────────────────────────────── */
 
 @keyframes glitch-clip-1 {
-
   0%,
   85%,
   100% {
@@ -469,7 +550,6 @@
 }
 
 @keyframes glitch-clip-2 {
-
   0%,
   82%,
   100% {
@@ -500,7 +580,6 @@
 /* ── Ambient pulse for critical state ────────────────────────── */
 
 @keyframes ambient-pulse {
-
   0%,
   100% {
     opacity: 0;

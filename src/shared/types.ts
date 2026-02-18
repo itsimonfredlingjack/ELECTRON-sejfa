@@ -132,6 +132,23 @@ export type LoopEvent =
       type: 'log';
       at: IsoTimestamp;
       runId: string;
-      level: 'debug' | 'info' | 'warn' | 'error';
+      level: 'debug' | 'info' | 'warn' | 'error' | 'success';
       message: string;
+    }
+  | {
+      type: 'filetail/state';
+      at: IsoTimestamp;
+      loopActive: boolean;
+      iterations: number;
+      completedAt?: string;
+    }
+  | {
+      type: 'filetail/stopped';
+      at: IsoTimestamp;
+    }
+  | {
+      type: 'filetail/started';
+      at: IsoTimestamp;
+      loopActive: boolean;
+      iterations: number;
     };

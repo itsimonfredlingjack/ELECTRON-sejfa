@@ -1,6 +1,6 @@
 import { contextBridge, ipcRenderer } from 'electron';
 
-import type { Result, SejfaApi } from './shared/api';
+import type { FileTailStatus, Result, SejfaApi } from './shared/api';
 import { Channel, IPC_EVENT_CHANNELS, IPC_INVOKE_CHANNELS } from './shared/ipc';
 import type {
   LoopEvent,
@@ -102,6 +102,23 @@ const api: SejfaApi = {
       const channel = Channel.SocketDisconnect;
       assertInvokeChannel(channel);
       return ipcRenderer.invoke(channel) as Promise<Result>;
+    },
+  },
+  fileTail: {
+    start: async () => {
+      const channel = Channel.FileTailStart;
+      assertInvokeChannel(channel);
+      return ipcRenderer.invoke(channel) as Promise<Result>;
+    },
+    stop: async () => {
+      const channel = Channel.FileTailStop;
+      assertInvokeChannel(channel);
+      return ipcRenderer.invoke(channel) as Promise<Result>;
+    },
+    getStatus: async () => {
+      const channel = Channel.FileTailGetStatus;
+      assertInvokeChannel(channel);
+      return ipcRenderer.invoke(channel) as Promise<FileTailStatus>;
     },
   },
   shell: {

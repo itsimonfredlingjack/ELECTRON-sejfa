@@ -78,7 +78,7 @@ export function useKeyboardShortcuts(opts: KeyboardShortcutsOpts) {
         return;
       }
 
-      if (/^[1-6]$/.test(e.key)) {
+      if (/^[1-5]$/.test(e.key)) {
         e.preventDefault();
         const idx = Number(e.key) - 1;
         const id = gates[idx];
