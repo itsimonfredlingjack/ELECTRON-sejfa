@@ -18,9 +18,11 @@ export function MissionHeader({ objectiveText, connected }: MissionHeaderProps) 
     <div className="flex items-center gap-4 px-6 py-3">
       {/* Connection indicator */}
       <div
-        className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${
-          connected ? 'bg-success/10' : 'bg-danger/10'
+        className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-all duration-300 ${
+          connected ? 'bg-success/10 ring-1 ring-success/20' : 'bg-danger/10 ring-1 ring-danger/20'
         }`}
+        role="status"
+        aria-label={connected ? 'Connected to backend' : 'Disconnected from backend'}
       >
         {connected ? (
           <Wifi className="h-4 w-4 text-success" />
@@ -31,7 +33,7 @@ export function MissionHeader({ objectiveText, connected }: MissionHeaderProps) 
 
       {/* Ticket badge */}
       <span
-        className={`shrink-0 font-mono text-sm font-bold tracking-tight px-2.5 py-0.5 rounded border transition-all duration-500 ${
+        className={`shrink-0 font-mono text-sm font-bold tracking-tight px-2.5 py-0.5 rounded border transition-all duration-300 ${
           connected
             ? 'text-primary bg-primary/10 border-primary/20'
             : 'text-danger bg-danger/10 border-danger/20 text-glitch'

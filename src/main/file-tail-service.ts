@@ -1,7 +1,5 @@
-import type { FSWatcher } from 'chokidar';
-import chokidar from 'chokidar';
 import { EventEmitter } from 'node:events';
-import { promises as fs } from 'node:fs';
+import { promises as fs, unwatchFile, watchFile } from 'node:fs';
 import { homedir } from 'node:os';
 import { join } from 'node:path';
 
@@ -25,12 +23,11 @@ export interface FileTailEvents {
 
 /**
  * Watches ralph-state.json from the loop project and emits changes.
- * Uses chokidar for push-based file watching (faster than polling).
+ * Uses Node.js built-in fs.watchFile (no native dependencies to break Vite).
  *
  * CRITICAL: Handles race conditions when file is being written.
  */
 export class FileTailService extends EventEmitter {
-  private watcher: FSWatcher | null = null;
   private lastState: RalphState | null = null;
   private loopProjectPath: string;
   private ralphStatePath: string;
@@ -38,16 +35,11 @@ export class FileTailService extends EventEmitter {
 
   constructor(loopProjectPath?: string) {
     super();
-    // CRITICAL: Use os.homedir() NOT hardcoded paths!
     this.loopProjectPath =
       loopProjectPath ?? join(homedir(), 'Desktop', 'DEV-PROJECTS', 'grupp-ett-github');
     this.ralphStatePath = join(this.loopProjectPath, '.claude', 'ralph-state.json');
   }
 
-  /**
-   * Start watching the ralph-state.json file.
-   * Uses chokidar for instant push-based notifications.
-   */
   start(): void {
     if (this.watching) {
       console.warn('[FileTail] Already watching');
@@ -56,83 +48,65 @@ export class FileTailService extends EventEmitter {
 
     console.log('[FileTail] Starting file watch:', this.ralphStatePath);
 
-    this.watcher = chokidar.watch(this.ralphStatePath, {
-      persistent: true,
-      ignoreInitial: false, // Trigger immediately on start
-      awaitWriteFinish: {
-        stabilityThreshold: 100, // Wait 100ms for file writes to finish
-        pollInterval: 50,
-      },
-    });
-
-    this.watcher.on('add', () => void this.handleFileChange());
-    this.watcher.on('change', () => void this.handleFileChange());
-    this.watcher.on('error', (err: unknown) => {
-      const error = err instanceof Error ? err : new Error(String(err));
-      this.handleError(error);
+    // fs.watchFile is polling-based (no native deps) — 1.5s interval is fine for this
+    watchFile(this.ralphStatePath, { interval: 1500 }, () => {
+      void this.handleFileChange();
     });
 
     this.watching = true;
+
+    // Read the file once immediately so the UI gets initial state
+    void this.handleFileChange();
   }
 
-  /**
-   * Stop watching the file.
-   */
   stop(): void {
-    if (this.watcher) {
-      void this.watcher.close();
-      this.watcher = null;
+    if (this.watching) {
+      unwatchFile(this.ralphStatePath);
     }
     this.watching = false;
     this.lastState = null;
     console.log('[FileTail] Stopped watching');
   }
 
-  /**
-   * Get current watching status.
-   */
   isWatching(): boolean {
     return this.watching;
   }
 
-  /**
-   * Get the last known state.
-   */
   getLastState(): RalphState | null {
     return this.lastState;
   }
 
   /**
-   * Handle file change event.
-   * CRITICAL: Race condition handling with try/catch for JSON.parse!
+   * CRITICAL: Race condition handling — file may be half-written when we read it.
    */
   private async handleFileChange(): Promise<void> {
     try {
       const content = await fs.readFile(this.ralphStatePath, 'utf-8');
 
-      // CRITICAL: Race condition protection!
-      // File might be read while being written → partial JSON → SyntaxError
       let state: RalphState;
       try {
         state = JSON.parse(content) as RalphState;
       } catch (err) {
         if (err instanceof SyntaxError) {
-          // This is expected! File is being written right now.
-          // Next change event will come soon with complete data.
-          console.debug('[FileTail] Partial read detected, waiting for next write...');
+          // File is being written right now — ignore, next poll will catch it
+          console.debug('[FileTail] Partial read, waiting for next poll...');
           return;
         }
-        // Other errors are real problems
         throw err;
       }
 
-      // Emit change only if state actually changed
+      // Only emit if state actually changed
       if (JSON.stringify(state) !== JSON.stringify(this.lastState)) {
+        console.log(
+          '[FileTail] State changed:',
+          state.loop_active ? 'ACTIVE' : 'idle',
+          'iter:',
+          state.iterations,
+        );
         this.lastState = state;
         this.emit('change', state);
       }
     } catch (err) {
-      // File doesn't exist yet, or other FS errors
       if ((err as NodeJS.ErrnoException).code === 'ENOENT') {
         console.debug('[FileTail] File not found (loop not started yet)');
       } else {
@@ -141,9 +115,6 @@ export class FileTailService extends EventEmitter {
     }
   }
 
-  /**
-   * Handle errors.
-   */
   private handleError(error: Error): void {
     console.error('[FileTail] Error:', error);
     this.emit('error', error);

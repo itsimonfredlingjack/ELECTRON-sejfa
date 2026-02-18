@@ -265,48 +265,61 @@ export function LogConsole(props: { events: EventUI[] }) {
             {autoScroll ? 'Live' : 'Paused'}
           </button>
         </div>
-        <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-primary via-secondary to-transparent" />
+        <div className="absolute bottom-0 left-0 right-0 h-px bg-linear-to-r from-primary via-secondary to-transparent" />
       </div>
 
-      {/* Log Area */}
-      <div className="relative min-h-0 flex-1 bg-bg-deep/80 backdrop-blur-sm">
-        {filteredEvents.length === 0 && props.events.length === 0 ? (
-          <div className="flex h-full flex-col items-center justify-center text-text-muted/50 gap-3">
-            <span className="font-mono text-sm">
-              <span className="text-primary/60">$</span> <span>Awaiting pipeline activity</span>
-              <span
-                className="inline-block w-2 h-4 ml-0.5 bg-primary/60 align-middle"
-                style={{ animation: 'type-cursor 1s step-end infinite' }}
-              />
-            </span>
-          </div>
-        ) : filteredEvents.length === 0 ? (
-          <div className="flex h-full flex-col items-center justify-center text-text-muted/50 gap-3">
-            <Terminal className="h-10 w-10" />
-            <span className="text-sm font-medium">No events to display</span>
-            <span className="text-xs">Try adjusting filters</span>
-          </div>
-        ) : (
-          <Virtuoso
-            ref={virtuosoRef}
-            data={filteredEvents}
-            followOutput={autoScroll ? 'auto' : false}
-            itemContent={(index, event) => {
-              const prevEvent = index > 0 ? filteredEvents[index - 1] : undefined;
-              const currentMin = getMinute(event.at);
-              const prevMin = prevEvent ? getMinute(prevEvent.at) : currentMin;
-              const showSeparator = index > 0 && currentMin !== prevMin;
+      {/* Log Area — terminal tape aesthetic with soft fade edges */}
+      <div className="relative min-h-0 flex-1 overflow-hidden">
+        <div className="absolute inset-0 bg-bg-deep/80 backdrop-blur-sm" />
+        {/* Soft fade at top and bottom — avoids hard cutoff, adds depth */}
+        <div
+          className="pointer-events-none absolute inset-x-0 top-0 z-10 h-8 bg-linear-to-b from-black/80 to-transparent"
+          aria-hidden
+        />
+        <div
+          className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-8 bg-linear-to-t from-black/80 to-transparent"
+          aria-hidden
+        />
+        <div className="relative z-0 flex min-h-0 flex-1 flex-col">
+          {filteredEvents.length === 0 && props.events.length === 0 ? (
+            <div className="flex flex-1 flex-col items-center justify-center text-text-muted/50 gap-3">
+              <span className="font-mono text-sm">
+                <span className="text-primary/60">$</span> <span>Awaiting pipeline activity</span>
+                <span
+                  className="inline-block w-2 h-4 ml-0.5 bg-primary/60 align-middle"
+                  style={{ animation: 'type-cursor 1s step-end infinite' }}
+                />
+              </span>
+            </div>
+          ) : filteredEvents.length === 0 ? (
+            <div className="flex flex-1 flex-col items-center justify-center text-text-muted/50 gap-3">
+              <Terminal className="h-10 w-10" />
+              <span className="text-sm font-medium">No events to display</span>
+              <span className="text-xs">Try adjusting filters</span>
+            </div>
+          ) : (
+            <Virtuoso
+              ref={virtuosoRef}
+              data={filteredEvents}
+              followOutput={autoScroll ? 'auto' : false}
+              style={{ height: '100%' }}
+              itemContent={(index, event) => {
+                const prevEvent = index > 0 ? filteredEvents[index - 1] : undefined;
+                const currentMin = getMinute(event.at);
+                const prevMin = prevEvent ? getMinute(prevEvent.at) : currentMin;
+                const showSeparator = index > 0 && currentMin !== prevMin;
 
-              return (
-                <>
-                  {showSeparator && <TimeSeparator time={currentMin} />}
-                  <LogRow event={event} index={index} />
-                </>
-              );
-            }}
-            className="scrollbar-thin scrollbar-track-transparent scrollbar-thumb-primary/20 hover:scrollbar-thumb-primary/40"
-          />
-        )}
+                return (
+                  <>
+                    {showSeparator && <TimeSeparator time={currentMin} />}
+                    <LogRow event={event} index={index} />
+                  </>
+                );
+              }}
+              className="relative z-0 pt-4 pb-4 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-primary/20 hover:scrollbar-thumb-primary/40 [&>div]:!bg-transparent"
+            />
+          )}
+        </div>
       </div>
     </section>
   );

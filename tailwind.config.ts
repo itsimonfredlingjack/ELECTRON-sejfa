@@ -30,9 +30,9 @@ export default {
         'glow-warning': 'var(--glow-warning)',
       },
       fontFamily: {
-        ui: ['"Inter"', 'system-ui', 'sans-serif'],
-        mono: ['"JetBrains Mono"', '"Fira Code"', 'monospace'],
-        heading: ['"Space Grotesk"', 'sans-serif'],
+        ui: ['var(--font-ui)', 'system-ui', 'sans-serif'],
+        mono: ['var(--font-mono)', 'monospace'],
+        heading: ['var(--font-heading)', 'system-ui', 'sans-serif'],
       },
       borderRadius: {
         panel: '14px',

@@ -46,11 +46,13 @@ export function StatusBar({ connected, alertsCount, mode, onModeChange }: Status
     <div className="toolbar-scanline flex items-center justify-between gap-4 px-6 py-2 border-b border-[var(--border-subtle)] bg-[var(--bg-panel)]">
       {/* Connection Badge */}
       <div
-        className={`relative flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-[11px] font-medium transition-colors ${
+        className={`relative flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-[11px] font-medium transition-all duration-200 ${
           connected
-            ? 'border-success/20 bg-success/5 text-success'
-            : 'border-danger/20 bg-danger/5 text-danger'
+            ? 'border-success/20 bg-success/5 text-success hover:border-success/30 hover:bg-success/10'
+            : 'border-danger/20 bg-danger/5 text-danger hover:border-danger/30 hover:bg-danger/10'
         }`}
+        role="status"
+        aria-label={connected ? 'Connection: Online' : 'Connection: Offline'}
       >
         {connected && (
           <>
@@ -86,21 +88,29 @@ export function StatusBar({ connected, alertsCount, mode, onModeChange }: Status
           <button
             type="button"
             onClick={() => onModeChange('observe')}
-            className={`relative flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-semibold transition-colors bg-transparent ${
-              mode === 'observe' ? 'text-primary' : 'text-text-muted hover:text-text-secondary'
+            aria-pressed={mode === 'observe'}
+            aria-label="Observe mode — view pipeline without controlling"
+            className={`relative flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-semibold transition-all duration-200 bg-transparent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 ${
+              mode === 'observe'
+                ? 'text-primary'
+                : 'text-text-muted hover:text-text-secondary hover:opacity-90'
             }`}
           >
-            <Eye className="h-3 w-3" />
+            <Eye className="h-3 w-3" aria-hidden />
             Observe
           </button>
           <button
             type="button"
             onClick={() => onModeChange('control')}
-            className={`relative flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-semibold transition-colors bg-transparent ${
-              mode === 'control' ? 'text-primary' : 'text-text-muted hover:text-text-secondary'
+            aria-pressed={mode === 'control'}
+            aria-label="Control mode — start, pause, and control pipeline"
+            className={`relative flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-semibold transition-all duration-200 bg-transparent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 ${
+              mode === 'control'
+                ? 'text-primary'
+                : 'text-text-muted hover:text-text-secondary hover:opacity-90'
             }`}
           >
-            <Gamepad2 className="h-3 w-3" />
+            <Gamepad2 className="h-3 w-3" aria-hidden />
             Control
           </button>
         </div>
@@ -155,17 +165,19 @@ function ObjectiveBanner({
           type="button"
           disabled={openPrDisabled}
           onClick={onOpenPr}
-          className="flex items-center gap-1.5 rounded-lg border border-border-subtle bg-bg-deep/30 px-2.5 py-1.5 text-[11px] font-semibold text-text-primary/80 transition-colors hover:bg-bg-panel-hover hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:bg-bg-deep/30 disabled:hover:text-text-primary/80"
+          aria-label={openPrDisabled ? 'Open PR (unavailable)' : 'Open pull request'}
+          className="btn-interactive flex items-center gap-1.5 rounded-lg border border-border-subtle bg-bg-deep/30 px-2.5 py-1.5 text-[11px] font-semibold text-text-primary/80 hover:bg-bg-panel-hover hover:text-primary hover:border-primary/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:bg-bg-deep/30 disabled:hover:text-text-primary/80"
         >
-          Open PR <ExternalLink className="h-3 w-3" />
+          Open PR <ExternalLink className="h-3 w-3" aria-hidden />
         </button>
         <button
           type="button"
           disabled={openRunDisabled}
           onClick={onOpenRun}
-          className="flex items-center gap-1.5 rounded-lg border border-border-subtle bg-bg-deep/30 px-2.5 py-1.5 text-[11px] font-semibold text-text-primary/80 transition-colors hover:bg-bg-panel-hover hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:bg-bg-deep/30 disabled:hover:text-text-primary/80"
+          aria-label={openRunDisabled ? 'Open run (unavailable)' : 'Open CI run'}
+          className="btn-interactive flex items-center gap-1.5 rounded-lg border border-border-subtle bg-bg-deep/30 px-2.5 py-1.5 text-[11px] font-semibold text-text-primary/80 hover:bg-bg-panel-hover hover:text-primary hover:border-primary/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:bg-bg-deep/30 disabled:hover:text-text-primary/80"
         >
-          Open Run <ExternalLink className="h-3 w-3" />
+          Open Run <ExternalLink className="h-3 w-3" aria-hidden />
         </button>
       </div>
 
@@ -225,10 +237,15 @@ export function ActionBar({
           type="button"
           disabled={startDisabled}
           onClick={onStart}
-          className={`btn-power-ripple flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 ${
+          aria-label={
+            startDisabled
+              ? 'Start task (unavailable in Observe mode or while starting)'
+              : 'Start task'
+          }
+          className={`btn-power-ripple btn-interactive flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 ${
             startDisabled
               ? 'border-border-subtle text-text-muted/50 cursor-not-allowed'
-              : 'border-success/30 bg-success/5 text-success hover:bg-success/10 hover:shadow-glow-success'
+              : 'border-success/30 bg-success/5 text-success hover:bg-success/10 hover:border-success/40 hover:shadow-glow-success active:shadow-glow-success'
           }`}
         >
           <Play className="h-3.5 w-3.5 fill-current" />
@@ -238,10 +255,11 @@ export function ActionBar({
           type="button"
           disabled={pauseDisabled}
           onClick={onPause}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 ${
+          aria-label={pauseDisabled ? 'Pause agent (unavailable in Observe mode)' : 'Pause agent'}
+          className={`btn-interactive flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 ${
             pauseDisabled
               ? 'border-border-subtle text-text-muted/50 cursor-not-allowed'
-              : 'border-warning/30 bg-warning/5 text-warning hover:bg-warning/10'
+              : 'border-warning/30 bg-warning/5 text-warning hover:bg-warning/10 hover:border-warning/40'
           }`}
         >
           <Pause className="h-3.5 w-3.5 fill-current" />
@@ -276,10 +294,15 @@ export function ActionBar({
             type="button"
             disabled={killDisabled}
             onClick={onArmKill}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold border transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger/30 ${
+            aria-label={
+              killDisabled
+                ? 'Arm kill switch (unavailable in Observe mode)'
+                : 'Arm kill switch — stops all processes'
+            }
+            className={`btn-interactive flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger/30 ${
               killDisabled
                 ? 'border-transparent text-text-muted/30 cursor-not-allowed bg-transparent'
-                : 'border-danger/30 text-danger bg-danger/5 hover:bg-danger/10'
+                : 'border-danger/30 text-danger bg-danger/5 hover:bg-danger/10 hover:border-danger/40'
             }`}
           >
             <Power className="h-3.5 w-3.5" />
@@ -293,7 +316,8 @@ export function ActionBar({
             <button
               type="button"
               onClick={onConfirmKill}
-              className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-black tracking-widest border-2 border-danger bg-danger text-white shadow-glow-danger hover:scale-105 transition-transform animate-pulse"
+              aria-label="Confirm kill — stop all processes immediately"
+              className="btn-interactive flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-black tracking-widest border-2 border-danger bg-danger text-white shadow-glow-danger hover:shadow-glow-danger animate-pulse"
             >
               CONFIRM KILL
             </button>

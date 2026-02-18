@@ -72,8 +72,8 @@ export function FileMonitorToggle() {
         onClick={handleToggle}
         disabled={loading}
         className={`
-          flex items-center gap-2 rounded-md px-3 py-1.5 font-mono text-xs font-semibold transition-all
-          ${watching ? 'bg-green-500/20 text-green-400 hover:bg-green-500/30' : 'bg-gray-500/20 text-gray-400 hover:bg-gray-500/30'}
+          btn-interactive flex items-center gap-2 rounded-md px-3 py-1.5 font-mono text-xs font-semibold
+          ${watching ? 'bg-success/20 text-success hover:bg-success/30 border border-success/20' : 'bg-bg-panel/50 text-text-muted hover:bg-bg-panel/70 border border-border-subtle/50'}
           ${loading ? 'opacity-50 cursor-wait' : 'cursor-pointer'}
         `}
         aria-label={watching ? 'Stop file monitoring' : 'Start file monitoring'}
@@ -93,7 +93,7 @@ export function FileMonitorToggle() {
         <div className="flex items-center gap-2 text-xs">
           <div className="flex items-center gap-1.5">
             <div
-              className={`h-1.5 w-1.5 rounded-full ${lastState.loop_active ? 'bg-green-400 animate-pulse' : 'bg-gray-400'}`}
+              className={`h-1.5 w-1.5 rounded-full ${lastState.loop_active ? 'bg-success animate-pulse shadow-[0_0_6px_var(--success)]' : 'bg-text-muted'}`}
             />
             <span className="text-white/50">
               {lastState.loop_active ? 'Loop active' : 'Loop idle'}

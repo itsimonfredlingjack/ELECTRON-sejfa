@@ -1,17 +1,29 @@
-import { AnimatePresence, motion } from 'framer-motion';
-import { WifiOff, X } from 'lucide-react';
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
+import {
+  ChevronDown,
+  ChevronUp,
+  Cloud,
+  LayoutGrid,
+  Volume2,
+  VolumeX,
+  Wifi,
+  WifiOff,
+  X,
+} from 'lucide-react';
 import React from 'react';
 
 import type { Result } from '../../shared/api';
 import { deriveGates, deriveObjectiveText, deriveTimelineEvents } from '../adapters/loop-adapters';
+import { ActivityPanel, parseActivity } from '../components/activity-panel';
 import { EvidenceDrawer } from '../components/evidence-drawer';
 import { FileMonitorToggle } from '../components/file-monitor-toggle';
 import { KeyboardHelp } from '../components/keyboard-help';
-import { LogConsole } from '../components/log-console';
 import { MissionHeader } from '../components/mission-header';
+import { OrbitalReactor, type TDDPhase } from '../components/orbital-reactor';
 import { PowerUpSequence } from '../components/power-up-sequence';
 import { QualityGates } from '../components/quality-gates';
-import { RalphReactor, type ReactorState } from '../components/ralph-reactor';
+import type { ReactorState } from '../components/ralph-reactor';
+import { ThoughtStream } from '../components/thought-stream';
 import { ActionBar, type ToolbarMode } from '../components/toolbar';
 import { useElectronApi } from '../hooks/use-electron-api';
 import { useKeyboardShortcuts } from '../hooks/use-keyboard-shortcuts';
@@ -23,10 +35,19 @@ import {
   useAppMode,
   useCurrentNode,
   useEvents,
+  useFileTailActive,
+  useFileTailConnected,
+  useFileTailIterations,
   useGates,
   useObjective,
 } from '../stores/loop-store';
-import { useProcesses, useSocketConnected, useSocketLastError } from '../stores/system-store';
+import {
+  systemActions,
+  useProcesses,
+  useSocketConnected,
+  useSocketLastError,
+  useSoundMuted,
+} from '../stores/system-store';
 
 /* ── Helpers ──────────────────────────────────────────────── */
 
@@ -40,6 +61,45 @@ function msUntil(iso: string) {
 }
 function isOk(res: Result): res is { ok: true } {
   return res.ok;
+}
+
+/* ── Satellite Component ──────────────────────────────────── */
+
+function Satellite({
+  icon: Icon,
+  label,
+  active,
+  side,
+}: {
+  icon: React.ComponentType<{ className?: string }>;
+  label: string;
+  active: boolean;
+  side: 'left' | 'right';
+}) {
+  return (
+    <div
+      className={`absolute top-1/2 -translate-y-1/2 ${side === 'left' ? '-left-24' : '-right-24'} flex flex-col items-center gap-2 transition-opacity duration-500 ${active ? 'opacity-100' : 'opacity-50'}`}
+    >
+      <div
+        className={`relative flex h-12 w-12 items-center justify-center rounded-xl bg-black/50 border backdrop-blur-md ${active ? 'shadow-[0_0_20px_rgb(6_182_212/0.15)] border-cyan-500/30' : 'border-white/15'}`}
+      >
+        <Icon className={`h-6 w-6 ${active ? 'text-cyan-400' : 'text-white/35'}`} />
+        {active && (
+          <span className="absolute -top-1 -right-1 block h-2.5 w-2.5 rounded-full bg-cyan-400 shadow-[0_0_10px_rgb(6_182_212)] animate-pulse" />
+        )}
+      </div>
+      <span className="text-[9px] font-mono font-bold tracking-widest text-white/50 uppercase">
+        {label}
+      </span>
+
+      {/* Data Beam */}
+      {active && (
+        <div
+          className={`absolute top-1/2 -translate-y-1/2 h-0.5 w-24 bg-linear-to-r ${side === 'left' ? 'from-transparent to-cyan-500/40 -right-24' : 'from-cyan-500/40 to-transparent -left-24'}`}
+        />
+      )}
+    </div>
+  );
 }
 
 /* ── MainView ─────────────────────────────────────────────── */
@@ -57,11 +117,20 @@ export function MainView() {
   const socketLastError = useSocketLastError();
   const processes = useProcesses();
 
+  const fileTailConnected = useFileTailConnected();
+  const fileTailActive = useFileTailActive();
+  const fileTailIterations = useFileTailIterations();
+
   const [selectedGateId, setSelectedGateId] = React.useState<GateId>('local');
   const [drawerOpen, setDrawerOpen] = React.useState(false);
   const [helpOpen, setHelpOpen] = React.useState(false);
   const [overlayDismissed, setOverlayDismissed] = React.useState(false);
   const [showPowerUp, setShowPowerUp] = React.useState(true);
+  const [consoleExpanded, setConsoleExpanded] = React.useState(false);
+  const [actionFeedback, setActionFeedback] = React.useState<{
+    message: string;
+    type: 'success' | 'pending' | 'error';
+  } | null>(null);
 
   React.useEffect(() => {
     if (socketConnected) setOverlayDismissed(false);
@@ -87,26 +156,36 @@ export function MainView() {
     [derivedGates.gates, selectedGateId],
   );
 
-  // Reactor state: derived from connection + process + gate status
-  const derivedReactorState: ReactorState = React.useMemo(() => {
-    if (!socketConnected) return 'offline';
-    if (derivedGates.gates.some((g) => g.status === 'failed')) return 'critical';
-    if (Object.values(processes).some((p) => p?.state === 'running')) return 'active';
-    return 'idle';
-  }, [socketConnected, processes, derivedGates.gates]);
+  // Reactor state calculation (LEGACY)
+  const legacyReactorState: ReactorState = React.useMemo(() => {
+    if (socketConnected) {
+      if (derivedGates.gates.some((g) => g.status === 'failed')) return 'critical';
+      if (Object.values(processes).some((p) => p?.state === 'running')) return 'active';
+      return 'idle';
+    }
+    if (fileTailConnected) {
+      if (fileTailActive) return 'active';
+      return 'idle';
+    }
+    return 'offline';
+  }, [socketConnected, processes, derivedGates.gates, fileTailConnected, fileTailActive]);
 
-  // DEV: Shift+D cycles through reactor states for testing sounds/visuals
-  const DEBUG_STATES: ReactorState[] = ['idle', 'active', 'critical', 'offline'];
-  const [debugOverride, setDebugOverride] = React.useState<ReactorState | null>(null);
+  // DEV: Shift+D cycles through TDD phases
+  const DEBUG_PHASES: TDDPhase[] = ['idle', 'red', 'refactor', 'green', 'verify', 'offline'];
+  const [debugPhase, setDebugPhase] = React.useState<TDDPhase | null>(null);
 
   React.useEffect(() => {
     function handleDebugKey(e: KeyboardEvent) {
       if (e.shiftKey && e.key === 'D') {
-        setDebugOverride((prev) => {
-          if (prev === null) return DEBUG_STATES[0]!;
-          const idx = DEBUG_STATES.indexOf(prev);
+        setDebugPhase((prev) => {
+          if (prev === null) {
+            const first = DEBUG_PHASES[1];
+            return first ?? DEBUG_PHASES[0] ?? 'idle';
+          }
+          const idx = DEBUG_PHASES.indexOf(prev);
           const next = idx + 1;
-          return next >= DEBUG_STATES.length ? null : DEBUG_STATES[next]!;
+          const nextPhase = next >= DEBUG_PHASES.length ? DEBUG_PHASES[0] : DEBUG_PHASES[next];
+          return nextPhase ?? 'idle';
         });
       }
     }
@@ -114,10 +193,34 @@ export function MainView() {
     return () => window.removeEventListener('keydown', handleDebugKey);
   }, []);
 
-  const reactorState = debugOverride ?? derivedReactorState;
+  // TDD Phase Calculation
+  const tddPhase: TDDPhase = React.useMemo(() => {
+    if (debugPhase) return debugPhase;
+    if (legacyReactorState === 'offline') return 'offline';
+    if (legacyReactorState === 'idle') return 'idle';
+
+    const gates = derivedGates.gates;
+    const hasFailures = gates.some((g) => g.status === 'failed');
+    const allPassed = gates.every((g) => g.status === 'passed');
+    const isRunning = gates.some((g) => g.status === 'running');
+
+    if (hasFailures) return 'red';
+    if (allPassed) return 'verify';
+    if (isRunning) {
+      // If we are running but haven't failed yet, and aren't all passed -> REFACTOR/BUILD
+      // Or if we are 'Green' (passed tests) but deploying?
+      // For simplicity: Running = Refactor (Working)
+      return 'refactor';
+    }
+    // If we have some passed but stopped?
+    if (gates.some((g) => g.status === 'passed')) return 'green';
+
+    return 'idle';
+  }, [debugPhase, legacyReactorState, derivedGates.gates]);
 
   // Sound effects — reacts to state transitions
-  useSoundEffects(reactorState, killArmedUntil !== null);
+  const soundMuted = useSoundMuted();
+  useSoundEffects(legacyReactorState, killArmedUntil !== null, soundMuted);
 
   const controlsEnabled = appMode === 'control';
   const anyStartingOrRunning = Object.values(processes).some(
@@ -127,6 +230,21 @@ export function MainView() {
       p?.state === 'stopping' ||
       p?.state === 'backing_off',
   );
+
+  // Thought Stream Logic
+  // Extract the latest meaningful "thought" from logs
+  const latestThought = React.useMemo(() => {
+    for (const e of timelineEvents) {
+      const parsed = parseActivity(e);
+      if (parsed.title === 'Task Started' || parsed.title === 'Task Completed') continue;
+
+      return parsed.title + (parsed.detail ? `: ${parsed.detail}` : '');
+    }
+    return null;
+  }, [timelineEvents]);
+
+  const isThinking = tddPhase === 'refactor' || tddPhase === 'red';
+  const reduceMotion = useReducedMotion() ?? false;
 
   /* ── Callbacks ─────────────────────────────────────────── */
 
@@ -192,9 +310,12 @@ export function MainView() {
   }, [api, controlsEnabled, disarmKill, killToken]);
 
   const pauseAgent = React.useCallback(async () => {
+    setActionFeedback({ message: 'Pausing agent…', type: 'pending' });
     try {
       await api.processes.stop('agent');
+      setActionFeedback({ message: 'Agent paused', type: 'success' });
     } catch (err) {
+      setActionFeedback({ message: 'Pause failed', type: 'error' });
       loopActions.addEvent({
         type: 'log',
         at: nowIso(),
@@ -203,15 +324,19 @@ export function MainView() {
         message: `Pause failed: ${err instanceof Error ? err.message : String(err)}`,
       });
     }
+    setTimeout(() => setActionFeedback(null), 2500);
   }, [api]);
 
   const startAll = React.useCallback(async () => {
+    setActionFeedback({ message: 'Starting pipeline…', type: 'pending' });
     try {
       await api.socket.connect();
       await api.processes.start('monitor');
       await api.processes.start('agent');
       await api.processes.start('logTail');
+      setActionFeedback({ message: 'Pipeline started', type: 'success' });
     } catch (err) {
+      setActionFeedback({ message: 'Start failed', type: 'error' });
       loopActions.addEvent({
         type: 'log',
         at: nowIso(),
@@ -220,12 +345,16 @@ export function MainView() {
         message: `Start failed: ${err instanceof Error ? err.message : String(err)}`,
       });
     }
+    setTimeout(() => setActionFeedback(null), 2500);
   }, [api]);
 
   const retryConnect = React.useCallback(async () => {
+    setActionFeedback({ message: 'Retrying connection…', type: 'pending' });
     try {
       await api.socket.connect();
+      setActionFeedback({ message: 'Connected', type: 'success' });
     } catch (err) {
+      setActionFeedback({ message: 'Retry failed', type: 'error' });
       loopActions.addEvent({
         type: 'log',
         at: nowIso(),
@@ -234,6 +363,7 @@ export function MainView() {
         message: `Retry failed: ${err instanceof Error ? err.message : String(err)}`,
       });
     }
+    setTimeout(() => setActionFeedback(null), 2500);
   }, [api]);
 
   const setMode = React.useCallback((m: ToolbarMode) => {
@@ -258,23 +388,53 @@ export function MainView() {
 
   /* ── Render ────────────────────────────────────────────── */
 
+  // Calculate dynamic noise opacity based on chaos level (Red/Refactor = chaotic)
+  const chaosLevel = React.useMemo(() => {
+    if (tddPhase === 'red') return 1;
+    if (tddPhase === 'refactor') return 0.6;
+    if (tddPhase === 'idle') return 0.2;
+    return 0; // Green/Verify = Clarity
+  }, [tddPhase]);
+
   return (
     <div
-      className="relative h-screen w-screen overflow-hidden bg-bg-deep text-white select-none hud-ambient noise-overlay"
-      data-reactor={reactorState}
+      className="relative h-screen w-screen overflow-hidden bg-bg-deep text-white select-none hud-ambient"
+      data-reactor={legacyReactorState}
+      style={
+        {
+          '--noise-opacity': `${0.02 + chaosLevel * 0.05}`, // Dynamic noise — stronger base for depth
+          '--scanline-opacity': `${0.035 + chaosLevel * 0.04}`,
+        } as React.CSSProperties
+      }
     >
       {/* ── BACKGROUND LAYERS (atmosphere) ──────────────── */}
       <div className="pointer-events-none absolute inset-0 z-0">
-        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/60" />
-        <div className="scanline" />
+        <div className="absolute inset-0 bg-linear-to-b from-black/20 via-transparent to-black/30" />
+        <div className="hud-grid" />
+        <div className="hud-center-well" />
+        <div className="scanline" style={{ opacity: 'var(--scanline-opacity)' }} />
+        <div className="noise-overlay" style={{ opacity: 'var(--noise-opacity)' }} />
+
         {/* Critical-state red pulse overlay */}
-        {reactorState === 'critical' && (
+        {tddPhase === 'red' && (
           <div
             className="absolute inset-0"
             style={{
               background:
-                'radial-gradient(ellipse at center, rgb(239 68 68 / 0.08), transparent 70%)',
-              animation: 'ambient-pulse 2s ease-in-out infinite',
+                'radial-gradient(ellipse at center, rgb(239 68 68 / 0.15), transparent 70%)',
+              animation: 'ambient-pulse 0.5s ease-in-out infinite',
+            }}
+          />
+        )}
+
+        {/* Offline-state red tint (disconnected) */}
+        {legacyReactorState === 'offline' && (
+          <div
+            className="absolute inset-0 transition-opacity duration-500"
+            style={{
+              background:
+                'radial-gradient(ellipse at 50% 50%, rgb(239 68 68 / 0.06), transparent 60%), linear-gradient(180deg, transparent 0%, rgb(239 68 68 / 0.04) 100%)',
+              animation: 'ambient-pulse 3s ease-in-out infinite',
             }}
           />
         )}
@@ -287,7 +447,29 @@ export function MainView() {
       <div className="relative z-10 grid h-full grid-rows-[auto_1fr_auto]">
         <header className="flex items-center justify-between border-b border-white/5 bg-black/20 backdrop-blur-sm">
           <MissionHeader objectiveText={derivedObjective.text} connected={socketConnected} />
-          <div className="shrink-0 pr-4">
+          <div className="flex shrink-0 items-center gap-2 pr-4">
+            <button
+              type="button"
+              onClick={() => systemActions.toggleSoundMuted()}
+              className={`rounded p-1.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 ${
+                soundMuted
+                  ? 'text-text-muted hover:text-text-secondary'
+                  : 'text-text-secondary hover:text-primary'
+              }`}
+              aria-label={soundMuted ? 'Unmute sounds' : 'Mute sounds'}
+              title={soundMuted ? 'Sound on' : 'Sound off'}
+            >
+              {soundMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
+            </button>
+            <button
+              type="button"
+              onClick={() => setHelpOpen((v) => !v)}
+              className="text-[11px] font-medium text-text-muted hover:text-text-secondary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 rounded px-2 py-1"
+              aria-label="Show keyboard shortcuts"
+              title="Press ? for shortcuts"
+            >
+              ? Shortcuts
+            </button>
             <FileMonitorToggle />
           </div>
         </header>
@@ -307,22 +489,51 @@ export function MainView() {
 
           {/* The Arc Reactor */}
           <motion.div
-            className="relative z-20"
-            initial={{ scale: 0.8, opacity: 0 }}
+            className="relative z-20 flex items-center justify-center"
+            initial={reduceMotion ? { scale: 1, opacity: 1 } : { scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            transition={{ duration: 0.6, ease: 'easeOut' }}
+            transition={reduceMotion ? { duration: 0 } : { duration: 0.6, ease: 'easeOut' }}
           >
-            <RalphReactor state={reactorState} currentNode={currentNode} />
+            {/* Satellites */}
+            <Satellite
+              side="left"
+              label="JIRA"
+              icon={LayoutGrid}
+              active={legacyReactorState !== 'offline' && legacyReactorState !== 'idle'}
+            />
+
+            <OrbitalReactor
+              state={legacyReactorState}
+              tddPhase={tddPhase}
+              currentNode={currentNode ?? (fileTailActive ? `ITER ${fileTailIterations}` : null)}
+              gates={derivedGates.gates}
+            />
+
+            <Satellite
+              side="right"
+              label="AZURE"
+              icon={Cloud}
+              active={legacyReactorState !== 'offline' && legacyReactorState !== 'idle'}
+            />
           </motion.div>
 
-          {/* Anchored bottom bar: Quality Gates (left) + Controls (right) */}
-          <div className="absolute bottom-8 left-6 right-6 z-30 flex items-end justify-between">
+          {/* Thought Stream (top-left under IDLE, with spacing) */}
+          <div className="absolute top-6 left-6 z-40 max-w-sm">
+            <AnimatePresence>
+              {(latestThought || isThinking) && (
+                <ThoughtStream thought={latestThought} isThinking={isThinking} />
+              )}
+            </AnimatePresence>
+          </div>
+
+          {/* Anchored bottom bar: Quality Gates (left) + Controls (right) — docked to grid */}
+          <div className="absolute bottom-6 left-6 right-6 z-30 flex items-end justify-between gap-6">
             {/* Quality Gate Sentinels */}
             <motion.div
               className="tech-panel shine-sweep rounded-xl px-3 py-2"
-              initial={{ y: 20, opacity: 0 }}
+              initial={reduceMotion ? { y: 0, opacity: 1 } : { y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
-              transition={{ duration: 0.4, delay: 0.2 }}
+              transition={reduceMotion ? { duration: 0 } : { duration: 0.4, delay: 0.2 }}
             >
               <span
                 className="corner-bl absolute -bottom-px -left-px block h-[10px] w-[10px] border-b-2 border-l-2 rounded-bl"
@@ -332,42 +543,84 @@ export function MainView() {
                 className="corner-br absolute -bottom-px -right-px block h-[10px] w-[10px] border-b-2 border-r-2 rounded-br"
                 style={{ borderColor: 'rgb(var(--ambient-primary-rgb))' }}
               />
-              <QualityGates gates={derivedGates.gates} />
+              <div className="flex flex-col gap-2">
+                <QualityGates gates={derivedGates.gates} />
+                <p className="text-[10px] font-medium text-text-muted/80 text-center">
+                  Pipeline: Jira → Agent → Actions → Deploy → Verify · Press 1–5 for evidence
+                </p>
+              </div>
             </motion.div>
 
-            {/* Action Controls */}
+            {/* Action Controls — primary pilot controls, first-class panel */}
             <motion.div
-              className="tech-panel shine-sweep rounded-xl px-3 py-2"
-              initial={{ y: 20, opacity: 0 }}
+              className="action-panel tech-panel shine-sweep rounded-xl px-4 py-2.5"
+              initial={reduceMotion ? { y: 0, opacity: 1 } : { y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
-              transition={{ duration: 0.4, delay: 0.3 }}
+              transition={reduceMotion ? { duration: 0 } : { duration: 0.4, delay: 0.3 }}
             >
               <span
                 className="corner-bl absolute -bottom-px -left-px block h-[10px] w-[10px] border-b-2 border-l-2 rounded-bl"
-                style={{ borderColor: 'rgb(var(--ambient-primary-rgb))' }}
+                style={{ borderColor: 'rgb(var(--primary-rgb))' }}
               />
               <span
                 className="corner-br absolute -bottom-px -right-px block h-[10px] w-[10px] border-b-2 border-r-2 rounded-br"
-                style={{ borderColor: 'rgb(var(--ambient-primary-rgb))' }}
+                style={{ borderColor: 'rgb(var(--primary-rgb))' }}
               />
-              <ActionBar
-                mode={appMode}
-                startDisabled={!controlsEnabled || anyStartingOrRunning}
-                pauseDisabled={!controlsEnabled}
-                killDisabled={!controlsEnabled}
-                killArmedUntil={killArmedUntil}
-                onStart={startAll}
-                onPause={pauseAgent}
-                onArmKill={armKill}
-                onConfirmKill={confirmKill}
-              />
+              <div className="flex flex-col items-end gap-2">
+                {actionFeedback && (
+                  <span
+                    className={`text-[11px] font-semibold px-2 py-1 rounded transition-opacity ${
+                      actionFeedback.type === 'success'
+                        ? 'text-success bg-success/10'
+                        : actionFeedback.type === 'error'
+                          ? 'text-danger bg-danger/10'
+                          : 'text-primary bg-primary/10'
+                    }`}
+                    role="status"
+                    aria-live="polite"
+                  >
+                    {actionFeedback.message}
+                  </span>
+                )}
+                <ActionBar
+                  mode={appMode}
+                  startDisabled={!controlsEnabled || anyStartingOrRunning}
+                  pauseDisabled={!controlsEnabled}
+                  killDisabled={!controlsEnabled}
+                  killArmedUntil={killArmedUntil}
+                  onStart={startAll}
+                  onPause={pauseAgent}
+                  onArmKill={armKill}
+                  onConfirmKill={confirmKill}
+                />
+              </div>
             </motion.div>
           </div>
         </main>
 
-        {/* ROW 3: CONSOLE DRAWER (Anchored Footer) */}
-        <footer className="min-h-32 max-h-[40vh] h-48 resize-y overflow-auto bg-black/40 backdrop-blur-md">
-          <LogConsole events={timelineEvents} />
+        {/* ROW 3: CONSOLE DRAWER (Collapsible — stängd som standard) */}
+        <footer
+          className={`flex flex-col overflow-hidden border-t border-white/5 bg-black/40 backdrop-blur-md transition-[height] duration-300 ease-out ${
+            consoleExpanded ? 'min-h-32 max-h-[40vh] h-48 resize-y' : 'h-9 shrink-0'
+          }`}
+        >
+          {consoleExpanded ? (
+            <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+              <ActivityPanel events={timelineEvents} onCollapse={() => setConsoleExpanded(false)} />
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setConsoleExpanded(true)}
+              className="flex h-full w-full items-center justify-between px-4 py-0 transition-colors hover:bg-white/5"
+              aria-label="Expand console"
+            >
+              <span className="font-mono text-[11px] font-bold uppercase tracking-wider text-text-muted">
+                Activity · {timelineEvents.length} events
+              </span>
+              <ChevronUp className="h-4 w-4 text-text-muted" />
+            </button>
+          )}
         </footer>
       </div>
 
@@ -388,39 +641,54 @@ export function MainView() {
               type="button"
               onClick={() => setOverlayDismissed(true)}
               className="absolute top-4 right-4 p-1.5 rounded-lg text-white/40 hover:text-white hover:bg-white/5 transition-colors"
-              aria-label="Dismiss overlay"
+              aria-label="Dismiss and continue in offline mode"
             >
               <X className="h-5 w-5" />
             </button>
-            <div className="flex flex-col items-center gap-4 text-center max-w-md">
-              <div className="h-16 w-16 rounded-full bg-red-500/10 flex items-center justify-center">
-                <WifiOff className="h-8 w-8 text-red-400 animate-pulse" />
+            <div className="flex flex-col items-center gap-5 text-center max-w-md px-6">
+              <div className="h-16 w-16 rounded-full bg-danger/10 flex items-center justify-center">
+                <WifiOff className="h-8 w-8 text-danger animate-pulse" />
               </div>
               <h2 className="font-heading text-xl font-semibold text-white tracking-tight">
-                Backend Unreachable
+                Disconnected from Backend
               </h2>
-              <p className="text-sm text-white/50">
-                Cannot connect to the SEJFA monitor backend.
-                {socketLastError && (
-                  <span className="block mt-1 font-mono text-xs text-red-400">
-                    {socketLastError}
-                  </span>
-                )}
-              </p>
+              <div className="flex flex-col gap-3 text-sm text-text-secondary text-left">
+                <p>
+                  Live pipeline control and updates are unavailable until the connection is
+                  restored.
+                </p>
+                <div className="rounded-lg border border-border-subtle bg-bg-panel/50 p-4 space-y-2">
+                  <p className="font-semibold text-text-primary">Still available:</p>
+                  <ul className="list-disc list-inside space-y-1 text-text-secondary">
+                    <li>View activity log and evidence</li>
+                    <li>Browse gate details (press 1–5)</li>
+                    <li>Switch between Observe and Control</li>
+                  </ul>
+                </div>
+                <div className="rounded-lg border border-border-subtle bg-bg-panel/50 p-4 space-y-2">
+                  <p className="font-semibold text-text-primary">What you can do:</p>
+                  <ul className="list-disc list-inside space-y-1 text-text-secondary">
+                    <li>Retry connection below</li>
+                    <li>Dismiss to continue in offline view</li>
+                  </ul>
+                </div>
+              </div>
               <div className="flex items-center gap-3">
                 <button
                   type="button"
                   onClick={retryConnect}
-                  className="px-4 py-2 rounded-lg border border-cyan-500/30 text-cyan-400 text-sm font-semibold hover:bg-cyan-500/10 transition-colors"
+                  className="btn-interactive px-4 py-2 rounded-lg border border-primary/30 bg-primary/10 text-primary text-sm font-semibold hover:bg-primary/20 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
+                  aria-label="Retry connection to backend"
                 >
                   Retry Connection
                 </button>
                 <button
                   type="button"
                   onClick={() => setOverlayDismissed(true)}
-                  className="px-4 py-2 rounded-lg border border-white/10 text-white/50 text-sm font-medium hover:bg-white/5 transition-colors"
+                  className="btn-interactive px-4 py-2 rounded-lg border border-border-subtle text-text-secondary text-sm font-medium hover:bg-bg-panel-hover transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
+                  aria-label="Dismiss and continue in offline mode"
                 >
-                  Dismiss
+                  Continue Offline
                 </button>
               </div>
             </div>

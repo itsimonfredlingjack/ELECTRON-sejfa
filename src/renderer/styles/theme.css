@@ -12,10 +12,10 @@
 
   /* ── Modern Professional Dark ─────────────────────────────────── */
   /* Rich, neutral dark canvas — not blue-tinted, not pure black    */
-  --bg-deep: #0a0a0e;
-  --bg-panel: rgb(18 18 22 / 0.82);
+  --bg-deep: #0c0c12;
+  --bg-panel: rgb(18 18 22 / 0.78);
   --bg-panel-hover: rgb(26 26 32 / 0.9);
-  --glass-panel: rgb(18 18 24 / 0.68);
+  --glass-panel: rgb(18 18 24 / 0.62);
 
   --border-subtle: rgb(255 255 255 / 0.12);
   --border-glow: rgb(99 102 241 / 0.2);
@@ -63,8 +63,9 @@
   --glow-warning: 0 0 0 1px rgb(var(--warning-rgb) / 0.15), 0 8px 24px
     rgb(var(--warning-rgb) / 0.08);
 
-  /* Typography */
-  --font-ui: "Inter", system-ui, sans-serif;
+  /* Typography — display vs body pairing */
+  --font-heading: "Rajdhani", system-ui, sans-serif;
+  --font-ui: "DM Sans", system-ui, sans-serif;
   --font-mono: "JetBrains Mono", "Fira Code", ui-monospace, SFMono-Regular, monospace;
 
   /* Back-compat mappings */

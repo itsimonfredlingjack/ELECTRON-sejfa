@@ -6,6 +6,7 @@ import type { LoopEvent, ManagedProcessStatus, SocketStatus } from './shared/typ
 import { ChildProcessManager } from './main/child-processes';
 import { FileTailService } from './main/file-tail-service';
 import { registerIpcHandlers } from './main/ipc-handlers';
+import { setApplicationMenu } from './main/menu';
 import { registerAppSecurityHandlers } from './main/security';
 import { registerGlobalShortcuts } from './main/shortcuts';
 import { SocketBridge } from './main/socket-bridge';
@@ -92,6 +93,7 @@ function updateTray() {
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
   registerAppSecurityHandlers({ isDev });
+  setApplicationMenu();
 
   processes = new ChildProcessManager();
   socket = new SocketBridge(process.env.SEJFA_MONITOR_URL ?? 'http://localhost:5000');
@@ -204,7 +206,16 @@ app.whenReady().then(() => {
   fileTail.on('change', (state) => {
     const at = new Date().toISOString();
 
-    // Emit different events based on state
+    // Broadcast structured state so the reactor can respond
+    broadcast({
+      type: 'filetail/state',
+      at,
+      loopActive: state.loop_active,
+      iterations: state.iterations,
+      ...(state.completed_at ? { completedAt: state.completed_at } : {}),
+    });
+
+    // Also emit log events for the console
     if (state.loop_active) {
       broadcast({
         type: 'log',

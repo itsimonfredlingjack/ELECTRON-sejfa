@@ -158,6 +158,13 @@ export function registerIpcHandlers(ctx: IpcContext) {
   ipcMain.handle(Channel.FileTailStart, async (): Promise<Result> => {
     try {
       ctx.fileTail.start();
+      const last = ctx.fileTail.getLastState();
+      ctx.broadcast({
+        type: 'filetail/started',
+        at: nowIso(),
+        loopActive: last?.loop_active ?? false,
+        iterations: last?.iterations ?? 0,
+      });
       ctx.broadcast({
         type: 'log',
         at: nowIso(),
@@ -174,6 +181,7 @@ export function registerIpcHandlers(ctx: IpcContext) {
   ipcMain.handle(Channel.FileTailStop, async (): Promise<Result> => {
     try {
       ctx.fileTail.stop();
+      ctx.broadcast({ type: 'filetail/stopped', at: nowIso() });
       ctx.broadcast({
         type: 'log',
         at: nowIso(),

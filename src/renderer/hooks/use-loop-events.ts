@@ -129,6 +129,15 @@ export function useLoopEvents() {
           loop.setCurrentNode(node);
           break;
         }
+        case 'filetail/state':
+          loop.setFileTailState(event.loopActive, event.iterations);
+          break;
+        case 'filetail/started':
+          loop.setFileTailState(event.loopActive, event.iterations);
+          break;
+        case 'filetail/stopped':
+          loop.setFileTailDisconnected();
+          break;
         default:
           break;
       }

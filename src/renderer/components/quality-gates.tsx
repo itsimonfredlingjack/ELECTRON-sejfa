@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { CheckCircle2, Code2, FlaskConical, Rocket, ShieldCheck } from 'lucide-react';
-import React from 'react';
+import type React from 'react';
 
 import type { GateStatusUI, GateUI } from '../models/ui';
 
@@ -81,13 +81,16 @@ function SentinelCard({
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: def.gateIndex * 0.08 }}
+      whileHover={{ scale: 1.02, y: -1 }}
+      whileTap={{ scale: 0.99 }}
     >
       {/* Scanning laser for running state */}
       {isRunning && (
         <div
           className="absolute top-0 bottom-0 w-8 pointer-events-none"
           style={{
-            background: `linear-gradient(90deg, transparent, rgb(var(--primary-rgb) / 0.15), transparent)`,
+            background:
+              'linear-gradient(90deg, transparent, rgb(var(--primary-rgb) / 0.15), transparent)',
             animation: 'sentinel-scan 2s ease-in-out infinite',
           }}
         />
@@ -132,7 +135,7 @@ function SentinelCard({
 
       {/* Label */}
       <span
-        className="text-[11px] font-bold uppercase tracking-[0.12em] transition-colors duration-300"
+        className="font-heading text-[11px] font-bold uppercase tracking-[0.12em] transition-colors duration-300"
         style={{
           color,
           ...(isPassed && {

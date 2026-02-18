@@ -409,6 +409,104 @@
   }
 }
 
+/* ── Activity Card Enter ─────────────────────────────────────── */
+
+@keyframes activity-card-enter {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ── Orbital Reactor Animations ───────────────────────────────── */
+
+/* Particle fade in/out while drifting along orbital paths */
+@keyframes orbital-particle-drift {
+  0%,
+  100% {
+    opacity: 0.1;
+  }
+
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.orbital-particle-drift {
+  animation: orbital-particle-drift 6s ease-in-out infinite;
+}
+
+/* Scale + opacity breathing for offline pipeline nodes */
+@keyframes orbital-node-breathe {
+  0%,
+  100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.5;
+    transform: scale(1.04);
+  }
+}
+
+.orbital-node-breathe {
+  animation: orbital-node-breathe 4s ease-in-out infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+/* Subtle shake for failed nodes in critical state */
+@keyframes orbital-node-shake {
+  0%,
+  90%,
+  100% {
+    transform: translate(0);
+  }
+
+  92% {
+    transform: translate(-1.5px, 0.5px);
+  }
+
+  94% {
+    transform: translate(1px, -0.5px);
+  }
+
+  96% {
+    transform: translate(-0.5px, 1px);
+  }
+
+  98% {
+    transform: translate(1px, 0);
+  }
+}
+
+.orbital-node-shake {
+  animation: orbital-node-shake 2s ease-in-out infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+/* Slow dash-flow for idle connector paths */
+@keyframes orbital-connector-flow {
+  from {
+    stroke-dashoffset: 0;
+  }
+
+  to {
+    stroke-dashoffset: -20;
+  }
+}
+
+.orbital-connector-flow {
+  animation: orbital-connector-flow 4s linear infinite;
+}
+
 /* ── Shine Sweep (holographic hover) ──────────────────────────── */
 
 @keyframes shine-sweep {

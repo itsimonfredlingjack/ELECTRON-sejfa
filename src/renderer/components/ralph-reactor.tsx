@@ -71,7 +71,7 @@ export function RalphReactor({ state, currentNode }: RalphReactorProps) {
       <motion.div
         animate={{ scale: [1, 1.05, 1], opacity: [0.8, 1, 0.8] }}
         transition={{ duration: pulseSpeed, repeat: Number.POSITIVE_INFINITY }}
-        className={`flex h-40 w-40 items-center justify-center rounded-full bg-gradient-to-br ${GRADIENT[state]} backdrop-blur-md ${GLOW[state]}`}
+        className={`flex h-40 w-40 items-center justify-center rounded-full bg-linear-to-br ${GRADIENT[state]} backdrop-blur-md ${GLOW[state]}`}
       >
         <div className="text-center">
           <h1

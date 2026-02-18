@@ -64,16 +64,16 @@ function tone(opts: {
   gain.gain.linearRampToValueAtTime(volume, now + attack);
   gain.gain.linearRampToValueAtTime(volume * sustain, now + attack + decay);
 
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+  osc.start(now);
+
   if (duration > 0) {
     const releaseStart = now + duration - release;
     gain.gain.setValueAtTime(volume * sustain, releaseStart);
     gain.gain.linearRampToValueAtTime(0, now + duration);
     osc.stop(now + duration + 0.05);
   }
-
-  osc.connect(gain);
-  gain.connect(ctx.destination);
-  osc.start(now);
 
   return {
     stop: () => {
@@ -265,15 +265,24 @@ function playOffline(): void {
 
 /* ── React Hook ─────────────────────────────────────────── */
 
-export function useSoundEffects(reactorState: ReactorState, killArmed: boolean) {
+export function useSoundEffects(reactorState: ReactorState, killArmed: boolean, muted: boolean) {
   const prevState = React.useRef<ReactorState>(reactorState);
   const humRef = React.useRef<{ stop: () => void } | null>(null);
 
+  // When muted, stop all audio immediately
+  React.useEffect(() => {
+    if (muted) {
+      humRef.current?.stop();
+      humRef.current = null;
+    }
+  }, [muted]);
+
   // Manage looping hums based on reactor state
   React.useEffect(() => {
-    // Stop any existing hum before starting a new one
     humRef.current?.stop();
     humRef.current = null;
+
+    if (muted) return;
 
     if (reactorState === 'idle') {
       humRef.current = playIdleHum();
@@ -285,14 +294,15 @@ export function useSoundEffects(reactorState: ReactorState, killArmed: boolean) 
       humRef.current?.stop();
       humRef.current = null;
     };
-  }, [reactorState]);
+  }, [reactorState, muted]);
 
   // One-shot sounds on state transitions
   React.useEffect(() => {
+    if (muted) return;
+
     const prev = prevState.current;
     prevState.current = reactorState;
 
-    // Don't fire on initial mount
     if (prev === reactorState) return;
 
     if (reactorState === 'critical') {
@@ -300,20 +310,19 @@ export function useSoundEffects(reactorState: ReactorState, killArmed: boolean) 
     } else if (reactorState === 'offline') {
       playOffline();
     } else if (prev === 'critical') {
-      // Recovered from critical — play success
       playSuccessChirp();
     } else if (prev === 'active' && reactorState === 'idle') {
-      // Work completed — play success
       playSuccessChirp();
     }
-  }, [reactorState]);
+  }, [reactorState, muted]);
 
   // Kill switch armed sound
   const prevKillArmed = React.useRef(false);
   React.useEffect(() => {
+    if (muted) return;
     if (killArmed && !prevKillArmed.current) {
       playKillArmed();
     }
     prevKillArmed.current = killArmed;
-  }, [killArmed]);
+  }, [killArmed, muted]);
 }

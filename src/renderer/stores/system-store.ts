@@ -12,12 +12,14 @@ export type SystemState = {
   processes: Partial<Record<ManagedProcessId, ManagedProcessStatus>>;
   socket: { connected: boolean; lastError?: string };
   lastHeartbeat: IsoTimestamp | null;
+  soundMuted: boolean;
 };
 
 const INITIAL_SYSTEM_STATE: SystemState = {
   processes: {},
   socket: { connected: false },
   lastHeartbeat: null,
+  soundMuted: false,
 };
 
 export const useSystemStore = create<SystemState>(() => INITIAL_SYSTEM_STATE);
@@ -53,6 +55,10 @@ export const systemActions = {
   touchHeartbeat: (at?: IsoTimestamp) => {
     useSystemStore.setState({ lastHeartbeat: at ?? nowIso() });
   },
+
+  toggleSoundMuted: () => {
+    useSystemStore.setState((s) => ({ soundMuted: !s.soundMuted }));
+  },
 };
 
 export function useSystemActions() {
@@ -73,4 +79,8 @@ export function useSocketLastError() {
 
 export function useLastHeartbeat() {
   return useSystemStore((s) => s.lastHeartbeat);
+}
+
+export function useSoundMuted() {
+  return useSystemStore((s) => s.soundMuted);
 }

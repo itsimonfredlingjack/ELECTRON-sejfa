@@ -10,6 +10,9 @@ export type LoopState = {
   events: LoopEvent[];
   currentNode: string | null;
   appMode: AppMode;
+  fileTailConnected: boolean;
+  fileTailActive: boolean;
+  fileTailIterations: number;
 };
 
 const MAX_EVENTS = 1000;
@@ -20,6 +23,9 @@ const INITIAL_LOOP_STATE: LoopState = {
   events: [],
   currentNode: null,
   appMode: 'observe',
+  fileTailConnected: false,
+  fileTailActive: false,
+  fileTailIterations: 0,
 };
 
 export const useLoopStore = create<LoopState>(() => INITIAL_LOOP_STATE);
@@ -94,6 +100,22 @@ export const loopActions = {
   setAppMode: (appMode: AppMode) => {
     useLoopStore.setState({ appMode });
   },
+
+  setFileTailState: (active: boolean, iterations: number) => {
+    useLoopStore.setState({
+      fileTailConnected: true,
+      fileTailActive: active,
+      fileTailIterations: iterations,
+    });
+  },
+
+  setFileTailDisconnected: () => {
+    useLoopStore.setState({
+      fileTailConnected: false,
+      fileTailActive: false,
+      fileTailIterations: 0,
+    });
+  },
 };
 
 export function useLoopActions() {
@@ -118,4 +140,16 @@ export function useCurrentNode() {
 
 export function useAppMode() {
   return useLoopStore((s) => s.appMode);
+}
+
+export function useFileTailConnected() {
+  return useLoopStore((s) => s.fileTailConnected);
+}
+
+export function useFileTailActive() {
+  return useLoopStore((s) => s.fileTailActive);
+}
+
+export function useFileTailIterations() {
+  return useLoopStore((s) => s.fileTailIterations);
 }

@@ -9,6 +9,7 @@ export default defineConfig(async () => {
 
   return {
     plugins: [react(), tailwindcss()],
+    server: { port: 5180 },
     test: {
       environment: 'jsdom',
       globals: true,
