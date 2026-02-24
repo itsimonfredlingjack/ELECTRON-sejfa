@@ -13,6 +13,7 @@ export type SystemState = {
   socket: { connected: boolean; lastError?: string };
   lastHeartbeat: IsoTimestamp | null;
   soundMuted: boolean;
+  monitorConnected: boolean;
 };
 
 const INITIAL_SYSTEM_STATE: SystemState = {
@@ -20,6 +21,7 @@ const INITIAL_SYSTEM_STATE: SystemState = {
   socket: { connected: false },
   lastHeartbeat: null,
   soundMuted: false,
+  monitorConnected: false,
 };
 
 export const useSystemStore = create<SystemState>(() => INITIAL_SYSTEM_STATE);
@@ -59,6 +61,10 @@ export const systemActions = {
   toggleSoundMuted: () => {
     useSystemStore.setState((s) => ({ soundMuted: !s.soundMuted }));
   },
+
+  setMonitorConnected: (connected: boolean) => {
+    useSystemStore.setState({ monitorConnected: connected });
+  },
 };
 
 export function useSystemActions() {
@@ -83,4 +89,8 @@ export function useLastHeartbeat() {
 
 export function useSoundMuted() {
   return useSystemStore((s) => s.soundMuted);
+}
+
+export function useMonitorConnected() {
+  return useSystemStore((s) => s.monitorConnected);
 }

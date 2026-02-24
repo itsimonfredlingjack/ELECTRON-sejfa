@@ -1,6 +1,13 @@
 import { create } from 'zustand';
 
-import type { GateState, LoopEvent, TaskObjective } from '../../shared/types';
+import type {
+  CompletionInfo,
+  CostUpdate,
+  GateState,
+  LoopEvent,
+  StuckAlert,
+  TaskObjective,
+} from '../../shared/types';
 
 export type AppMode = 'observe' | 'control';
 
@@ -13,6 +20,10 @@ export type LoopState = {
   fileTailConnected: boolean;
   fileTailActive: boolean;
   fileTailIterations: number;
+  cost: CostUpdate | null;
+  stuckAlert: StuckAlert | null;
+  completionInfo: CompletionInfo | null;
+  activeStage: string | null;
 };
 
 const MAX_EVENTS = 1000;
@@ -26,6 +37,10 @@ const INITIAL_LOOP_STATE: LoopState = {
   fileTailConnected: false,
   fileTailActive: false,
   fileTailIterations: 0,
+  cost: null,
+  stuckAlert: null,
+  completionInfo: null,
+  activeStage: null,
 };
 
 export const useLoopStore = create<LoopState>(() => INITIAL_LOOP_STATE);
@@ -116,6 +131,26 @@ export const loopActions = {
       fileTailIterations: 0,
     });
   },
+
+  setCost: (cost: CostUpdate) => {
+    useLoopStore.setState({ cost });
+  },
+
+  setStuckAlert: (alert: StuckAlert | null) => {
+    useLoopStore.setState({ stuckAlert: alert });
+  },
+
+  setCompletion: (info: CompletionInfo) => {
+    useLoopStore.setState({ completionInfo: info });
+  },
+
+  clearCompletion: () => {
+    useLoopStore.setState({ completionInfo: null });
+  },
+
+  setActiveStage: (stage: string | null) => {
+    useLoopStore.setState({ activeStage: stage });
+  },
 };
 
 export function useLoopActions() {
@@ -152,4 +187,20 @@ export function useFileTailActive() {
 
 export function useFileTailIterations() {
   return useLoopStore((s) => s.fileTailIterations);
+}
+
+export function useCost() {
+  return useLoopStore((s) => s.cost);
+}
+
+export function useStuckAlert() {
+  return useLoopStore((s) => s.stuckAlert);
+}
+
+export function useCompletionInfo() {
+  return useLoopStore((s) => s.completionInfo);
+}
+
+export function useActiveStage() {
+  return useLoopStore((s) => s.activeStage);
 }

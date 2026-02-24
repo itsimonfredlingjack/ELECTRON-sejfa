@@ -7,6 +7,7 @@ import { ChildProcessManager } from './main/child-processes';
 import { FileTailService } from './main/file-tail-service';
 import { registerIpcHandlers } from './main/ipc-handlers';
 import { setApplicationMenu } from './main/menu';
+import { MonitorBridge } from './main/monitor-bridge';
 import { registerAppSecurityHandlers } from './main/security';
 import { registerGlobalShortcuts } from './main/shortcuts';
 import { SocketBridge } from './main/socket-bridge';
@@ -25,6 +26,7 @@ let tray: TrayController | null = null;
 let processes: ChildProcessManager | null = null;
 let socket: SocketBridge | null = null;
 let fileTail: FileTailService | null = null;
+let monitorBridge: MonitorBridge | null = null;
 
 let lastObjective: string | undefined;
 let lastGate: string | undefined;
@@ -98,6 +100,7 @@ app.whenReady().then(() => {
   processes = new ChildProcessManager();
   socket = new SocketBridge(process.env.SEJFA_MONITOR_URL ?? 'http://localhost:5000');
   fileTail = new FileTailService(process.env.SEJFA_LOOP_PROJECT_PATH);
+  monitorBridge = new MonitorBridge(process.env.SEJFA_MONITOR_API_URL ?? 'http://localhost:8100');
 
   const win = showOrCreateWindow();
   registerGlobalShortcuts({ toggleWindow: toggleWindowVisibility });
@@ -124,6 +127,7 @@ app.whenReady().then(() => {
     processes,
     socket,
     fileTail,
+    monitorBridge,
     tray,
     broadcast,
   });
@@ -244,6 +248,29 @@ app.whenReady().then(() => {
       message: `FileTail error: ${error.message}`,
     });
   });
+
+  // Monitor API bridge — forward events to renderer
+  monitorBridge.on('status', (st: { connected: boolean }) => {
+    broadcast({
+      type: 'monitor/status',
+      at: new Date().toISOString(),
+      connected: st.connected,
+    });
+    broadcast({
+      type: 'log',
+      at: new Date().toISOString(),
+      runId: 'monitor-api',
+      level: st.connected ? 'info' : 'warn',
+      message: st.connected ? 'Monitor API connected' : 'Monitor API disconnected',
+    });
+  });
+
+  monitorBridge.on('monitorEvent', (event: LoopEvent) => {
+    broadcast(event);
+  });
+
+  // Auto-connect to Monitor API
+  monitorBridge.connect();
 
   // Default behavior: try connecting immediately, but tolerate backend absence.
   socket.connect();

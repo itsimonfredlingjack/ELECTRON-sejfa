@@ -15,6 +15,8 @@ import React from 'react';
 import type { Result } from '../../shared/api';
 import { deriveGates, deriveObjectiveText, deriveTimelineEvents } from '../adapters/loop-adapters';
 import { ActivityPanel, parseActivity } from '../components/activity-panel';
+import { CompletionPanel } from '../components/completion-panel';
+import { CostCounter } from '../components/cost-counter';
 import { EvidenceDrawer } from '../components/evidence-drawer';
 import { FileMonitorToggle } from '../components/file-monitor-toggle';
 import { KeyboardHelp } from '../components/keyboard-help';
@@ -23,6 +25,7 @@ import { OrbitalReactor, type TDDPhase } from '../components/orbital-reactor';
 import { PowerUpSequence } from '../components/power-up-sequence';
 import { QualityGates } from '../components/quality-gates';
 import type { ReactorState } from '../components/ralph-reactor';
+import { StuckAlert } from '../components/stuck-alert';
 import { ThoughtStream } from '../components/thought-stream';
 import { ActionBar, type ToolbarMode } from '../components/toolbar';
 import { useElectronApi } from '../hooks/use-electron-api';
@@ -46,6 +49,7 @@ import {
   useProcesses,
   useSocketConnected,
   useSocketLastError,
+  useMonitorConnected,
   useSoundMuted,
 } from '../stores/system-store';
 
@@ -156,11 +160,13 @@ export function MainView() {
     [derivedGates.gates, selectedGateId],
   );
 
-  // Reactor state calculation (LEGACY)
+  // Reactor state calculation (LEGACY) — also check Monitor API connection
+  const monitorConnected = useMonitorConnected();
   const legacyReactorState: ReactorState = React.useMemo(() => {
-    if (socketConnected) {
+    if (socketConnected || monitorConnected) {
       if (derivedGates.gates.some((g) => g.status === 'failed')) return 'critical';
       if (Object.values(processes).some((p) => p?.state === 'running')) return 'active';
+      if (monitorConnected && derivedGates.gates.some((g) => g.status === 'running')) return 'active';
       return 'idle';
     }
     if (fileTailConnected) {
@@ -168,7 +174,7 @@ export function MainView() {
       return 'idle';
     }
     return 'offline';
-  }, [socketConnected, processes, derivedGates.gates, fileTailConnected, fileTailActive]);
+  }, [socketConnected, monitorConnected, processes, derivedGates.gates, fileTailConnected, fileTailActive]);
 
   // DEV: Shift+D cycles through TDD phases
   const DEBUG_PHASES: TDDPhase[] = ['idle', 'red', 'refactor', 'green', 'verify', 'offline'];
@@ -443,10 +449,14 @@ export function MainView() {
       {/* Cinematic vignette frame */}
       <div className="vignette" />
 
+      {/* Stuck alert banner */}
+      <StuckAlert />
+
       {/* ── LAYOUT GRID: Header / Stage / Footer ───────── */}
       <div className="relative z-10 grid h-full grid-rows-[auto_1fr_auto]">
         <header className="flex items-center justify-between border-b border-white/5 bg-black/20 backdrop-blur-sm">
           <MissionHeader objectiveText={derivedObjective.text} connected={socketConnected} />
+          <CostCounter />
           <div className="flex shrink-0 items-center gap-2 pr-4">
             <button
               type="button"
@@ -630,7 +640,7 @@ export function MainView() {
         {showPowerUp && <PowerUpSequence onComplete={() => setShowPowerUp(false)} />}
 
         {/* NO CONNECTION OVERLAY - only shows if WebSocket disconnected and power-up complete */}
-        {!socketConnected && !overlayDismissed && !showPowerUp && (
+        {!socketConnected && !monitorConnected && !overlayDismissed && !showPowerUp && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -697,6 +707,7 @@ export function MainView() {
       </AnimatePresence>
 
       <EvidenceDrawer open={drawerOpen} gate={selectedGate} onClose={closeDrawer} />
+      <CompletionPanel />
       <KeyboardHelp open={helpOpen} onClose={() => setHelpOpen(false)} />
     </div>
   );

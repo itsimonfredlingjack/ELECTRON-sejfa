@@ -35,6 +35,11 @@ export function useLoopEvents() {
       system.touchHeartbeat(event.at ?? nowIso());
       loop.addEvent(event);
 
+      // Mark monitor as connected when any monitor event arrives
+      if (event.type.startsWith('monitor/')) {
+        system.setMonitorConnected(true);
+      }
+
       switch (event.type) {
         case 'loop/started':
           loop.setObjective(event.objective);
@@ -137,6 +142,40 @@ export function useLoopEvents() {
           break;
         case 'filetail/stopped':
           loop.setFileTailDisconnected();
+          break;
+        case 'monitor/status':
+          system.setMonitorConnected(event.connected);
+          break;
+        case 'monitor/tool_event':
+          break;
+        case 'monitor/stuck_alert':
+          loop.setStuckAlert(event.alert);
+          break;
+        case 'monitor/cost_update':
+          loop.setCost(event.cost);
+          break;
+        case 'monitor/session_start':
+          if (event.session.ticket_id) {
+            loop.setObjective({
+              id: event.session.session_id,
+              summary: event.session.ticket_id,
+              source: 'jira',
+              priority: 'normal',
+              createdAt: event.at,
+            });
+          }
+          break;
+        case 'monitor/session_complete':
+          loop.setCompletion(event.completion);
+          break;
+        case 'monitor/pipeline_stage':
+          loop.setActiveStage(event.active ? event.stage : null);
+          loop.upsertGate({
+            nodeId: event.stage,
+            status: event.active ? 'running' : 'passed',
+            updatedAt: event.at,
+          });
+          loop.setCurrentNode(event.stage);
           break;
         default:
           break;

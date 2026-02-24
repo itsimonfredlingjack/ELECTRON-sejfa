@@ -7,6 +7,7 @@ import type { LoopEvent, ProcessStatusSnapshot, SocketStatus } from '../shared/t
 import type { ChildProcessManager } from './child-processes';
 import type { FileTailService } from './file-tail-service';
 import { createKillSwitch } from './kill-switch';
+import type { MonitorBridge } from './monitor-bridge';
 import type { SocketBridge } from './socket-bridge';
 import type { TrayController } from './tray';
 import {
@@ -33,6 +34,7 @@ export type IpcContext = {
   processes: ChildProcessManager;
   socket: SocketBridge;
   fileTail: FileTailService;
+  monitorBridge: MonitorBridge;
   tray: TrayController;
   broadcast: (event: LoopEvent) => void;
 };
@@ -212,5 +214,27 @@ export function registerIpcHandlers(ctx: IpcContext) {
     } catch (err) {
       return fail('BAD_INPUT', err instanceof Error ? err.message : String(err));
     }
+  });
+
+  ipcMain.handle(Channel.MonitorConnect, async (): Promise<Result> => {
+    try {
+      ctx.monitorBridge.connect();
+      return ok();
+    } catch (err) {
+      return fail('MONITOR_CONNECT_FAILED', err instanceof Error ? err.message : String(err));
+    }
+  });
+
+  ipcMain.handle(Channel.MonitorDisconnect, async (): Promise<Result> => {
+    try {
+      ctx.monitorBridge.disconnect();
+      return ok();
+    } catch (err) {
+      return fail('MONITOR_DISCONNECT_FAILED', err instanceof Error ? err.message : String(err));
+    }
+  });
+
+  ipcMain.handle(Channel.MonitorGetStatus, async () => {
+    return ctx.monitorBridge.getStatus();
   });
 }

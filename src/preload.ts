@@ -128,6 +128,36 @@ const api: SejfaApi = {
       return ipcRenderer.invoke(channel, { url }) as Promise<Result>;
     },
   },
+  monitor: {
+    connect: async () => {
+      const channel = Channel.MonitorConnect;
+      assertInvokeChannel(channel);
+      return ipcRenderer.invoke(channel) as Promise<Result>;
+    },
+    disconnect: async () => {
+      const channel = Channel.MonitorDisconnect;
+      assertInvokeChannel(channel);
+      return ipcRenderer.invoke(channel) as Promise<Result>;
+    },
+    getStatus: async () => {
+      const channel = Channel.MonitorGetStatus;
+      assertInvokeChannel(channel);
+      return ipcRenderer.invoke(channel) as Promise<{ connected: boolean }>;
+    },
+    onEvent: (cb) => {
+      const channel = Channel.MonitorEventPush;
+      assertEventChannel(channel);
+
+      const listener = (_event: Electron.IpcRendererEvent, payload: LoopEvent) => {
+        cb(payload);
+      };
+
+      ipcRenderer.on(channel, listener);
+      return () => {
+        ipcRenderer.off(channel, listener);
+      };
+    },
+  },
 };
 
 contextBridge.exposeInMainWorld('sejfa', api);

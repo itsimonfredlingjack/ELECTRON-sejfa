@@ -1,5 +1,54 @@
 export type IsoTimestamp = string;
 
+/* ── Monitor API Types ──────────────────────────────────── */
+
+export interface MonitorToolEvent {
+  event_id: string;
+  session_id: string;
+  ticket_id: string | null;
+  timestamp: string;
+  event_type: 'pre_tool_use' | 'post_tool_use' | 'stop';
+  tool_name: string;
+  tool_args_hash: string;
+  tool_args_summary: string;
+  success: boolean | null;
+  duration_ms: number | null;
+  tokens: { input: number; output: number; cache_read: number } | null;
+  cost_usd: number | null;
+  error: string | null;
+}
+
+export interface StuckAlert {
+  pattern: string;
+  repeat_count: number;
+  tokens_burned: number;
+  since: string;
+}
+
+export interface CostUpdate {
+  session_id: string;
+  total_usd: number;
+  breakdown: { input_usd: number; output_usd: number; cache_usd: number };
+}
+
+export interface MonitorSessionInfo {
+  session_id: string;
+  ticket_id: string | null;
+  started_at: string;
+}
+
+export interface CompletionInfo {
+  session_id: string;
+  ticket_id: string | null;
+  outcome: 'done' | 'failed' | 'blocked' | 'unknown';
+  pytest_summary: string | null;
+  ruff_summary: string | null;
+  git_diff_summary: string | null;
+  pr_url: string | null;
+}
+
+/* ── Process Types ──────────────────────────────────────── */
+
 export type ManagedProcessId = 'monitor' | 'agent' | 'logTail';
 export type ManagedProcessState =
   | 'stopped'
@@ -151,4 +200,40 @@ export type LoopEvent =
       at: IsoTimestamp;
       loopActive: boolean;
       iterations: number;
+    }
+  | {
+      type: 'monitor/status';
+      at: IsoTimestamp;
+      connected: boolean;
+    }
+  | {
+      type: 'monitor/tool_event';
+      at: IsoTimestamp;
+      event: MonitorToolEvent;
+    }
+  | {
+      type: 'monitor/stuck_alert';
+      at: IsoTimestamp;
+      alert: StuckAlert;
+    }
+  | {
+      type: 'monitor/cost_update';
+      at: IsoTimestamp;
+      cost: CostUpdate;
+    }
+  | {
+      type: 'monitor/session_start';
+      at: IsoTimestamp;
+      session: MonitorSessionInfo;
+    }
+  | {
+      type: 'monitor/session_complete';
+      at: IsoTimestamp;
+      completion: CompletionInfo;
+    }
+  | {
+      type: 'monitor/pipeline_stage';
+      at: IsoTimestamp;
+      stage: string;
+      active: boolean;
     };

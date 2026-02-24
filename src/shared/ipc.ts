@@ -20,7 +20,12 @@ export enum Channel {
 
   ShellOpenExternal = 'sejfa:shell/openExternal',
 
+  MonitorConnect = 'sejfa:monitor/connect',
+  MonitorDisconnect = 'sejfa:monitor/disconnect',
+  MonitorGetStatus = 'sejfa:monitor/getStatus',
+
   LoopEventPush = 'sejfa:loop/event',
+  MonitorEventPush = 'sejfa:monitor/event',
 }
 
 // Backwards compatibility with Phase 1 naming.
@@ -42,8 +47,11 @@ export const IPC_INVOKE_CHANNELS = [
   Channel.FileTailStop,
   Channel.FileTailGetStatus,
   Channel.ShellOpenExternal,
+  Channel.MonitorConnect,
+  Channel.MonitorDisconnect,
+  Channel.MonitorGetStatus,
 ] as const;
 export type IpcInvokeChannel = (typeof IPC_INVOKE_CHANNELS)[number];
 
-export const IPC_EVENT_CHANNELS = [Channel.LoopEventPush] as const;
+export const IPC_EVENT_CHANNELS = [Channel.LoopEventPush, Channel.MonitorEventPush] as const;
 export type IpcEventChannel = (typeof IPC_EVENT_CHANNELS)[number];

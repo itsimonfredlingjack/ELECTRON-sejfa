@@ -55,4 +55,10 @@ export interface SejfaApi {
   shell: {
     openExternal: (url: string) => Promise<Result>;
   };
+  monitor: {
+    connect: () => Promise<Result>;
+    disconnect: () => Promise<Result>;
+    getStatus: () => Promise<{ connected: boolean }>;
+    onEvent: (cb: (event: LoopEvent) => void) => Unsubscribe;
+  };
 }

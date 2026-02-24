@@ -31,8 +31,8 @@ function gateIdLabel(id: GateId) {
 const PIPELINE: readonly GateId[] = ['local', 'ci', 'review', 'deploy', 'verify'] as const;
 
 const CANDIDATES: Record<GateId, readonly string[]> = {
-  local: ['local', 'tests'],
-  ci: ['ci', 'actions'],
+  local: ['local', 'tests', 'jira'],
+  ci: ['ci', 'actions', 'agent'],
   review: ['review', 'pr'],
   deploy: ['deploy'],
   verify: ['verify', 'rollback'],
